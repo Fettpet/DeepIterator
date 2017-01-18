@@ -16,7 +16,7 @@ struct is_iteratorPair_trait
     template <typename >
     static std::false_type test(...);
 
-    using type= decltype(test<T>(0));
+    using type= decltype(test<std::remove_reference<T>::type>(0));
     static constexpr const bool value= type::value;
 };
 
