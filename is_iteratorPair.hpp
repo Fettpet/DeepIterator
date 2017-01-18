@@ -9,7 +9,7 @@ struct is_iteratorPair_trait
         typename TT,
         typename Dummy = typename std::iterator_traits<
             typename TT::first_type
-        >::iterator_category
+        >
     >
     static std::true_type test(int);
 
