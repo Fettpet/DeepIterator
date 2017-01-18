@@ -1,0 +1,38 @@
+template<typename Child>
+struct Iterator
+{
+    operator++()
+    {
+        if(curChildState == end(curElem))
+        {
+            curElem = next(curElem);
+            curChildState = begin(curElem);
+        } 
+        else
+            curChildState++;
+    }
+
+    curElem;
+    curChildState;
+};
+
+
+Testfall:
+
+ - 2D-Array, vector< vector<int> >
+ - Ziel: über alle Elemente iterieren
+ - Methode: Hierarchischer Iterator mit child policy
+
+ - Anfangszustand:
+   * Die inneren Vektoren beinhalten 3, 4, 3 Elemente
+   * Fortlaufende Zahlen von 1-10
+ 
+ - Operation:
+   * mit 2 multiplizieren
+
+ - Ablauf der main Funktion:
+   * Anfangszustand herstellen
+   * Anfangszustand anzeigen
+   * foreach Algorithmus ausführen
+   * Endzustand anzeigen
+
