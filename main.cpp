@@ -10,6 +10,7 @@
 #include "Supercell.hpp"
 #include "Frame.hpp"
 #include "Particle.hpp"
+#include "DeepContainer.hpp"
 template<
     typename TElement>
 struct DeepIterator;
@@ -45,103 +46,31 @@ struct DeepIterator;
  * @tparam TElement Der Rückgabetyp des Iterator. in unserem ersten Beispiel ist
  * es ein int
  */
-template<
-    typename TContainer,
-    typename TElement>
-struct DeepContainer
-{
-public:
-    typedef DeepIterator<TElement> iterator;
-    
-public:
-    DeepContainer(TContainer& container):
-        refContainer(container)
-    {}
-    
-    iterator begin() {
-        return DeepIterator<TElement>(*(refContainer.begin()));
-    }
-    
-    
-    iterator end() {
-        return DeepIterator<TElement>(refContainer.size());
-    }
-    
-    
-    
-protected:
-    TContainer& refContainer;
-};
 
-/**
- * @brief Der DeepIterator ist ein Iterator über den DeepContainer. 
- * 
- */
-template<
-    typename TElement>
-struct DeepIterator
-{
-public:
-    typedef TElement        value_type;
-    typedef TElement&       reference;
-    typedef const reference const_reference;
-    typedef TElement*       pointer;
-    
-public:
-    
-    DeepIterator(const size_t pos):
-        pos(pos)
-    {}
-    
-    DeepIterator(value_type& value):
-        pos(0), ptr(&value)
-    {}
-    
-    DeepIterator(value_type&& value):
-        pos(0), ptr(&value)
-    {}
-    
-    const_reference
-    operator*()
-    const
-    {
-        return ptr[pos];
-    }
-    
-    reference
-    operator*()
-    {
-        return ptr[pos];
-    }
-    
-    bool
-    operator!=(const DeepIterator& other)
-    {
-        return pos != other.pos;
-    }
-    
-    void
-    operator++()
-    {
-        pos++;
-    }
-    
-    
-protected:
-    size_t pos;
-    TElement* ptr;
-};
 
 
 int main(int argc, char **argv) {
     std::vector<int> vec1d = {0, 1, 2, 3, 4, 5};
-    DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
-    
-    deepForeach(deepCon1d, [](int& x){std::cout << x << " ";});
+   // DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
+    typedef Particle<int, 2> particle_type;
+    typedef Frame<particle_type, 10> frame_type;
+    typedef SuperCell<frame_type> supercell_type;
+    deepForeach(vec1d, [](int& x){std::cout << x << " ";});
 
-    SuperCell<Frame<Particle<int, 2>, 10> > cell(5, 2);
+    std::cout << std::endl;
+    
+    SuperCell< frame_type > cell(5, 2);
  
-    std::cout << cell << std::endl;
+    DeepContainer<frame_type, particle_type > con(*cell.lastFrame, 2);
+    
+    std::for_each(con.begin(), con.end(), [](const particle_type& par){std::cout << par;});
+
+    std::cout << std::endl <<"output of frames in supercell" << std::endl;
+    
+    DeepContainer<supercell_type, frame_type > con2(cell);
+    
+    std::for_each(con2.begin(), con2.end(), [](const frame_type& par){std::cout << par;});
+    
     return EXIT_SUCCESS;
     
 }
