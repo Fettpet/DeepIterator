@@ -1,10 +1,12 @@
 #pragma once
 
-#include "is_iteratorPair.hpp"
-#include "isContainer.hpp"
+#include "Traits/is_iteratorPair.hpp"
+#include "Traits/isContainer.hpp"
 #include <algorithm>
 #include <iterator>
 
+namespace Data 
+{
 namespace detail
 {
 /**
@@ -84,7 +86,7 @@ void deepForeach(
         deepForeach(iterPair.first,
                     iterPair.second,
                     functor,
-                    is_iteratorPair< typename std::iterator_traits<Iter>::value_type >());
+                    Trait::is_iteratorPair< typename std::iterator_traits<Iter>::value_type >());
         iter++;
     }
 }
@@ -115,14 +117,14 @@ void deepForeach(
                 )
 {
     auto iter = con.begin();
-        while(iter != con.end())
-        {
-            using bool_t = typename isContainer<decltype(*iter)>::type;
-            deepForeach(*iter,
-                        functor,
-                        bool_t());
-            iter++;
-        }
+    while(iter != con.end())
+    {
+        using bool_t = typename Trait::isContainer<decltype(*iter)>::type;
+        deepForeach(*iter,
+                     functor,
+                     bool_t());
+        iter++;
+    }
 }
 
 
@@ -149,7 +151,7 @@ void deepForeach(
                  std::true_type
                 )
 {
-    using bool_tt = typename isContainer<decltype(*(con.begin()))>::type;
+    using bool_tt = typename Trait::isContainer<decltype(*(con.begin()))>::type;
     
 
     deepForeach(con, functor, std::true_type(), bool_tt());    
@@ -188,7 +190,7 @@ void deepForeach( Iter& begin,
         begin,
         end,
         functor,
-        is_iteratorPair< typename std::iterator_traits<Iter>::value_type >());
+        Trait::is_iteratorPair< typename std::iterator_traits<Iter>::value_type >());
 }
 
 template<typename TContainer,
@@ -196,10 +198,11 @@ template<typename TContainer,
 void deepForeach(TContainer& con,
                  const Functor& functor)
 {
-    using bool_t = typename isContainer<TContainer>::type;
+    using bool_t = typename Trait::isContainer<TContainer>::type;
     detail::deepForeach(
         con,
         functor,
         bool_t());
 }
 
+}// namespace data

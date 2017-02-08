@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <memory>
 #include "deepForeach.hpp"
-#include "isContainer.hpp"
+#include "Traits/isContainer.hpp"
 #include <cstdlib>
-#include "Supercell.hpp"
-#include "Frame.hpp"
-#include "Particle.hpp"
+#include "PIC/Supercell.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
 #include "DeepContainer.hpp"
 template<
     typename TElement>
@@ -50,26 +50,63 @@ struct DeepIterator;
 
 
 int main(int argc, char **argv) {
-    std::vector<int> vec1d = {0, 1, 2, 3, 4, 5};
-   // DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
-    typedef Particle<int, 2> particle_type;
-    typedef Frame<particle_type, 10> frame_type;
-    typedef SuperCell<frame_type> supercell_type;
-    deepForeach(vec1d, [](int& x){std::cout << x << " ";});
 
-    std::cout << std::endl;
+   // DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
+    typedef Data::Particle<int, 2> particle_type;
+    typedef Data::Frame<particle_type, 10> frame_type;
+    typedef Data::SuperCell<frame_type> supercell_type;
+
+
+
     
-    SuperCell< frame_type > cell(5, 2);
+    Data::SuperCell< frame_type > cell(5, 2);
+    
+    std::cout << cell << std::endl;
  
-    DeepContainer<frame_type, particle_type > con(*cell.lastFrame, 2);
+    Data::DeepContainer<frame_type, particle_type > con(*cell.firstFrame, 2);
     
     std::for_each(con.begin(), con.end(), [](const particle_type& par){std::cout << par;});
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    DeepContainer<supercell_type, frame_type > con2(cell);
+    Data::DeepContainer<supercell_type, frame_type > con2(cell);
     
-    std::for_each(con2.begin(), con2.end(), [](const frame_type& par){std::cout << par;});
+    std::for_each(con2.begin(), con2.end(), [](const frame_type& par){std::cout << par << std::endl;});
+    
+    
+    /**
+     * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
+     */
+    typedef Data::DeepContainer<frame_type, particle_type> ParticleContainer;
+    typedef Data::DeepContainer<supercell_type, frame_type> FrameInSuperCellContainer;
+    
+    
+    typedef Data::DeepContainer<supercell_type, 
+                          Data::DeepContainer<
+                            frame_type, 
+                            particle_type
+                          >
+                        > ParticleInSuperCellContainer;
+    
+    /**
+     * Ich gebe eine Superzelle rein und erhalte einen Particle zurück
+     * Superzelle -> frame -> particle
+     * 
+     * Durch den Container wird die Reihenfolge
+     * Container < Superzelle, Frame > -> Container < Frame, Particle >
+     *
+     * Also wäre die sinnvollste Reihenfolge
+     * Container < Superzelle, Container< Frame, Particle > >
+     * 
+     */ 
+   /*  
+    
+    ParticleInSuperCellContainer con3(cell);
+    
+    auto test = con3.begin();
+  //  (*test).begin();
+    //*/
+   // std::cout << (con3.begin());
     
     return EXIT_SUCCESS;
     

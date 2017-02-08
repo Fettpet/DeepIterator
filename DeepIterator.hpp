@@ -1,23 +1,29 @@
 #pragma once
-#include "Frame.hpp"
-#include "Supercell.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
+#include "PIC/Supercell.hpp"
+
+namespace Data 
+{
+    
 template<
     typename TElement>
 struct DeepIterator;
 
 /**
- * @brief Der DeepIterator ist ein Iterator über den DeepContainer. 
+ * @brief Der DeepIterator für Particle
  * 
  */
 template<
-    typename TElement>
-struct DeepIterator
+    typename TValue,
+    unsigned DIM>
+struct DeepIterator<Data::Particle<TValue, DIM> >
 {
 public:
-    typedef TElement        value_type;
-    typedef TElement&       reference;
-    typedef const reference const_reference;
-    typedef TElement*       pointer;
+    typedef Particle<TValue, DIM>   value_type;
+    typedef value_type&             reference;
+    typedef const reference         const_reference;
+    typedef value_type*             pointer;
     
 public:
     
@@ -25,11 +31,7 @@ public:
         pos(pos)
     {}
     
-    DeepIterator(value_type& value):
-        pos(0), ptr(&value)
-    {}
-    
-    DeepIterator(value_type&& value):
+    DeepIterator(reference value):
         pos(0), ptr(&value)
     {}
     
@@ -61,8 +63,8 @@ public:
     
 protected:
     size_t pos;
-    TElement* ptr;
-};
+    pointer ptr;
+};// DeepIterator
 
 
 /** ***************************************************************************
@@ -72,7 +74,7 @@ protected:
 template<
     typename TParticle,
     unsigned NbParticleInFrame>
-struct DeepIterator<Frame<TParticle, NbParticleInFrame> >
+struct DeepIterator<Data::Frame<TParticle, NbParticleInFrame> >
 {
 public:
     typedef TParticle        value_type;
@@ -123,7 +125,7 @@ public:
 protected:
     size_t pos;
     TParticle* ptr;
-};
+};// DeepIterator
 
 /** ****************************************************************************
  * Ausprägung für Frames in Superzellen
@@ -131,7 +133,7 @@ protected:
 
 template<
     typename TFrame>
-struct DeepIterator<SuperCell<TFrame> >
+struct DeepIterator<Data::SuperCell<TFrame> >
 {
 public:
     typedef TFrame          value_type;
@@ -181,4 +183,6 @@ public:
     
 protected:
     pointer ptr;
-};
+};// DeepIterator
+
+}

@@ -1,7 +1,11 @@
 #pragma once
 #include "DeepIterator.hpp"
-#include "Frame.hpp"
-#include "Particle.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
+
+
+namespace Data 
+{
 template<
     typename TContainer,
     typename TElement>
@@ -14,27 +18,39 @@ template<
 struct DeepContainer
 {
 public:
-    typedef DeepIterator<TElement> iterator;
+    typedef TElement                                        value_type; // DeepContainer
+    typedef TContainer                                      input_type; // Supercell
+    typedef TElement                                        child_type; // Deepcontainer
+    typedef DeepContainer<TContainer, 
+                          typename child_type::input_type>  iter_type;
+    
+    typedef DeepIterator<iter_type>                         iterator; // DeepIterator<Deepcontainer
+
+    
+    typedef typename TElement::container_type   container_type;
+    
     
 public:
-    DeepContainer(TContainer& container):
+    DeepContainer(input_type& container):
         refContainer(container)
     {}
     
     iterator begin() {
-        return DeepIterator<TElement>(*(refContainer.begin()));
+        auto test = (iter_type(refContainer));
+        return iterator(test);
     }
     
     
     iterator end() {
-        return DeepIterator<TElement>(refContainer.size());
+        return iterator(refContainer.end());
     }
     
     
     
+    
 protected:
-    TContainer& refContainer;
-};
+    input_type& refContainer;
+}; // DeepContainer
 
 
 /** ****************************************************************************
@@ -46,36 +62,43 @@ template<
     unsigned Dim,
     unsigned nbParticleInFrame
     >
-struct DeepContainer<Frame<Particle<TPos, Dim>, nbParticleInFrame>, Particle<TPos, Dim> >
+struct DeepContainer<Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, Data::Particle<TPos, Dim> >
 {
-    typedef Particle<TPos, Dim> TElement;
-    typedef Frame<Particle<TPos, Dim>, nbParticleInFrame> TContainer;
-    typedef DeepIterator<TElement> iterator;
+    typedef Particle<TPos, Dim>                         value_type;
+    typedef Frame<value_type, nbParticleInFrame>        container_type;
+    typedef DeepIterator<value_type>                    iterator;
+    typedef DeepContainer<container_type, value_type>   this_type;
+    typedef container_type                              input_type;
     
     
-    DeepContainer(TContainer& container, unsigned nbElem):
+    DeepContainer(container_type& container, unsigned nbElem):
         refContainer(container), nbElem(nbElem)
     {}
     
+    DeepContainer(const DeepContainer & other):
+        refContainer(other.refContainer),
+        nbElem(other.nbElem)
+    {}
+    
     iterator begin() {
-        return DeepIterator<TElement>((refContainer.particles[0]));
+        return DeepIterator<value_type>(refContainer.particles[0]);
     }
     
     
     iterator end() {
         if(refContainer.nextFrame != nullptr)
         {
-            return DeepIterator<TElement>(nbParticleInFrame);
+            return DeepIterator<value_type>(nbParticleInFrame);
         }
         else
         {
-            return DeepIterator<TElement>(nbElem);
+            return DeepIterator<value_type>(nbElem);
         }
     }
     
-    TContainer& refContainer;
+    container_type& refContainer;
     unsigned nbElem;
-};
+}; // DeepContainer
 
 /** ****************************************************************************
  *@brief specialisation for Frames in Suprecell
@@ -86,26 +109,28 @@ template<
    
     unsigned nbParticleInFrame
     >
-struct DeepContainer<SuperCell<Frame<TParticle, nbParticleInFrame> >, Frame<TParticle, nbParticleInFrame> >
+struct DeepContainer<Data::SuperCell<Data::Frame<TParticle, nbParticleInFrame> >, Data::Frame<TParticle, nbParticleInFrame> >
 {
-    typedef Frame<TParticle, nbParticleInFrame>             TElement;
-    typedef SuperCell<Frame<TParticle, nbParticleInFrame> > TContainer;
-    typedef DeepIterator<TContainer>                        iterator;
-    
-    
-    DeepContainer(TContainer& container):
+    typedef Frame<TParticle, nbParticleInFrame>         value_type;
+    typedef SuperCell<value_type >                      container_type;
+    typedef DeepIterator<container_type>                iterator;
+    typedef DeepContainer<container_type, value_type>   this_type;
+    typedef container_type                              input_type;
+    DeepContainer(container_type& container):
         refContainer(container)
     {}
     
     iterator begin() {
-        return DeepIterator<TContainer>(refContainer.firstFrame);
+        return DeepIterator<container_type>(refContainer.firstFrame);
     }
     
     
     iterator end() {
-        return DeepIterator<TContainer>(nullptr);
+        return DeepIterator<container_type>(nullptr);
     }
     
-    TContainer& refContainer;
+    container_type& refContainer;
     unsigned nbElem;
-};
+}; // DeepContainer
+
+} // namespace Data
