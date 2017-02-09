@@ -53,41 +53,43 @@ struct DeepIterator;
 int main(int argc, char **argv) {
 
    // DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
-    typedef Data::Particle<int, 2> particle_type;
-    typedef Data::Frame<particle_type, 10> frame_type;
-    typedef Data::SuperCell<frame_type> supercell_type;
+    typedef Data::Particle<int, 2> Particle;
+    typedef Data::Frame<Particle, 10> Frame;
+    typedef Data::SuperCell<Frame> Supercell;
 
 
 
-    Data::SuperCell< frame_type > cell(5, 2);
+    Supercell cell(5, 2);
+    
+    std::vector<Supercell> supercellContainer{ Supercell(5,1), Supercell(7,4), Supercell(3,4)};
     
     std::cout << cell << std::endl;
  
-    Data::DeepContainer<frame_type, particle_type, Data::Direction::Forward, 3> con(*cell.firstFrame, 2);
+    Data::DeepContainer<Frame, Particle, Data::Direction::Forward, 3> con(*cell.firstFrame, 2);
 
  //   Data::Frame<Data::Particle<int, 2u>, 10u> t;
  //   Data::Accessor<Data::Frame<Data::Particle<int, 2u>, 10u> > test(2);
   // std::cout << test;
   //  con.begin();
-     Data::deepForeach(con, [](const particle_type& par){std::cout << par;});
+     Data::deepForeach(con, [](const Particle& par){std::cout << par;});
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    Data::DeepContainer<supercell_type, frame_type, Data::Direction::Forward, 1 > con2(cell);
+    Data::DeepContainer<Supercell, Frame, Data::Direction::Forward, 1 > con2(cell);
     
 
     
-     Data::deepForeach(con2, [](const frame_type& par){std::cout << par << std::endl;});
+     Data::deepForeach(con2, [](const Frame& par){std::cout << par << std::endl;});
     
     
     /**
      * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
     */
-    typedef Data::DeepContainer<frame_type, particle_type, Data::Direction::Forward, 1> ParticleContainer;
-    typedef Data::DeepContainer<supercell_type, frame_type,  Data::Direction::Forward, 1> FrameInSuperCellContainer;
+    typedef Data::DeepContainer<Frame, Particle, Data::Direction::Forward, 1> ParticleContainer;
+    typedef Data::DeepContainer<Supercell, Frame,  Data::Direction::Forward, 1> FrameInSuperCellContainer;
     
     
-    typedef Data::DeepContainer<supercell_type, 
+    typedef Data::DeepContainer<Supercell, 
                                 ParticleContainer,
                                 Data::Direction::Forward, 
                                 1
@@ -109,7 +111,7 @@ int main(int argc, char **argv) {
     ParticleInSuperCellContainer con3(cell);
     
     
-    Data::deepForeach(con3, [](const particle_type& par){std::cout << par << " a";});
+    Data::deepForeach(con3, [](const Particle& par){std::cout << par << " a";});
 
     
    // typeid.name();

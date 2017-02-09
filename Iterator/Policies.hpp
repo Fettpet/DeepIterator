@@ -17,11 +17,6 @@ namespace Data
  */
 enum class Direction {Forward, Backward };
 
-/**
- * @brief This policy is used to decide which is the datastruce. We doesn't use
- * the direct datastruce because they are templates.
- */
-enum class Datastructure {Cell, Frame, Supercell, Particle};
 
 
 struct NoChild;
