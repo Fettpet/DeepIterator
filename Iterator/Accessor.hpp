@@ -1,41 +1,77 @@
 #pragma once
 #include "../PIC/Frame.hpp"
 #include "../PIC/Supercell.hpp"
-
+#include <iostream>
 
 namespace Data
 {
 template<typename TData>
 struct Accessor;
 
+
+
 template<typename TParticle, 
-         size_t nbParticle>
-struct Accessor<Frame<TParticle, nbParticle> >
+         unsigned nbParticle>
+struct Accessor<Data::Frame<TParticle, nbParticle> >
 {
+     
+
+    typedef TParticle                       ParticleType;
+    typedef Data::Frame<TParticle, nbParticle>    FrameType;
+    typedef FrameType*                      FramePointer;
+    typedef TParticle                       ReturnType;
+    typedef ReturnType&                     ReturnReference;
+   
     
     
-    template<TStorage>
-    TParticle
-    inline
-    get(TStorage& store)
+    template<typename TIndex>
+    static
+    ReturnType&
+    
+    get(FramePointer frame, const TIndex& index)
     {
-        return store.ref[store.index];
+        return (*frame)[index];
     }
+    
        
 }; // Accessor < Frame >
 
 template<typename TFrame>
 struct Accessor<SuperCell<TFrame> >
 {
+    typedef TFrame                          FrameType;
+    typedef FrameType*                      FramePointer;
+    typedef FrameType                       ReturnType;
+    typedef ReturnType&                     ReturnReference;
     
     
-    template<TStorage>
-    TFrame
+    Accessor() = default;
+    static
+    ReturnReference
     inline
-    get(TStorage& store)
+    get(FramePointer frame)
     {
-        return store.ref;
+        return *frame;
     }
+    
+    
+    static
+    ReturnReference
+    inline
+    get(FrameType& frame)
+    {
+        return frame;
+    }
+    
+    static
+    const
+    ReturnReference
+    inline
+    get(const FrameType& frame)
+    {
+        return frame;
+    }
+    
        
 }; // Accessor < Frame >
 

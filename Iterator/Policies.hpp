@@ -22,5 +22,8 @@ enum class Direction {Forward, Backward };
  * the direct datastruce because they are templates.
  */
 enum class Datastructure {Cell, Frame, Supercell, Particle};
+
+
+struct NoChild;
     
 }

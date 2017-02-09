@@ -1,9 +1,12 @@
 #pragma once 
 #include "../PIC/Frame.hpp"
-
+// I dont use it
 namespace Data 
 {
     
+    /**
+     * @tparam TData the type of the 
+     */
     template<typename TData>
     struct Storage;
     

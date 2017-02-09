@@ -2,54 +2,69 @@
 #include "DeepIterator.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
-
+#include "Iterator/Accessor.hpp"
+#include "Iterator/Navigator.hpp"
+#include "Iterator/Policies.hpp"
 
 namespace Data 
 {
 template<
     typename TContainer,
-    typename TElement>
+    typename TElement,
+    Data::Direction Direction,
+    size_t jumpSize
+    >
 struct DeepContainer;
 
 
 template<
     typename TContainer,
-    typename TElement>
+    typename TElement,
+    Data::Direction TDirection,
+    size_t jumpSize>
 struct DeepContainer
 {
 public:
-    typedef TElement                                        value_type; // DeepContainer
-    typedef TContainer                                      input_type; // Supercell
-    typedef TElement                                        child_type; // Deepcontainer
-    typedef DeepContainer<TContainer, 
-                          typename child_type::input_type>  iter_type;
+    typedef TElement                                        ValueType; // DeepContainer
+    typedef TContainer                                      InputType; // Supercell
+    typedef InputType*                                      InputPointer;
+    typedef TElement                                        ChildType; // Deepcontainer
+    typedef typename ChildType::InputType                   ChildInput;
+    typedef Navigator<TContainer, TDirection, jumpSize>     NavigatorType;
+    typedef Accessor<TContainer>                            AccessorType;
     
-    typedef DeepIterator<iter_type>                         iterator; // DeepIterator<Deepcontainer
+    typedef DeepIterator<InputType, AccessorType, NavigatorType, ChildType> iterator; // DeepIterator<Deepcontainer
 
-    
+    /*
     typedef typename TElement::container_type   container_type;
-    
+    */
     
 public:
-    DeepContainer(input_type& container):
-        refContainer(container)
+    DeepContainer(InputType& container):
+        refContainer(&container)
     {}
     
+    DeepContainer(InputPointer con):
+        refContainer(con)
+        {}
+    
+    
+    
     iterator begin() {
-        auto test = (iter_type(refContainer));
-        return iterator(test);
+  //      auto test = (ValueType(refContainer));
+        return iterator(refContainer);
     }
     
     
     iterator end() {
-        return iterator(refContainer.end());
+        return iterator(nullptr);
     }
     
     
     
     
 protected:
-    input_type& refContainer;
+    InputPointer refContainer;
 }; // DeepContainer
 
 
@@ -59,19 +74,22 @@ protected:
 
 template<
     typename TPos,
+    Data::Direction TDirection,
+    size_t jumpSize,
     unsigned Dim,
     unsigned nbParticleInFrame
     >
-struct DeepContainer<Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, Data::Particle<TPos, Dim> >
+struct DeepContainer<Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, Data::Particle<TPos, Dim>, TDirection, jumpSize>
 {
-    typedef Particle<TPos, Dim>                         value_type;
-    typedef Frame<value_type, nbParticleInFrame>        container_type;
-    typedef DeepIterator<value_type>                    iterator;
-    typedef DeepContainer<container_type, value_type>   this_type;
-    typedef container_type                              input_type;
+    typedef Particle<TPos, Dim>                                                     ValueType;
+    typedef Frame<ValueType, nbParticleInFrame>                                     FrameType;
+    typedef FrameType                                                               InputType;
+    typedef Navigator<FrameType, TDirection, jumpSize>                              NavigatorType;
+    typedef Accessor<FrameType>                                                     AccessorType;
+    typedef DeepIterator<FrameType, AccessorType, NavigatorType, Data::NoChild>     iterator;
     
     
-    DeepContainer(container_type& container, unsigned nbElem):
+    DeepContainer(FrameType& container, unsigned nbElem):
         refContainer(container), nbElem(nbElem)
     {}
     
@@ -81,22 +99,22 @@ struct DeepContainer<Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, Data::
     {}
     
     iterator begin() {
-        return DeepIterator<value_type>(refContainer.particles[0]);
+        return iterator(refContainer, 0);
     }
     
     
     iterator end() {
         if(refContainer.nextFrame != nullptr)
         {
-            return DeepIterator<value_type>(nbParticleInFrame);
+            return iterator(nbParticleInFrame);
         }
         else
         {
-            return DeepIterator<value_type>(nbElem);
+            return iterator(nbElem);
         }
     }
     
-    container_type& refContainer;
+    FrameType& refContainer;
     unsigned nbElem;
 }; // DeepContainer
 
@@ -106,30 +124,39 @@ struct DeepContainer<Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, Data::
 
 template<
     typename TParticle,
-   
+    Data::Direction TDirection,
+    size_t jumpSize,
     unsigned nbParticleInFrame
     >
-struct DeepContainer<Data::SuperCell<Data::Frame<TParticle, nbParticleInFrame> >, Data::Frame<TParticle, nbParticleInFrame> >
+struct DeepContainer<
+        Data::SuperCell<Data::Frame<TParticle, nbParticleInFrame> >,
+        Data::Frame<TParticle, nbParticleInFrame>,
+        TDirection,
+        jumpSize
+        >
 {
-    typedef Frame<TParticle, nbParticleInFrame>         value_type;
-    typedef SuperCell<value_type >                      container_type;
-    typedef DeepIterator<container_type>                iterator;
-    typedef DeepContainer<container_type, value_type>   this_type;
-    typedef container_type                              input_type;
-    DeepContainer(container_type& container):
+    typedef Frame<TParticle, nbParticleInFrame>                                         ValueType;
+    typedef SuperCell<ValueType >                                                       ContainerType;
+    typedef Navigator<ContainerType, TDirection, jumpSize>                              NavigatorType;
+    typedef Accessor<ContainerType>                                                     AccessorType;
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, Data::NoChild>     iterator;
+    typedef DeepContainer<ContainerType, ValueType, TDirection, jumpSize>               ThisType;
+    typedef ContainerType                                                               InputType;
+    
+    DeepContainer(ContainerType& container):
         refContainer(container)
     {}
     
     iterator begin() {
-        return DeepIterator<container_type>(refContainer.firstFrame);
+        return iterator(refContainer.firstFrame);
     }
     
     
     iterator end() {
-        return DeepIterator<container_type>(nullptr);
+        return iterator(nullptr);
     }
     
-    container_type& refContainer;
+    ContainerType& refContainer;
     unsigned nbElem;
 }; // DeepContainer
 

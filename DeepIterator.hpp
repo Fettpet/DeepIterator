@@ -2,187 +2,239 @@
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
 #include "PIC/Supercell.hpp"
+#include "Iterator/Policies.hpp"
+#include <boost/iterator/iterator_concepts.hpp>
+
+
+
+
 
 namespace Data 
 {
-    
-template<
-    typename TElement>
+/**
+ * @tparam TChild ist ein virtueller Container oder NoChild
+ */
+
+template<typename TElement,
+        typename TAccessor, 
+        typename TNavigator, 
+        typename TChild>
 struct DeepIterator;
 
-/**
- * @brief Der DeepIterator für Particle
- * 
- */
-template<
-    typename TValue,
-    unsigned DIM>
-struct DeepIterator<Data::Particle<TValue, DIM> >
+
+/** ************************************+
+ * @brief specialication for Particle in Frame
+ * ************************************/
+template<typename TParticle,
+        typename TAccessor, 
+        typename TNavigator,
+        unsigned nbParticles>
+struct DeepIterator<Data::Frame<TParticle, nbParticles>, TAccessor, TNavigator, Data::NoChild>
 {
+// datatypes
 public:
-    typedef Particle<TValue, DIM>   value_type;
-    typedef value_type&             reference;
-    typedef const reference         const_reference;
-    typedef value_type*             pointer;
-    
+    typedef Frame<TParticle, nbParticles>   FrameType;
+    typedef FrameType*                      FramePointer;
+    typedef FrameType&                      FrameReference;
+    typedef TParticle                       ValueType;
+    typedef ValueType*                      ValuePointer;
+    typedef ValueType&                      ValueReference;
+    typedef TAccessor                       Accessor;
+    typedef TNavigator                      Navigator;
+ 
+// functios
 public:
-    
-    DeepIterator(const size_t pos):
-        pos(pos)
+    DeepIterator(const size_t index):
+        ptr(nullptr), index(index)
+    {}
+    DeepIterator(const FrameReference ref, const size_t index):
+        ptr(&ref), index(index)
     {}
     
-    DeepIterator(reference value):
-        pos(0), ptr(&value)
-    {}
+    DeepIterator(const DeepIterator& other) = default;
     
-    const_reference
+    DeepIterator& operator=(const DeepIterator&) = default;
+    /**
+     * @brief goto the next element
+     */
+
+    DeepIterator&
+    operator++()
+    {
+        Navigator::next(index);
+        return *this;
+    }
+    
+   
+    ValueReference
+    operator*()
+    {
+        return Accessor::get(ptr, index);
+    }
+    
+    const
+    ValueReference
     operator*()
     const
     {
-        return ptr[pos];
-    }
-    
-    reference
-    operator*()
-    {
-        return ptr[pos];
+        return Accessor::get(ptr, index);
     }
     
     bool
     operator!=(const DeepIterator& other)
-    {
-        return pos != other.pos;
-    }
-    
-    void
-    operator++()
-    {
-        pos++;
-    }
-    
-    
-protected:
-    size_t pos;
-    pointer ptr;
-};// DeepIterator
-
-
-/** ***************************************************************************
- * @brief Deep Iterator Ausprägung für Frames 
- ****************************************************************************/
-
-template<
-    typename TParticle,
-    unsigned NbParticleInFrame>
-struct DeepIterator<Data::Frame<TParticle, NbParticleInFrame> >
-{
-public:
-    typedef TParticle        value_type;
-    typedef TParticle&       reference;
-    typedef const reference const_reference;
-    typedef TParticle*       pointer;
-    
-public:
-    
-    DeepIterator(const size_t pos):
-        pos(pos)
-    {}
-    
-    DeepIterator(value_type& value):
-        pos(0), ptr(&value)
-    {}
-    
-    DeepIterator(value_type&& value):
-        pos(0), ptr(&value)
-    {}
-    
-    const_reference
-    operator*()
     const
     {
-        return ptr[pos];
+        return index < other.index;
     }
-    
-    reference
-    operator*()
-    {
-        return ptr[pos];
-    }
-    
+
+        
     bool
-    operator!=(const DeepIterator& other)
+    operator!=(nullptr_t)
+    const
     {
-        return pos != other.pos;
+        return false;
     }
-    
-    void
-    operator++()
-    {
-        pos++;
-    }
-    
     
 protected:
-    size_t pos;
-    TParticle* ptr;
-};// DeepIterator
+    FramePointer ptr;
+    size_t index;
+    
+}; // struct DeepIterator
+
 
 /** ****************************************************************************
- * Ausprägung für Frames in Superzellen
+ * @brief 
  * ****************************************************************************/
 
-template<
-    typename TFrame>
-struct DeepIterator<Data::SuperCell<TFrame> >
+template<typename TFrame,
+        typename TNavigator,
+        typename TAccessor>
+struct DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, NoChild>
 {
 public:
-    typedef TFrame          value_type;
-    typedef TFrame&         reference;
-    typedef const reference const_reference;
-    typedef TFrame*         pointer;
+    typedef TFrame                          ValueType;
+    typedef ValueType*                      ValuePointer;
+    typedef ValueType&                      ValueReference;
+    typedef TAccessor                       Accessor;
+    typedef TNavigator                      Navigator;
     
 public:
     
-    DeepIterator(pointer ptr):
+    DeepIterator(ValuePointer ptr):
         ptr(ptr)
     {}
     
-    DeepIterator(value_type& value):
+    DeepIterator(ValueType& value):
         ptr(&value)
     {}
     
-    DeepIterator(value_type&& value):
-        ptr(&value)
-    {}
-    
-    const_reference
+    const 
+    ValueReference
     operator*()
     const
     {
-        return *ptr;
+        return Accessor::get(ptr);
     }
     
-    reference
+    ValueReference
     operator*()
     {
-        return *ptr;
+        return Accessor::get(ptr);
     }
     
     bool
     operator!=(const DeepIterator& other)
+    const
     {
         return ptr != nullptr;
     }
     
-    void
+    bool
+    operator!=(nullptr_t)
+    const
+    {
+        return false;
+    }
+    
+    DeepIterator&
     operator++()
     {
-        ptr = ptr->nextFrame;
+        Navigator::next(ptr);
+        return *this;
     }
     
     
 protected:
-    pointer ptr;
+    ValuePointer ptr;
 };// DeepIterator
 
-}
+
+
+template<typename TFrame,
+         typename TNavigator,
+         typename TAccessor,
+         typename TChild>
+struct DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, TChild>
+{
+public:
+    typedef Data::SuperCell<TFrame>             SuperCellType;
+    typedef SuperCellType                       InputType;
+    typedef TFrame                              ValueType;
+    typedef ValueType*                          ValuePointer;
+    typedef ValueType&                          ValueReference;
+    typedef TAccessor                           Accessor;
+    typedef TNavigator                          Navigator;
+    typedef TChild                              ChildContainer;
+    typedef typename TChild::iterator           ChildIterator;
+    typedef typename ChildContainer::ValueType  ResultType;     
+    typedef DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, TChild> ThisType;
+public:
+    
+    DeepIterator(nullptr_t t):
+        nbElem(0),
+        ptr(nullptr)
+    {}
+    
+    DeepIterator(InputType* in):
+        nbElem(in->nbParticlesInLastFrame),
+        ptr(Navigator::first(in))
+    {
+        std::cout << "Supercell with Child" << std::endl;
+    }
+    
+    TChild
+    operator*()
+    {
+        return TChild(Accessor::get(ptr), nbElem);
+    }
+    
+    bool
+    operator!=(const DeepIterator& other)
+    const
+    {
+        return ptr != nullptr;
+    }
+    
+    bool
+    operator!=(nullptr_t)
+    const
+    {
+        return false;
+    }
+    
+    ThisType&
+    operator++()
+    {
+        Navigator::next(ptr);
+        return *this;
+    }
+    
+    
+protected:
+    unsigned nbElem;
+    ValuePointer ptr;
+};// DeepIterator < Supercell , Child >
+    
+    
+    
+} // namespace Data

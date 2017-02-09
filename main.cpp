@@ -3,6 +3,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <algorithm>
+#include <typeinfo>
 #include <memory>
 #include "deepForeach.hpp"
 #include "Traits/isContainer.hpp"
@@ -58,34 +59,38 @@ int main(int argc, char **argv) {
 
 
 
-    
     Data::SuperCell< frame_type > cell(5, 2);
     
     std::cout << cell << std::endl;
  
-    Data::DeepContainer<frame_type, particle_type > con(*cell.firstFrame, 2);
-    
-    std::for_each(con.begin(), con.end(), [](const particle_type& par){std::cout << par;});
+    Data::DeepContainer<frame_type, particle_type, Data::Direction::Forward, 3> con(*cell.firstFrame, 2);
+
+ //   Data::Frame<Data::Particle<int, 2u>, 10u> t;
+ //   Data::Accessor<Data::Frame<Data::Particle<int, 2u>, 10u> > test(2);
+  // std::cout << test;
+  //  con.begin();
+     Data::deepForeach(con, [](const particle_type& par){std::cout << par;});
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    Data::DeepContainer<supercell_type, frame_type > con2(cell);
+    Data::DeepContainer<supercell_type, frame_type, Data::Direction::Forward, 1 > con2(cell);
     
-    std::for_each(con2.begin(), con2.end(), [](const frame_type& par){std::cout << par << std::endl;});
+
+    
+     Data::deepForeach(con2, [](const frame_type& par){std::cout << par << std::endl;});
     
     
     /**
      * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
-     */
-    typedef Data::DeepContainer<frame_type, particle_type> ParticleContainer;
-    typedef Data::DeepContainer<supercell_type, frame_type> FrameInSuperCellContainer;
+    */
+    typedef Data::DeepContainer<frame_type, particle_type, Data::Direction::Forward, 1> ParticleContainer;
+    typedef Data::DeepContainer<supercell_type, frame_type,  Data::Direction::Forward, 1> FrameInSuperCellContainer;
     
     
     typedef Data::DeepContainer<supercell_type, 
-                          Data::DeepContainer<
-                            frame_type, 
-                            particle_type
-                          >
+                                ParticleContainer,
+                                Data::Direction::Forward, 
+                                1
                         > ParticleInSuperCellContainer;
     
     /**
@@ -99,10 +104,17 @@ int main(int argc, char **argv) {
      * Container < Superzelle, Container< Frame, Particle > >
      * 
      */ 
-   /*  
+   
     
     ParticleInSuperCellContainer con3(cell);
     
+    
+    Data::deepForeach(con3, [](const particle_type& par){std::cout << par << " a";});
+
+    
+   // typeid.name();
+   // con3.end();
+   /* 
     auto test = con3.begin();
   //  (*test).begin();
     //*/

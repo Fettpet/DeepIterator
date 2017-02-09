@@ -120,10 +120,11 @@ void deepForeach(
     while(iter != con.end())
     {
         using bool_t = typename Trait::isContainer<decltype(*iter)>::type;
-        deepForeach(*iter,
+        auto t = *iter;
+        deepForeach(t,
                      functor,
                      bool_t());
-        iter++;
+        ++iter;
     }
 }
 

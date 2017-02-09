@@ -8,16 +8,16 @@ template<
     unsigned nbParticles>
 struct Frame
 {
-    typedef TParticle particle_type;
-    typedef typename TParticle::position_type particle_position_type;
-    typedef Frame<TParticle, nbParticles> FrameType;
+    typedef TParticle                           ParticleType;
+    typedef ParticleType*                       ParticlePointer;
+    typedef ParticleType&                       ParticleReference;
+    typedef typename TParticle::position_type   particle_position_type;
+    typedef Frame<TParticle, nbParticles>       FrameType;
     
     constexpr static unsigned Dim = TParticle::Dim;
     constexpr static unsigned nbParticleInFrame = nbParticles;
     
    
-    Frame(){}
-    
     Frame(...):
         nextFrame(nullptr), previousFrame(nullptr)
     {
@@ -30,6 +30,25 @@ struct Frame
         }
         
     }
+    
+    template<typename TIndex>
+    inline
+    ParticleReference
+    operator[] (const TIndex& idx)
+    {
+        return particles[idx];
+    }
+    
+    template<typename TIndex>
+    inline
+    const
+    ParticleReference
+    operator[] (const TIndex& idx)
+    const
+    {
+        return particles[idx];
+    }
+
     
     FrameType& operator=(const FrameType& other)
     {
