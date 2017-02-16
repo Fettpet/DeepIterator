@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <iomanip>
-namespace Data
+namespace hzdr
 {
 template<
     typename TParticle,

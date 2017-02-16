@@ -2,7 +2,7 @@
 #include <array>
 #include <iostream>
 
-namespace Data 
+namespace hzdr 
 {
 template<typename TPosition, unsigned dim>
 struct Particle;

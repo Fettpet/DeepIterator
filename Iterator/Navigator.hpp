@@ -2,15 +2,15 @@
 #include "Policies.hpp"
 #include "PIC/Frame.hpp"
 
-namespace Data 
+namespace hzdr 
 {
 
 /**
  * @brief The navigator is used to go to the next element
  * 
  */
-template<typename TData,
-         Data::Direction TDirection,
+template<typename Thzdr,
+         hzdr::Direction TDirection,
          unsigned jumpSize>
 struct Navigator;
     
@@ -20,7 +20,7 @@ struct Navigator;
 template<typename TParticle,
          unsigned nbParticle,
          unsigned jumpSize>
-struct Navigator< Data::Frame<TParticle, nbParticle>,Data::Direction::Forward, jumpSize>
+struct Navigator< hzdr::Frame<TParticle, nbParticle>,hzdr::Direction::Forward, jumpSize>
 {
 public:
     template<typename TIndex>
@@ -45,7 +45,7 @@ public:
 template<typename TParticle,
          unsigned nbParticle,
          unsigned jumpSize>
-struct Navigator< Data::Frame<TParticle, nbParticle>,Data::Direction::Backward, jumpSize>
+struct Navigator< hzdr::Frame<TParticle, nbParticle>,hzdr::Direction::Backward, jumpSize>
 {
 public:
     template<typename TIndex>
@@ -75,9 +75,9 @@ public:
  *****************/
 template<typename TFrame,
          unsigned jumpSize>
-struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Forward, jumpSize>
+struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Forward, jumpSize>
 {
-    typedef Data::SuperCell<TFrame>   SuperCellType;
+    typedef hzdr::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
     typedef FrameType*                FramePointer;
     
@@ -115,9 +115,9 @@ public:
     
     
 template<typename TFrame, unsigned jumpSize>
-struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Backward, jumpSize>
+struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward, jumpSize>
 {
-    typedef Data::SuperCell<TFrame>   SuperCellType;
+    typedef hzdr::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
     typedef FrameType*                FramePointer;
 public:
@@ -156,4 +156,4 @@ public:
     }
 }; // Navigator<Forward, Frame, jumpSize>
 
-}// namespace Data
+}// namespace hzdr

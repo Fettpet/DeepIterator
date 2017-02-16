@@ -11,17 +11,17 @@
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
-#include "DeepContainer.hpp"
+#include "DeepView.hpp"
 template<
     typename TElement>
 struct DeepIterator;
 
 
 /**
- * @brief Der DeepContainer ist ein virtueller Container, welcher zusätzliche 
+ * @brief Der  ist ein virtueller Container, welcher zusätzliche 
  * Informationen bereithält. Beispielsweiße benötigt ein Frame die Information,
  * wie viele Particle in diesem Frame drin sind. 
- * In diesem Beispiel wollen wir einen DeepContainer schreiben, welcher nur das 
+ * In diesem Beispiel wollen wir einen  schreiben, welcher nur das 
  * n-te Element betrachtet. Als erstes betrachten wir hierfür den .
  * 
  * Zu betrachtende Beispiele
@@ -34,7 +34,7 @@ struct DeepIterator;
  * 
  * 1. Fall
  * Arbeitsreihenfolge:
- * 1. Ich überlege mir, wie ich den DeepContainer auf den std::vector abbilde
+ * 1. Ich überlege mir, wie ich den  auf den std::vector abbilde
  * 
  * Bedingungen:
  * Damit der Deepcontainer mit DeepForeach arbeitet benötigt er
@@ -52,10 +52,10 @@ struct DeepIterator;
 
 int main(int argc, char **argv) {
 
-   // DeepContainer<std::vector<int>, int> deepCon1d(vec1d);
-    typedef Data::Particle<int, 2> Particle;
-    typedef Data::Frame<Particle, 10> Frame;
-    typedef Data::SuperCell<Frame> Supercell;
+   // <std::vector<int>, int> deepCon1d(vec1d);
+    typedef hzdr::Particle<int, 2> Particle;
+    typedef hzdr::Frame<Particle, 10> Frame;
+    typedef hzdr::SuperCell<Frame> Supercell;
 
 
 
@@ -65,39 +65,39 @@ int main(int argc, char **argv) {
     
     std::cout << cell << std::endl;
  
-    Data::DeepContainer<Frame, Particle, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 3> con(*cell.firstFrame, 2);
+    hzdr::DeepView<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 3> con(*cell.firstFrame, 2);
     
     for(auto it = con.begin(); it != con.end(); ++it)
     {
         std::cout << *it;
     }
 
- //   Data::Frame<Data::Particle<int, 2u>, 10u> t;
- //   Data::Accessor<Data::Frame<Data::Particle<int, 2u>, 10u> > test(2);
+ //   hzdr::Frame<hzdr::Particle<int, 2u>, 10u> t;
+ //   hzdr::Accessor<hzdr::Frame<hzdr::Particle<int, 2u>, 10u> > test(2);
   // std::cout << test;
   //  con.begin();
-     Data::deepForeach(con, [](const Particle& par){std::cout << par;});
+     hzdr::deepForeach(con, [](const Particle& par){std::cout << par;});
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    Data::DeepContainer<Supercell, Frame, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1 > con2(cell);
+    hzdr::DeepView<Supercell, Frame, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1 > con2(cell);
     
 
     
-     Data::deepForeach(con2, [](const Frame& par){std::cout << par << std::endl;});
+     hzdr::deepForeach(con2, [](const Frame& par){std::cout << par << std::endl;});
     
     
     /**
      * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
     */
-    typedef Data::DeepContainer<Frame, Particle, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1> ParticleContainer;
-    typedef Data::DeepContainer<Supercell, Frame,  Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
+    typedef hzdr::DeepView<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> ParticleContainer;
+    typedef hzdr::DeepView<Supercell, Frame,  hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
     
     
-    typedef Data::DeepContainer<Supercell, 
+    typedef hzdr::DeepView<Supercell, 
                                 ParticleContainer,
-                                Data::Direction::Forward, 
-                                Data::Collectivity::NonCollectiv,
+                                hzdr::Direction::Forward, 
+                                hzdr::Collectivity::NonCollectiv,
                                 1
                         > ParticleInSuperCellContainer;
                         
@@ -117,9 +117,18 @@ int main(int argc, char **argv) {
     
     ParticleInSuperCellContainer con3(cell);
     
+    for(auto it=con3.begin(); it!=con3.end(); ++it)
+    {
+        
+    }
+    /*
+    for(auto it=con3.begin(); it!=con3.end(); ++it)
+    {
+        
+    }
+    */
     
-    
-    Data::deepForeach(con3, [](const Particle& par){std::cout << par << " a";});
+  //  hzdr::deepForeach(con3, [](const Particle& par){std::cout << par << " a";});
 
     
    // typeid.name();

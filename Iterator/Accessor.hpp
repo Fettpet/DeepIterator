@@ -4,21 +4,21 @@
 #include "PIC/Supercell.hpp"
 #include <iostream>
 
-namespace Data
+namespace hzdr
 {
-template<typename TData>
+template<typename Thzdr>
 struct Accessor;
 
 
 
 template<typename TParticle, 
          unsigned nbParticle>
-struct Accessor<Data::Frame<TParticle, nbParticle> >
+struct Accessor<hzdr::Frame<TParticle, nbParticle> >
 {
      
 
     typedef TParticle                               ParticleType;
-    typedef Data::Frame<TParticle, nbParticle>      FrameType;
+    typedef hzdr::Frame<TParticle, nbParticle>      FrameType;
     typedef FrameType*                              FramePointer;
     typedef TParticle                               ReturnType;
     typedef ReturnType&                             ReturnReference;
@@ -75,4 +75,4 @@ struct Accessor<SuperCell<TFrame> >
        
 }; // Accessor < Frame >
 
-}// namespace Data
+}// namespace hzdr

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace Data 
+namespace hzdr 
 {
 namespace detail
 {

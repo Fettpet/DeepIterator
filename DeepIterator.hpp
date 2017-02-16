@@ -10,7 +10,7 @@
 
 
 
-namespace Data 
+namespace hzdr 
 {
 /**
  * @tparam TChild ist ein virtueller Container oder NoChild
@@ -32,7 +32,7 @@ template<typename TParticle,
         typename TNavigator,
         typename TCollective,
         unsigned nbParticles>
-struct DeepIterator<Data::Frame<TParticle, nbParticles>, TAccessor, TNavigator, TCollective, Data::NoChild>
+struct DeepIterator<hzdr::Frame<TParticle, nbParticles>, TAccessor, TNavigator, TCollective, hzdr::NoChild>
 {
 // datatypes
 public:
@@ -42,6 +42,7 @@ public:
     typedef TParticle                       ValueType;
     typedef ValueType*                      ValuePointer;
     typedef ValueType&                      ValueReference;
+    typedef ValueType                       ReturnType;
     typedef TAccessor                       Accessor;
     typedef TNavigator                      Navigator;
     typedef TCollective                     Collecter;
@@ -111,7 +112,7 @@ public:
     operator!=(nullptr_t)
     const
     {
-        return false;
+        return true;
     }
     
 protected:
@@ -123,19 +124,20 @@ protected:
 
 
 /** ****************************************************************************
- * @brief 
+ * @brief specialication of iterator of Supercells with no child
  * ****************************************************************************/
 
 template<typename TFrame,
         typename TNavigator,
         typename TCollective,
         typename TAccessor>
-struct DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, NoChild>
+struct DeepIterator<hzdr::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, NoChild>
 {
 public:
     typedef TFrame                          ValueType;
     typedef ValueType*                      ValuePointer;
     typedef ValueType&                      ValueReference;
+    typedef ValueType                       ReturnType;
     typedef TAccessor                       Accessor;
     typedef TNavigator                      Navigator;
     typedef TCollective                     Collecter;
@@ -223,51 +225,63 @@ protected:
 };// DeepIterator
 
 
-
+/** ****************************************************************************
+ * @brief specialication of iterator of Supercells with child
+ * ****************************************************************************/
 template<typename TFrame,
          typename TNavigator,
          typename TAccessor,
          typename TCollective,
          typename TChild>
-struct DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, TChild>
+struct DeepIterator<hzdr::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, TChild>
 {
 public:
-    typedef Data::SuperCell<TFrame>             SuperCellType;
-    typedef SuperCellType                       InputType;
-    typedef TFrame                              ValueType;
-    typedef ValueType*                          ValuePointer;
-    typedef ValueType&                          ValueReference;
-    typedef TAccessor                           Accessor;
-    typedef TNavigator                          Navigator;
-    typedef TChild                              ChildContainer;
-    typedef typename TChild::iterator           ChildIterator;
-    typedef typename ChildContainer::ValueType  ResultType;     
-    typedef DeepIterator<Data::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, TChild> ThisType;
+    typedef hzdr::SuperCell<TFrame>                     SuperCellType;
+    typedef SuperCellType                               InputType;
+    
+    typedef TFrame                                      ValueType;
+    typedef ValueType*                                  ValuePointer;
+    typedef ValueType&                                  ValueReference;
+    typedef TAccessor                                   Accessor;
+    typedef TNavigator                                  Navigator;
+    typedef TChild                                      ChildContainer;
+    typedef typename TChild::iterator                   ChildIterator;
+    typedef typename ChildIterator::ReturnType          ReturnType; 
+    typedef DeepIterator<hzdr::SuperCell<TFrame>,       
+                         TAccessor,                     
+                         TNavigator,                    
+                         TCollective, 
+                         TChild>                        ThisType;
+    constexpr static unsigned nbParticleInFrame = TFrame::nbParticleInFrame;
 public:
     
     DeepIterator(nullptr_t t):
         nbElem(0),
-        ptr(nullptr)
+        framePtr(nullptr),
+        childCon(nullptr, 0),
+        childIter(childCon.begin())
     {}
     
     DeepIterator(InputType* in):
         nbElem(in->nbParticlesInLastFrame),
-        ptr(Navigator::first(in))
+        framePtr(Navigator::first(in)),
+        childCon(*framePtr, isLastFrame(framePtr)?nbParticleInFrame:nbElem ),
+        childIter(childCon.begin())
     {
         std::cout << "Supercell with Child" << std::endl;
     }
     
-    TChild
+    ReturnType&
     operator*()
     {
-        return TChild(Accessor::get(ptr), nbElem);
+        return TChild(Accessor::get(framePtr), nbElem);
     }
     
     bool
     operator!=(const DeepIterator& other)
     const
     {
-        return ptr != nullptr;
+        return framePtr != nullptr;
     }
     
     bool
@@ -280,16 +294,46 @@ public:
     ThisType&
     operator++()
     {
-        Navigator::next(ptr);
+        if(childIter != childCon.end())
+        {
+            std::cout << *childIter << std::endl;; 
+            ++childIter;
+            
+        }
+        else 
+        {
+            
+            Navigator::next(framePtr);
+            if(isLastFrame(framePtr))
+            {
+                childCon = ChildContainer(*framePtr, nbElem);
+            }
+            else 
+            {
+                childCon = ChildContainer(*framePtr, nbParticleInFrame);
+            }
+            childIter = childCon.begin();
+        }
         return *this;
     }
     
     
+    
 protected:
     unsigned nbElem;
-    ValuePointer ptr;
+    ValuePointer framePtr;
+    ChildContainer childCon;
+    ChildIterator childIter;
+
+private:
+    bool isLastFrame(const ValuePointer p) const
+    {
+        if(p == nullptr) return true;
+        return p->nextFrame == nullptr;
+    }
+    
 };// DeepIterator < Supercell , Child >
     
     
     
-} // namespace Data
+} // namespace hzdr

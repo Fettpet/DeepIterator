@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-namespace Data
+namespace hzdr
 {
 template<typename TFrame>
 struct SuperCell

@@ -7,7 +7,7 @@
  */
 
 #pragma once
-namespace Data
+namespace hzdr
 {
 namespace Collectivity
 {

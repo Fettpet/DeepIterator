@@ -6,18 +6,17 @@
 #include "Iterator/Navigator.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Collective.hpp"
-namespace Data 
+namespace hzdr 
 {
 template<
     typename TContainer,
     typename TElement,
-    Data::Direction Direction,
+    hzdr::Direction Direction,
     typename Collectiv,
     size_t jumpSize
     >
-struct DeepContainer;
+struct DeepView;
 
-// DeepIterator<Deepcontainer
 
 /** **********************************************
  * @brief This iterator is the connector between two layers. 
@@ -30,10 +29,10 @@ struct DeepContainer;
 template<
     typename TContainer,
     typename TElement,
-    Data::Direction TDirection,
+    hzdr::Direction TDirection,
     typename TColl,
     size_t jumpSize>
-struct DeepContainer
+struct DeepView
 {
 public:
     typedef TElement                                        ValueType; 
@@ -51,15 +50,15 @@ public:
     */
     
 public:
-    DeepContainer(InputType& container):
+    DeepView(InputType& container):
         refContainer(&container)
     {}
     
-    DeepContainer(InputPointer con):
+    DeepView(InputPointer con):
         refContainer(con)
         {}
     
-    
+    DeepView& operator=(const DeepView&) = default;
     
     iterator begin() {
   //      auto test = (ValueType(refContainer));
@@ -80,7 +79,7 @@ public:
     
 protected:
     InputPointer refContainer;
-}; // DeepContainer
+}; // 
 
 
 /** ****************************************************************************
@@ -89,50 +88,58 @@ protected:
 
 template<
     typename TPos,
-    Data::Direction TDirection,
+    hzdr::Direction TDirection,
     size_t jumpSize,
     unsigned Dim,
     typename TCollective,
     unsigned nbParticleInFrame
     >
-struct DeepContainer<
-            Data::Frame<Particle<TPos, Dim>, nbParticleInFrame>, 
-            Data::Particle<TPos, Dim>, 
+struct DeepView<
+            hzdr::Frame<Particle<TPos, Dim>, nbParticleInFrame>, 
+            hzdr::Particle<TPos, Dim>, 
             TDirection, 
             TCollective,
             jumpSize>
 {
-    typedef Particle<TPos, Dim>                                                     ValueType;
-    typedef Frame<ValueType, nbParticleInFrame>                                     FrameType;
-    typedef FrameType                                                               InputType;
-    typedef Navigator<FrameType, TDirection, jumpSize>                              NavigatorType;
-    typedef Accessor<FrameType>                                                     AccessorType;
-    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,Data::NoChild>     iterator;
-    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,Data::NoChild>     Iterator;
+    typedef Particle<TPos, Dim>                                                                 ValueType;
+    typedef ValueType                                                                           ReturnType;
+    typedef Frame<ValueType, nbParticleInFrame>                                                 FrameType;
+    typedef FrameType                                                                           InputType;
+    typedef Navigator<FrameType, TDirection, jumpSize>                                          NavigatorType;
+    typedef Accessor<FrameType>                                                                 AccessorType;
+    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>     iterator;
+    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>     Iterator;
     /**
      * FrameType 
      */
-    DeepContainer(FrameType& container, unsigned nbElem):
-        refContainer(container), nbElem(nbElem)
+    DeepView(FrameType& container, unsigned nbElem):
+        refContainer(&container), nbElem(nbElem)
     {}
     
-    DeepContainer(const DeepContainer & other):
+    DeepView(const  DeepView& other):
         refContainer(other.refContainer),
         nbElem(other.nbElem)
     {}
     
+    DeepView(nullptr_t, unsigned):
+        refContainer(nullptr), 
+        nbElem(0)
+        {}
+    
+    DeepView& operator=(const DeepView&) = default;
+    
     iterator begin() {
-        return iterator(refContainer, 0);
+        return iterator(*refContainer, 0);
     }
     
     template<typename TOffset>
     iterator begin(const TOffset& offset) {
-        return iterator(refContainer, offset);
+        return iterator(*refContainer, offset);
     }
     
     
     iterator end() {
-        if(refContainer.nextFrame != nullptr)
+        if(refContainer->nextFrame != nullptr)
         {
             return iterator(nbParticleInFrame);
         }
@@ -142,9 +149,9 @@ struct DeepContainer<
         }
     }
     
-    FrameType& refContainer;
+    FrameType* refContainer;
     unsigned nbElem;
-}; // DeepContainer
+}; // 
 
 /** ****************************************************************************
  *@brief specialisation for Frames in Suprecell
@@ -152,47 +159,58 @@ struct DeepContainer<
 
 template<
     typename TParticle,
-    Data::Direction TDirection,
+    hzdr::Direction TDirection,
     size_t jumpSize,
     unsigned nbParticleInFrame,
     typename TCollective
     >
-struct DeepContainer<
-        Data::SuperCell<Data::Frame<TParticle, nbParticleInFrame> >,
-        Data::Frame<TParticle, nbParticleInFrame>,
+struct DeepView<
+        hzdr::SuperCell<hzdr::Frame<TParticle, nbParticleInFrame> >,
+        hzdr::Frame<TParticle, nbParticleInFrame>,
         TDirection,
         TCollective,
         jumpSize
         >
 {
-    typedef Frame<TParticle, nbParticleInFrame>                                         ValueType;
-    typedef SuperCell<ValueType >                                                       ContainerType;
-    typedef Navigator<ContainerType, TDirection, jumpSize>                              NavigatorType;
-    typedef Accessor<ContainerType>                                                     AccessorType;
-    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  Data::NoChild>     iterator;
-    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  Data::NoChild>     Iterator;
-    typedef DeepContainer<ContainerType, ValueType, TDirection, Data::Collectivity::NonCollectiv, jumpSize>               ThisType;
-    typedef ContainerType                                                               InputType;
+    typedef Frame<TParticle, nbParticleInFrame>                                                         ValueType;
+    typedef SuperCell<ValueType >                                                                       ContainerType;
+    typedef Navigator<ContainerType, TDirection, jumpSize>                                              NavigatorType;
+    typedef Accessor<ContainerType>                                                                     AccessorType;
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  hzdr::NoChild>       iterator;
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  hzdr::NoChild>       Iterator;
+    typedef DeepView<ContainerType, ValueType, TDirection, hzdr::Collectivity::NonCollectiv, jumpSize>  ThisType;
+    typedef ContainerType                                                                               InputType;
     
-    DeepContainer(ContainerType& container):
+    DeepView():
+        refContainer(nullptr),
+        nbElem(0)
+    {}
+    
+    DeepView(ContainerType& container):
+        refContainer(&container)
+    {}
+    
+    DeepView(ContainerType* container):
         refContainer(container)
     {}
     
+    DeepView& operator=(const DeepView&) = default;
+    
     iterator begin() {
-        return iterator(refContainer.firstFrame);
+        return iterator(refContainer->firstFrame);
     }
     
     template<typename TOffset>
     iterator begin(const TOffset& offset) {
-        return iterator(refContainer.firstFrame, offset);
+        return iterator(refContainer->firstFrame, offset);
     }
     
     iterator end() {
         return iterator(nullptr);
     }
     
-    ContainerType& refContainer;
+    ContainerType* refContainer;
     unsigned nbElem;
-}; // DeepContainer
+}; // 
 
-} // namespace Data
+} // namespace hzdr
