@@ -65,7 +65,12 @@ int main(int argc, char **argv) {
     
     std::cout << cell << std::endl;
  
-    Data::DeepContainer<Frame, Particle, Data::Direction::Forward, 3> con(*cell.firstFrame, 2);
+    Data::DeepContainer<Frame, Particle, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 3> con(*cell.firstFrame, 2);
+    
+    for(auto it = con.begin(); it != con.end(); ++it)
+    {
+        std::cout << *it;
+    }
 
  //   Data::Frame<Data::Particle<int, 2u>, 10u> t;
  //   Data::Accessor<Data::Frame<Data::Particle<int, 2u>, 10u> > test(2);
@@ -75,7 +80,7 @@ int main(int argc, char **argv) {
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    Data::DeepContainer<Supercell, Frame, Data::Direction::Forward, 1 > con2(cell);
+    Data::DeepContainer<Supercell, Frame, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1 > con2(cell);
     
 
     
@@ -85,15 +90,17 @@ int main(int argc, char **argv) {
     /**
      * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
     */
-    typedef Data::DeepContainer<Frame, Particle, Data::Direction::Forward, 1> ParticleContainer;
-    typedef Data::DeepContainer<Supercell, Frame,  Data::Direction::Forward, 1> FrameInSuperCellContainer;
+    typedef Data::DeepContainer<Frame, Particle, Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1> ParticleContainer;
+    typedef Data::DeepContainer<Supercell, Frame,  Data::Direction::Forward,Data::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
     
     
     typedef Data::DeepContainer<Supercell, 
                                 ParticleContainer,
                                 Data::Direction::Forward, 
+                                Data::Collectivity::NonCollectiv,
                                 1
                         > ParticleInSuperCellContainer;
+                        
     
     /**
      * Ich gebe eine Superzelle rein und erhalte einen Particle zurück
@@ -109,6 +116,7 @@ int main(int argc, char **argv) {
    
     
     ParticleInSuperCellContainer con3(cell);
+    
     
     
     Data::deepForeach(con3, [](const Particle& par){std::cout << par << " a";});

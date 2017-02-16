@@ -73,8 +73,9 @@ public:
 /** ****************
  * @brief This Navigator can acess all Frames in a Supercell
  *****************/
-template<typename TFrame>
-struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Forward, 1>
+template<typename TFrame,
+         unsigned jumpSize>
+struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Forward, jumpSize>
 {
     typedef Data::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
@@ -86,7 +87,12 @@ public:
     inline
     next(FramePointer& ptr) 
     {
-        ptr = ptr->nextFrame;
+        for(size_t i=0; i<jumpSize; ++i)
+        {
+            if(ptr == nullptr) continue;
+            ptr = ptr->nextFrame;
+        }
+        
     }
     
     static 
@@ -108,8 +114,8 @@ public:
 }; // Navigator<Forward, Frame, jumpSize>
     
     
-template<typename TFrame>
-struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Backward, 1>
+template<typename TFrame, unsigned jumpSize>
+struct Navigator< Data::SuperCell<TFrame>, Data::Direction::Backward, jumpSize>
 {
     typedef Data::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
@@ -122,7 +128,11 @@ public:
     inline
     next(FramePointer& ptr) 
     {
-        ptr = ptr->previousFrame;
+        for(size_t i=0; i<jumpSize; ++i)
+        {
+            if(ptr == nullptr) continue;    
+            ptr = ptr->previousFrame;
+        }
     }
     
     static 

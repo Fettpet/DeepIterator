@@ -17,18 +17,17 @@ struct Accessor<Data::Frame<TParticle, nbParticle> >
 {
      
 
-    typedef TParticle                       ParticleType;
-    typedef Data::Frame<TParticle, nbParticle>    FrameType;
-    typedef FrameType*                      FramePointer;
-    typedef TParticle                       ReturnType;
-    typedef ReturnType&                     ReturnReference;
+    typedef TParticle                               ParticleType;
+    typedef Data::Frame<TParticle, nbParticle>      FrameType;
+    typedef FrameType*                              FramePointer;
+    typedef TParticle                               ReturnType;
+    typedef ReturnType&                             ReturnReference;
    
     
     
     template<typename TIndex>
     static
     ReturnType&
-    
     get(FramePointer frame, const TIndex& index)
     {
         return (*frame)[index];
