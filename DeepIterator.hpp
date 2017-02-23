@@ -1,3 +1,13 @@
+/**
+ * @author Sebastian Hahn (t.hahn@hzdr.de )
+ * @brief The DeepIterator class is used to iterator over interleaved data 
+ * structures. The simplest example is for an interleaved data structure is 
+ * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
+ * within the structure.
+ * This implementation is special for the datastructurs of PIConGPU. 
+ * 
+ */
+
 #pragma once
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
@@ -13,6 +23,7 @@
 namespace hzdr 
 {
 /**
+ * @tparam TElement is the type of the element 
  * @tparam TChild ist ein virtueller Container oder NoChild
  */
 

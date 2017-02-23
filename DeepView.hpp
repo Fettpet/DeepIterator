@@ -1,3 +1,13 @@
+/**
+ * @author Sebastian Hahn (t.hahn@hzdr.de )
+ * @brief The DeepView provides functionality for the DeepIterator. The first 
+ * one is the construction of the DeepIterator type. This includes the navigator
+ * and the accessor. The second part of the functionality is providing the begin
+ * and end functions.
+ * The import template arguments are TContainer and TElement. 
+ * 
+ */
+
 #pragma once
 #include "DeepIterator.hpp"
 #include "PIC/Frame.hpp"
@@ -8,6 +18,9 @@
 #include "Iterator/Collective.hpp"
 namespace hzdr 
 {
+    
+    
+    
 template<
     typename TContainer,
     typename TElement,
@@ -19,7 +32,7 @@ struct DeepView;
 
 
 /** **********************************************
- * @brief This iterator is the connector between two layers. 
+ * @brief This view is the connector between two layers. 
  * @tparam TContainer The datatype of the input type: At the moment we have
  * Frame and Supercell Implemented.
  * @tparam TElement The return type. Implemented are particle frames and container
