@@ -1,40 +1,52 @@
+/**
+ * @author Sebastian Hahn (t.hahn[at]hzdr.de) 
+ * @brief The accessor handle the access to a value. It is a policy in the 
+ * DeepIterator. We had a trait called \see hzdr::traits::isIndexable. It has the
+ * condition that the datastructure has operator [] overloaded. If the condition
+ * is satisfied, you doesnt need to implement an own Accessor. In other cases, 
+ * you need to write one. 
+ * 
+ */
 
 #pragma once
 #include "PIC/Frame.hpp"
+#pragma once
 #include "PIC/Supercell.hpp"
 #include <iostream>
-
+#include <boost/core/ignore_unused.hpp>
 namespace hzdr
 {
-template<typename Thzdr>
+class Indexable;
+     
+template<typename TData>
 struct Accessor;
 
-
-
-template<typename TParticle, 
-         unsigned nbParticle>
-struct Accessor<hzdr::Frame<TParticle, nbParticle> >
+template<>
+struct Accessor<Indexable> 
 {
-     
-
-    typedef TParticle                               ParticleType;
-    typedef hzdr::Frame<TParticle, nbParticle>      FrameType;
-    typedef FrameType*                              FramePointer;
-    typedef TParticle                               ReturnType;
-    typedef ReturnType&                             ReturnReference;
-   
     
-    
-    template<typename TIndex>
+    template<typename TContainer, typename TIndex>
     static
-    ReturnType&
-    get(FramePointer frame, const TIndex& index)
+    auto 
+    get(TContainer& con, const TIndex& pos)
+    -> typename TContainer::ValueType*
     {
-        return (*frame)[index];
+        return &(con[pos]);
     }
     
-       
-}; // Accessor < Frame >
+    
+    template<typename TContainer, typename TIndex>
+    static
+    auto 
+    get(TContainer* con, const TIndex& pos)
+    -> typename TContainer::ValueType*
+    {
+        return &((*con)[pos]);
+    }
+}; // Accessor< Indexable >
+
+
+
 
 template<typename TFrame>
 struct Accessor<SuperCell<TFrame> >
@@ -43,36 +55,29 @@ struct Accessor<SuperCell<TFrame> >
     typedef FrameType*                      FramePointer;
     typedef FrameType                       ReturnType;
     typedef ReturnType&                     ReturnReference;
-    
+    typedef ReturnType*                     ReturnPtr;
     
     Accessor() = default;
+    
+
     static
-    ReturnReference
+    ReturnPtr
     inline
     get(FramePointer frame)
     {
-        return *frame;
+        return frame;
     }
     
     
+
     static
-    ReturnReference
+    ReturnPtr
     inline
     get(FrameType& frame)
     {
-        return frame;
+        return &frame;
     }
-    
-    static
-    const
-    ReturnReference
-    inline
-    get(const FrameType& frame)
-    {
-        return frame;
-    }
-    
-       
-}; // Accessor < Frame >
+ 
+}; // Accessor < SuperCell >
 
 }// namespace hzdr

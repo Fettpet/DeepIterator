@@ -12,6 +12,8 @@
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
 #include "DeepView.hpp"
+#include "Traits/HasOffset.hpp"
+#include "Iterator/RuntimeTuple.hpp"
 template<
     typename TElement>
 struct DeepIterator;
@@ -48,54 +50,123 @@ struct DeepIterator;
  * es ein int
  */
 
+struct testTrue 
+{
+    float offset;
+};
+
 
 
 int main(int argc, char **argv) {
 
-   // <std::vector<int>, int> deepCon1d(vec1d);
+
     typedef hzdr::Particle<int, 2> Particle;
     typedef hzdr::Frame<Particle, 10> Frame;
     typedef hzdr::SuperCell<Frame> Supercell;
 
-
-
     Supercell cell(5, 2);
+    std::cout << cell << std::endl; 
+    // All Particle within a Supercell
+    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
+                               hzdr::runtime::nbElements::enabled,
+                               hzdr::runtime::jumpsize::enabled> RuntimeTupleParticleInFrame;
+    typedef hzdr::View<Frame, 
+                       hzdr::Direction::Forward, 
+                       hzdr::Collectivity::NonCollectiv, 
+                       RuntimeTupleParticleInFrame> ParticleInFrame;
     
-    std::vector<Supercell> supercellContainer{ Supercell(5,1), Supercell(7,4), Supercell(3,4)};
-    
-    std::cout << cell << std::endl;
- 
-    hzdr::DeepView<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 3> con(*cell.firstFrame, 2);
-    
-    for(auto it = con.begin(); it != con.end(); ++it)
-    {
-        std::cout << *it;
-    }
+    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
+                               hzdr::runtime::nbElements::enabled,
+                               hzdr::runtime::jumpsize::enabled> RuntimeTupleParticleInSupercell;
+    typedef hzdr::View<Supercell,
+                       hzdr::Direction::Forward, 
+                       hzdr::Collectivity::NonCollectiv, 
+                       RuntimeTupleParticleInSupercell,
+                       ParticleInFrame> ParticleInSuperCell;
+                       
+    RuntimeTupleParticleInFrame runtimeFrame(0, 1, 1);
+    RuntimeTupleParticleInSupercell runtimeSupercell(1, 1, 1);
 
+   ParticleInSuperCell test(cell, runtimeSupercell, ParticleInFrame(cell.firstFrame, runtimeSupercell));
+   ParticleInFrame t(cell.firstFrame, runtimeFrame);
+   t.begin();
+   t.end();
+   for(auto it=test.begin(); it!=test.end(); ++it)
+   {
+        std::cout << **it;
+   }
+/*
+   for(auto it=test.begin(); it!=test.end(); ++it)
+   {
+        std::cout << **it;
+   }
+    /*
+    for(auto it=test.begin(); it!=test.end(); ++it)
+    {
+        if(*it)
+        {
+            std::cout << **it << std::endl;
+        }
+    }
+  //  ParticleInFrame(2);
+   //  test(cell, 2, ParticleInFrame(nullptr, 2)); 
+    
+
+//    std::cout << std::endl << counter << std::endl;
+    /**
+     * Wie stelle ich mir den Aufruf des Verschachtelten Iterators vor?
+     * 1. Beispiel: Alle Particles in Superzellen:
+     * 
+     * View < Supercell, jumpsize, Direction, View< Frame, jumpsize, Direction, Collectivity> >
+     */
+    
+    
+
+   // Particle test(5,4);
+  /*  
+    hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, 1> con(&test, static_cast<uint_fast32_t>(2));
+
+
+    for(auto it=con.begin(); it!=con.end(); ++it)
+    {
+        auto wrap = *it;
+        if(wrap)
+        {
+            std::cout << *wrap << std::endl;
+        }
+        
+    }
+    
+    
  //   hzdr::Frame<hzdr::Particle<int, 2u>, 10u> t;
  //   hzdr::Accessor<hzdr::Frame<hzdr::Particle<int, 2u>, 10u> > test(2);
   // std::cout << test;
   //  con.begin();
-     hzdr::deepForeach(con, [](const Particle& par){std::cout << par;});
+  
+  /*
 
     std::cout << std::endl <<"output of frames in supercell" << std::endl;
     
-    hzdr::DeepView<Supercell, Frame, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1 > con2(cell);
+    hzdr::View<Supercell, Frame, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1 > con2(cell);
     
-
+    for(auto it = con2.begin(); it != con2.end(); ++it)
+    {
+        auto wrap =*it;
+        if(wrap)
+        {
+            std::cout << *(wrap) << std::endl;
+        }
+    }
     
-     hzdr::deepForeach(con2, [](const Frame& par){std::cout << par << std::endl;});
+*/
+    /*
+    
+    typedef hzdr::View<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> ParticleInFrameContainer;
+    typedef hzdr::View<Supercell, Frame,  hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
     
     
-    /**
-     * @todo Zusammensetzen des Iterators über alle Particle in Supercellen
-    */
-    typedef hzdr::DeepView<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> ParticleContainer;
-    typedef hzdr::DeepView<Supercell, Frame,  hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
-    
-    
-    typedef hzdr::DeepView<Supercell, 
-                                ParticleContainer,
+    typedef hzdr::View<Supercell, 
+                                ParticleInFrameContainer,
                                 hzdr::Direction::Forward, 
                                 hzdr::Collectivity::NonCollectiv,
                                 1
@@ -113,32 +184,19 @@ int main(int argc, char **argv) {
      * Container < Superzelle, Container< Frame, Particle > >
      * 
      */ 
-   
+   /*
     
     ParticleInSuperCellContainer con3(cell);
     
-    for(auto it=con3.begin(); it!=con3.end(); ++it)
+    for(auto it = con3.begin(); it != con3.end(); ++it)
     {
-        
+        auto wrap =*it;
+        if(wrap)
+        {
+            std::cout << *wrap << std::endl;
+        }
     }
-    /*
-    for(auto it=con3.begin(); it!=con3.end(); ++it)
-    {
-        
-    }
-    */
-    
-  //  hzdr::deepForeach(con3, [](const Particle& par){std::cout << par << " a";});
-
-    
-   // typeid.name();
-   // con3.end();
-   /* 
-    auto test = con3.begin();
-  //  (*test).begin();
-    //*/
-   // std::cout << (con3.begin());
-    
+*/
     return EXIT_SUCCESS;
     
 }

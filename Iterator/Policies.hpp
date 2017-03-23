@@ -19,6 +19,6 @@ enum class Direction {Forward, Backward };
 
 
 
-struct NoChild;
+struct NoChild {};
     
 }

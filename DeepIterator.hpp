@@ -4,6 +4,16 @@
  * structures. The simplest example is for an interleaved data structure is 
  * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
  * within the structure.
+ * The iterator support lists and index based access. Both are specialised. 
+ * Because the implementation of interleaved and flat is different, we need four
+ * implemtations of the iterator:
+ * 1. flat and list based
+ * 2. flat and index based
+ * 3. interleaved and list based
+ * 4. interleaved and index based
+ *
+ * The iterator use the trait \b IsIndexable to decide wether the datastructure 
+ * is array like or list like. 
  * This implementation is special for the datastructurs of PIConGPU. 
  * 
  */
@@ -14,10 +24,12 @@
 #include "PIC/Supercell.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Collective.hpp"
+#include "Traits/NeedRuntimeSize.hpp"
 #include <boost/iterator/iterator_concepts.hpp>
-
-
-
+#include "Iterator/Wrapper.hpp"
+#include "Traits/IsIndexable.hpp"
+#include <limits>
+#include <type_traits>
 
 
 namespace hzdr 
@@ -27,60 +39,198 @@ namespace hzdr
  * @tparam TChild ist ein virtueller Container oder NoChild
  */
 
-template<typename TElement,
-        typename TAccessor, 
-        typename TNavigator, 
-        typename TCollective,
-        typename TChild>
+template<typename TElement, 
+         typename TAccessor, 
+         typename TNavigator, 
+         typename TCollective, 
+         typename TRuntimeVariables,
+         typename TChild,
+         typename TEnable = void>
 struct DeepIterator;
 
 
+
+
 /** ************************************+
- * @brief specialication for Particle in Frame
+ * @brief The flat implementation with indexable element type
  * ************************************/
-template<typename TParticle,
+template<typename TElement,
         typename TAccessor, 
         typename TNavigator,
-        typename TCollective,
-        unsigned nbParticles>
-struct DeepIterator<hzdr::Frame<TParticle, nbParticles>, TAccessor, TNavigator, TCollective, hzdr::NoChild>
+        typename TRuntimeVariables,
+        typename TCollective>
+struct DeepIterator<TElement, 
+                    TAccessor, 
+                    TNavigator, 
+                    TCollective, 
+                    TRuntimeVariables,
+                    hzdr::NoChild,
+                    typename std::enable_if<hzdr::traits::IsIndexable<TElement>::value>::type >
 {
 // datatypes
 public:
-    typedef Frame<TParticle, nbParticles>   FrameType;
-    typedef FrameType*                      FramePointer;
-    typedef FrameType&                      FrameReference;
-    typedef TParticle                       ValueType;
-    typedef ValueType*                      ValuePointer;
-    typedef ValueType&                      ValueReference;
-    typedef ValueType                       ReturnType;
-    typedef TAccessor                       Accessor;
-    typedef TNavigator                      Navigator;
-    typedef TCollective                     Collecter;
- 
+    typedef TElement                                ElementType;
+    typedef typename std::remove_reference<typename TElement::ValueType>::type            ValueType;
+    typedef ValueType*                              ValuePointer;
+    typedef ValueType&                              ValueReference;
+    typedef ValueType                               ReturnType;
+    typedef TAccessor                               Accessor;
+    typedef TNavigator                              Navigator;
+    typedef TCollective                             Collecter;
+    typedef Wrapper< ValueType, TCollective>        WrapperType;
+    typedef traits::NeedRuntimeSize<ElementType>    RuntimeSize;
 // functios
 public:
-    DeepIterator(const size_t index):
-        ptr(nullptr), index(index)
+
+/**
+ * @brief creates an virtual iterator. This one is used to specify a last element
+ * @param nbElems number of elements within the datastructure
+ */
+    DeepIterator(nullptr_t, 
+                 const uint_fast32_t& nbElems
+    ):
+        ptr(nullptr),
+        index(nbElems),
+        nbElemsInLast(0)
     {}
-    DeepIterator(const FrameReference ref, const size_t index):
-        ptr(&ref), index(index)
+
+    DeepIterator():
+        ptr(nullptr),
+        index(0),
+        nbElemsInLast(0)
+        {}
+    
+    DeepIterator(ElementType* ptr, 
+                 const uint_fast32_t& nbElemsInLast, 
+                 const TRuntimeVariables& runtimeVariables
+                ):
+                 ptr(ptr),
+                 index(Navigator::first(runtimeVariables.offset, runtimeVariables.nbRuntimeElements)),
+                 nbElemsInLast(nbElemsInLast),
+                 runtimeVariables(runtimeVariables)
+                 
     {}
     
-    DeepIterator(const DeepIterator& other) = default;
-    
-    DeepIterator& operator=(const DeepIterator& other)
+    /**
+     * @brief goto the next element
+     */
+
+    DeepIterator&
+    operator++()
     {
+        
         if(coll.isMover())
         {
-            coll = other.coll;
-            ptr = other.ptr;
-            index = other.index;    
+            Navigator::next(ptr, index, runtimeVariables);
+
         }
         coll.sync();
         return *this;
-        
     }
+    
+   
+    WrapperType
+    operator*()
+    {
+
+        return WrapperType(Accessor::get(ptr, index));
+    }
+    
+    
+    bool
+    operator!=(const DeepIterator& other)
+    const
+    {
+        return index < other.index;
+    }
+
+        
+    bool
+    operator!=(nullptr_t)
+    const
+    {
+        return true;
+    }
+    
+    DeepIterator& operator=(const DeepIterator& other)
+    {
+        ptr = other.ptr;
+        index = other.index;
+        //nbElems = other.nbElems;
+        
+        return *this;
+    }
+    
+    
+    void setPtr(ValuePointer inPtr)
+    {
+        ptr = inPtr;
+    }
+    
+protected:
+    Collecter coll;
+    ElementType* ptr;
+    uint_fast32_t index;
+    const uint_fast32_t nbElemsInLast;
+    TRuntimeVariables runtimeVariables;
+    
+private:
+
+}; // struct DeepIterator
+
+
+
+
+/** ************************************+
+ * @brief The flat implementation with list like type
+ * ************************************/
+template<typename TElement,
+        typename TAccessor, 
+        typename TNavigator,
+        typename TRuntimeVariables,
+        typename TCollective>
+struct DeepIterator<TElement, 
+                    TAccessor, 
+                    TNavigator, 
+                    TCollective, 
+                    TRuntimeVariables,
+                    hzdr::NoChild,
+                    typename std::enable_if<not hzdr::traits::IsIndexable<TElement>::value, void>::type >
+{
+// datatypes
+public:
+    typedef TElement                            ElementType;
+    typedef typename TElement::ValueType        ValueType;
+    typedef ValueType*                          ValuePointer;
+    typedef ValueType&                          ValueReference;
+    typedef ValueType                           ReturnType;
+    typedef TAccessor                           Accessor;
+    typedef TNavigator                          Navigator;
+    typedef TCollective                         Collecter;
+    typedef Wrapper< ValueType, TCollective>    WrapperType;
+// functios
+public:
+
+/**
+ * @brief creates an virtual iterator. This one is used to specify a last element
+ * @param nbElems number of elements within the datastructure
+ */
+    DeepIterator(nullptr_t, 
+                 const uint_fast32_t& nbElems
+    ):
+        ptr(nullptr)
+    {}
+
+    
+   DeepIterator(ElementType* ptr, 
+                 const uint_fast32_t& nbElemsInLast, 
+                 const TRuntimeVariables& runtimeVariables
+                ):
+                 ptr(Navigator::first(ptr)),
+                 runtimeVariables(runtimeVariables)
+                 
+    {}
+    
     /**
      * @brief goto the next element
      */
@@ -90,26 +240,157 @@ public:
     {
         if(coll.isMover())
         {
-            Navigator::next(index);
+            Navigator::next(ptr, runtimeVariables);
         }
         coll.sync();
         return *this;
     }
     
    
-    ValueReference
+    WrapperType
     operator*()
     {
-        return Accessor::get(ptr, index);
+        return WrapperType(Accessor::get(ptr));
     }
     
-    const
-    ValueReference
-    operator*()
+    
+    bool
+    operator!=(const DeepIterator& other)
     const
     {
-        return Accessor::get(ptr, index);
+        return ptr != nullptr;
     }
+
+        
+    bool
+    operator!=(nullptr_t)
+    const
+    {
+        return true;
+    }
+    
+    void setPtr(ValuePointer inPtr)
+    {
+        ptr = inPtr;
+    }
+    
+protected:
+    Collecter coll;
+    ValueType* ptr;
+    TRuntimeVariables runtimeVariables;
+private:
+}; // struct DeepIterator
+
+
+
+
+
+
+
+/** ************************************+
+ * @brief The nested implementation with indexable element type
+ * ************************************/
+template<typename TElement,
+        typename TAccessor, 
+        typename TNavigator,
+        typename TCollective,
+        typename TRuntimeVariables,
+        typename TChild>
+struct DeepIterator<TElement, 
+                    TAccessor, 
+                    TNavigator, 
+                    TCollective, 
+                    TRuntimeVariables,
+                    TChild,
+                    typename std::enable_if<hzdr::traits::IsIndexable<TElement>::value>::type >
+{
+// datatypes
+public:
+    typedef TElement                                ElementType;
+    typedef typename TElement::ValueType            ValueType;
+
+    typedef ValueType*                              ValuePointer;
+    typedef ValueType&                              ValueReference;
+    typedef TAccessor                               Accessor;
+    typedef TNavigator                              Navigator;
+    typedef TCollective                             Collecter;
+
+    typedef traits::NeedRuntimeSize<ElementType>    RuntimeSize;
+// child things
+    typedef TChild                                  ChildView;
+    typedef typename TChild::Iterator               ChildIterator;
+    typedef typename ChildIterator::ReturnType      ReturnType;
+    typedef Wrapper< ReturnType, TCollective>       WrapperType;
+// functios
+public:
+
+/**
+ * @brief creates an virtual iterator. This one is used to specify a last element
+ * @param nbElems number of elements within the datastructure
+ */
+    DeepIterator(nullptr_t, 
+                 const uint_fast32_t& nbElems
+    ):
+        ptr(nullptr),
+        index(nbElems),
+        nbElems(0)
+
+    {}
+
+    DeepIterator():
+        ptr(nullptr),
+        index(0),
+        nbElems(0)
+        {}
+    
+    
+    DeepIterator(ElementType* ptr, 
+                 const uint_fast32_t& nbElemsInLast,
+                 TRuntimeVariables runtimeVariables,
+                 ChildView view):
+                 ptr(ptr),
+                 index(Navigator::first(runtimeVariables.offset, nbElems)),
+                 nbElems(nbElems),
+                 runtimeVariables(runtimeVariables),
+                 childView(view),
+                 childIter(view.begin())
+                 
+    {
+        childView = ChildView(Accessor::get(ptr, index));
+        childIter = childView.begin();
+    }
+    
+    /**
+     * @brief goto the next element
+     */
+
+    DeepIterator&
+    operator++()
+    {
+        
+        if(coll.isMover())
+        {
+             ++childIter;
+            if(not (childIter != childView.end()))
+            {
+                Navigator::next(ptr, index, runtimeVariables);
+                childView = ChildView(Accessor::get(ptr, index));
+                childIter = childView.begin();
+            }
+                
+        }
+        coll.sync();
+        return *this;
+    }
+    
+   
+    WrapperType
+    operator*()
+    {
+      //  auto t = Accessor::get(ptr, index);
+        return *childIter;
+    }
+    
     
     bool
     operator!=(const DeepIterator& other)
@@ -127,81 +408,129 @@ public:
     }
     
 protected:
+    TRuntimeVariables runtimeVariables;
     Collecter coll;
-    FramePointer ptr;
-    size_t index;
+    ElementType* ptr;
+    uint_fast32_t index;
+    const uint_fast32_t nbElems;
+    ChildView childView;
+    ChildIterator childIter;
     
+private:
+
 }; // struct DeepIterator
 
 
-/** ****************************************************************************
- * @brief specialication of iterator of Supercells with no child
- * ****************************************************************************/
 
-template<typename TFrame,
+
+/** ************************************+
+ * @brief The nested implementation with list like element type
+ * ************************************/
+template<typename TElement,
+        typename TAccessor, 
         typename TNavigator,
         typename TCollective,
-        typename TAccessor>
-struct DeepIterator<hzdr::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, NoChild>
+        typename TRuntimeVariables,
+        typename TChild>
+struct DeepIterator<TElement, 
+                    TAccessor, 
+                    TNavigator, 
+                    TCollective, 
+                    TRuntimeVariables,
+                    TChild,
+                    typename std::enable_if<not hzdr::traits::IsIndexable<TElement>::value>::type >
 {
+// datatypes
 public:
-    typedef TFrame                          ValueType;
-    typedef ValueType*                      ValuePointer;
-    typedef ValueType&                      ValueReference;
-    typedef ValueType                       ReturnType;
-    typedef TAccessor                       Accessor;
-    typedef TNavigator                      Navigator;
-    typedef TCollective                     Collecter;
-    
-public:
-    
-    DeepIterator(ValuePointer ptr):
-        ptr(ptr)
-    {}
-    
-    template<typename TOffset>
-    DeepIterator(ValuePointer ptr, const TOffset& offset):
-        ptr(ptr)
-    {
-        for(TOffset i=static_cast<TOffset>(0); i < offset; ++i)
-        {
-            if(coll.isMover())
-                Navigator::next(ptr);
-        }
-        coll.sync();
+    typedef TElement                                ElementType;
+    typedef typename std::remove_reference<typename TElement::ValueType>::type            ValueType;
 
-    }
+    typedef ValueType*                              ValuePointer;
+    typedef ValueType&                              ValueReference;
+    typedef TAccessor                               Accessor;
+    typedef TNavigator                              Navigator;
+    typedef TCollective                             Collecter;
+
+    typedef traits::NeedRuntimeSize<ElementType>    RuntimeSize;
+// child things
+    typedef TChild                                  ChildView;
+    typedef typename TChild::Iterator               ChildIterator;
+    typedef typename ChildIterator::ReturnType      ReturnType;
+    typedef Wrapper< ReturnType, TCollective>       WrapperType;
+// functios
+public:
+
+/**
+ * @brief creates an virtual iterator. This one is used to specify a last element
+ * @param nbElems number of elements within the datastructure
+ */
+    DeepIterator(nullptr_t, 
+                 const uint_fast32_t& nbElems
+    ):
+        ptr(nullptr)
+
+    {}
+
+    DeepIterator():
+        ptr(nullptr)
+        {}
     
-    DeepIterator(ValueType& value):
-        ptr(&value)
+    DeepIterator(ElementType* ptr, 
+                 const uint_fast32_t& nbElems,
+                 const uint_fast32_t& nbElemsInLast):
+                 ptr(Navigator::first(ptr))       
     {}
     
-    template<typename TOffset>
-    DeepIterator(ValueType& value, const TOffset& offset):
-        ptr(&value)
+    
+    DeepIterator(ElementType* ptr2, 
+                 const uint_fast32_t& nbElems,
+                 TRuntimeVariables runtimeVariables,
+                 ChildView view):
+                 ptr(Navigator::first(ptr2)),
+                 childView(view),
+                 childIter(view.begin()),
+                 runtimeVariables(runtimeVariables)
+                
+                 
     {
-        for(TOffset i=static_cast<TOffset>(0); i < offset; ++i)
+        childView = ChildView(ptr);
+        childIter = childView.begin();
+    }
+    
+    /**
+     * @brief goto the next element
+     */
+
+    DeepIterator&
+    operator++()
+    {
+        
+        if(coll.isMover())
         {
-            if(coll.isMover())
-                Navigator::next(ptr);
+
+             ++childIter;
+            if(not (childIter != childView.end()))
+            {
+
+                Navigator::next(ptr,runtimeVariables);
+                
+                childView = ChildView(Accessor::get(ptr));
+                childIter = childView.begin();
+            }
+                
         }
         coll.sync();
+        return *this;
     }
     
-    
-    const 
-    ValueReference
-    operator*()
-    const
-    {
-        return Accessor::get(ptr);
-    }
-    
-    ValueReference
+   
+    WrapperType
     operator*()
     {
-        return Accessor::get(ptr);
+      //  auto t = Accessor::get(ptr, index);
+        return *childIter;
     }
+    
     
     bool
     operator!=(const DeepIterator& other)
@@ -209,142 +538,24 @@ public:
     {
         return ptr != nullptr;
     }
-    
+
+        
     bool
     operator!=(nullptr_t)
     const
     {
-        return false;
+        return true;
     }
-    
-    DeepIterator&
-    operator++()
-    {
-        if(coll.isMover())
-        {
-                Navigator::next(ptr);
-        }
-        coll.sync();
-        
-        return *this;
-    }
-    
     
 protected:
     Collecter coll;
-    ValuePointer ptr;
-};// DeepIterator
-
-
-/** ****************************************************************************
- * @brief specialication of iterator of Supercells with child
- * ****************************************************************************/
-template<typename TFrame,
-         typename TNavigator,
-         typename TAccessor,
-         typename TCollective,
-         typename TChild>
-struct DeepIterator<hzdr::SuperCell<TFrame>, TAccessor, TNavigator, TCollective, TChild>
-{
-public:
-    typedef hzdr::SuperCell<TFrame>                     SuperCellType;
-    typedef SuperCellType                               InputType;
-    
-    typedef TFrame                                      ValueType;
-    typedef ValueType*                                  ValuePointer;
-    typedef ValueType&                                  ValueReference;
-    typedef TAccessor                                   Accessor;
-    typedef TNavigator                                  Navigator;
-    typedef TChild                                      ChildContainer;
-    typedef typename TChild::iterator                   ChildIterator;
-    typedef typename ChildIterator::ReturnType          ReturnType; 
-    typedef DeepIterator<hzdr::SuperCell<TFrame>,       
-                         TAccessor,                     
-                         TNavigator,                    
-                         TCollective, 
-                         TChild>                        ThisType;
-    constexpr static unsigned nbParticleInFrame = TFrame::nbParticleInFrame;
-public:
-    
-    DeepIterator(nullptr_t t):
-        nbElem(0),
-        framePtr(nullptr),
-        childCon(nullptr, 0),
-        childIter(childCon.begin())
-    {}
-    
-    DeepIterator(InputType* in):
-        nbElem(in->nbParticlesInLastFrame),
-        framePtr(Navigator::first(in)),
-        childCon(*framePtr, isLastFrame(framePtr)?nbParticleInFrame:nbElem ),
-        childIter(childCon.begin())
-    {
-        std::cout << "Supercell with Child" << std::endl;
-    }
-    
-    ReturnType&
-    operator*()
-    {
-        return TChild(Accessor::get(framePtr), nbElem);
-    }
-    
-    bool
-    operator!=(const DeepIterator& other)
-    const
-    {
-        return framePtr != nullptr;
-    }
-    
-    bool
-    operator!=(nullptr_t)
-    const
-    {
-        return false;
-    }
-    
-    ThisType&
-    operator++()
-    {
-        if(childIter != childCon.end())
-        {
-            std::cout << *childIter << std::endl;; 
-            ++childIter;
-            
-        }
-        else 
-        {
-            
-            Navigator::next(framePtr);
-            if(isLastFrame(framePtr))
-            {
-                childCon = ChildContainer(*framePtr, nbElem);
-            }
-            else 
-            {
-                childCon = ChildContainer(*framePtr, nbParticleInFrame);
-            }
-            childIter = childCon.begin();
-        }
-        return *this;
-    }
-    
-    
-    
-protected:
-    unsigned nbElem;
-    ValuePointer framePtr;
-    ChildContainer childCon;
+    ValueType* ptr;
+    ChildView childView;
     ChildIterator childIter;
-
+    TRuntimeVariables runtimeVariables;
+    
 private:
-    bool isLastFrame(const ValuePointer p) const
-    {
-        if(p == nullptr) return true;
-        return p->nextFrame == nullptr;
-    }
-    
-};// DeepIterator < Supercell , Child >
-    
-    
-    
-} // namespace hzdr
+
+}; // struct DeepIterator
+
+}// namespace hzdr

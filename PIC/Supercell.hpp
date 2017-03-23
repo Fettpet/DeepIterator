@@ -9,14 +9,19 @@ struct SuperCell
 {
 
     typedef TFrame frame_type;
-    
-    SuperCell(unsigned nbFrames, unsigned nbParticles):
+    typedef TFrame FrameType;
+    typedef TFrame ValueType;
+    /**
+     * @param nbFrames: number of frames within the supercell,
+     * @param nbParticle number of particles in the last frame
+     */
+    SuperCell(uint32_t nbFrames, uint32_t nbParticles):
         firstFrame(new TFrame(0)),
         nbParticlesInLastFrame(nbParticles)
     {
         TFrame *curFrame;
         curFrame = firstFrame;
-        for(int i=1; i<nbFrames; ++i)
+        for(uint32_t i=1; i<nbFrames; ++i)
         {
             curFrame->nextFrame = new TFrame(0);
             curFrame->nextFrame->previousFrame = curFrame;
@@ -25,16 +30,16 @@ struct SuperCell
         
         lastFrame = curFrame;
         
-        for(int i=nbParticles; i<TFrame::nbParticleInFrame; ++i)
+        for(uint32_t i=nbParticles; i<TFrame::nbParticleInFrame; ++i)
         {
-            for(int dim=0; dim < TFrame::Dim; ++dim)
+            for(uint32_t dim=0; dim < TFrame::Dim; ++dim)
                 lastFrame->particles[i].data[dim] = -1;
         }
         
     }
     
     TFrame *firstFrame, *lastFrame;
-    unsigned nbParticlesInLastFrame;
+    uint32_t nbParticlesInLastFrame;
 }; // struct SuperCell
 
 template<typename TFrame>

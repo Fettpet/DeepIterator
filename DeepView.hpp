@@ -1,6 +1,6 @@
 /**
  * @author Sebastian Hahn (t.hahn@hzdr.de )
- * @brief The DeepView provides functionality for the DeepIterator. The first 
+ * @brief The View provides functionality for the DeepIterator. The first 
  * one is the construction of the DeepIterator type. This includes the navigator
  * and the accessor. The second part of the functionality is providing the begin
  * and end functions.
@@ -16,85 +16,209 @@
 #include "Iterator/Navigator.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Collective.hpp"
+#include "Traits/IsIndexable.hpp"
+#include "Traits/NumberElements.hpp"
+#include "Traits/HasJumpSize.hpp"
+#include "Traits/HasNbRuntimeElements.hpp"
+#include "Traits/HasOffset.hpp"
+#include <type_traits>
 namespace hzdr 
 {
     
-    
-    
-template<
-    typename TContainer,
-    typename TElement,
-    hzdr::Direction Direction,
-    typename Collectiv,
-    size_t jumpSize
-    >
-struct DeepView;
-
-
-/** **********************************************
+   
+/** *********************************************
  * @brief This view is the connector between two layers. 
  * @tparam TContainer The datatype of the input type: At the moment we have
  * Frame and Supercell Implemented.
  * @tparam TElement The return type. Implemented are particle frames and container
  * @tparam TDirection The direction of the iteration. 
- * @tparam jumpSize number of elements to jump over.
+ * @tparam TRuntimeVariables A tupble with variables which are know at runtime. 
+ * This should be a struct with the following possible public accessable vari-
+ * ables: 
+ * 1. nbRuntimeElements: If the datastructure has a size, which is firstly known
+ * at runtime, you can use this variable to specify the size
+ * 2. offset: First position after begin. In other word: these number of elements 
+ * are ignored. This is needed if you write parallel code. If this value is not
+ * given, offset=1 will be assumed.
+ * 3. jumpsize: Size of the jump when called ++, i.e. What is the next element. 
+ * If this value is not given, jumpsize=1 will be assumed.
  * ********************************************/
 template<
-    typename TContainer,
     typename TElement,
     hzdr::Direction TDirection,
     typename TColl,
-    size_t jumpSize>
-struct DeepView
+    typename TRuntimeVariables,
+    typename TChild = NoChild>
+struct View
 {
 public:
-    typedef TElement                                        ValueType; 
-    typedef TContainer                                      InputType; 
-    typedef InputType*                                      InputPointer;
-    typedef TElement                                        ChildType; 
-    typedef typename ChildType::InputType                   ChildInput;
-    typedef Navigator<TContainer, TDirection, jumpSize>     NavigatorType;
-    typedef Accessor<TContainer>                            AccessorType;
-    
-    typedef DeepIterator<InputType, AccessorType, NavigatorType, TColl, ChildType> iterator; 
-    typedef DeepIterator<InputType, AccessorType, NavigatorType, TColl, ChildType> Iterator; 
-    /*
-    typedef typename TElement::container_type   container_type;
-    */
+// Datatypes    
+    typedef TElement                                                                                            ValueType; 
+    typedef ValueType*                                                                                          ValuePointer;
+    typedef TChild                                                                                              ChildType; 
+    typedef typename std::conditional<traits::IsIndexable<ValueType>::value, Indexable, ValueType>::type        IndexableType;
+    typedef Navigator<IndexableType, TDirection, 0>                                                             NavigatorType;
+    typedef Accessor<IndexableType>                                                                             AccessorType;
+    typedef DeepIterator<ValueType, AccessorType, NavigatorType, TColl, TRuntimeVariables, ChildType>           iterator; 
+    typedef iterator                                                                                            Iterator; 
+    typedef traits::NeedRuntimeSize<TElement>                                                                   RuntimeSize;
+    typedef TRuntimeVariables                                                                                   RunTimeVariables;
     
 public:
-    DeepView(InputType& container):
-        refContainer(&container)
+    
+    
+/***************
+ * constructors without childs
+ **************/
+    View():
+        ptr(nullptr)
+        {}
+        /**
+     * @param container The element 
+     */
+    View(ValueType& container):
+        ptr(&container)
     {}
     
-    DeepView(InputPointer con):
-        refContainer(con)
-        {}
+    View(ValuePointer con):
+        ptr(con)
+    {}
     
-    DeepView& operator=(const DeepView&) = default;
-    
-    iterator begin() {
-  //      auto test = (ValueType(refContainer));
-        return iterator(refContainer);
-    }
-    
-    
-    iterator end() {
-        return iterator(nullptr);
-    }
-    
-    template<typename TOffset>
-    iterator begin(const TOffset& offset)
+    View(const View& other) = default;
+    View(View&& other) = default;
+        
+   View(ValueType& container, const RunTimeVariables& runtimeVar):
+        runtimeVars(runtimeVar),
+        ptr(&container)
     {
-        return iterator(refContainer, offset);
+        
     }
+    
+    View(ValuePointer con, const RunTimeVariables& runtimeVar):
+        runtimeVars(runtimeVar),
+        ptr(con)
+    {}
+    
+    
+    
+    
+    
+    /**
+     * @param container The element 
+     */
+    View(ValueType& container, ChildType& child):
+        ptr(&container), 
+        childView(child)
+    {}
+    
+    View(ValuePointer con,ChildType& child):
+        ptr(con),
+        childView(child)
+        {}
+        
+        
+   View(ValueType& container, const RunTimeVariables& runtimeVar, const ChildType& child):
+        runtimeVars(runtimeVar),
+        ptr(&container), 
+        childView(child)
+    {
+        
+    }
+    
+    View(ValuePointer con, const RunTimeVariables& runtimeVar, ChildType&& child):
+        runtimeVars(runtimeVar),
+        ptr(con),
+        childView(child)
+    {}
+    
+    
+        
+    View& operator=(View&& other)
+    {
+        std::swap(ptr, other.ptr);
+        return *this;
+    }
+    
+    View& operator=(const View& other)
+    {
+        ptr = other.ptr;
+        
+        return *this;
+    }
+    
+    /**
+     * 1. Iterator with runtime and offset
+     */
+    
+    template< bool test =  std::is_same<ChildType, NoChild>::value>
+    typename std::enable_if<test, Iterator>::type 
+    begin() 
+    {
+       const auto t =traits::NumberElements< TElement>::value;
+       return Iterator(ptr, t, runtimeVars);
+    }
+    
+    
+    template< bool test = not std::is_same<ChildType, NoChild>::value, typename TUnused =void>
+    typename std::enable_if<test, Iterator>::type                                       
+    begin() 
+    {
+       const auto t =traits::NumberElements< TElement>::value;
+       return Iterator(ptr, t, runtimeVars, childView);
+    }
+    
+    /*
+    Iterator begin() {
+        
+        if(hzdr::traits::HasNbRuntimeElementst<RunTimeVariables>::value)
+        {
+            if(hzdr::traits::HasOffset<RunTimeVariables>::value)
+            {
+                return Iterator(ptr, runtimeVars.offset, t, runtimeVars.nbRuntimeElements, childView);
+            }
+            else 
+            {
+                ;
+            }
+        }
+        else 
+        {
+            if(hzdr::traits::HasOffset<RunTimeVariables>::value)
+            {
+                return Iterator(ptr, runtimeVars.offset, t, 0, childView);
+            }
+            else 
+            {
+                return Iterator(ptr, 0, t, 0, childView);
+            }
+        }
+    }
+*/
+    Iterator end() {
+        if(hzdr::traits::HasNbRuntimeElementst<RunTimeVariables>::value)
+        {
+            const uint_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.nbRuntimeElements  : traits::NumberElements< TElement>::value;
+
+            return Iterator(nullptr, elem);
+        }
+        else 
+        {
+            const uint_fast32_t elem = RuntimeSize::test(ptr)? 0  :traits::NumberElements< TElement>::value;
+            return Iterator(nullptr, elem);
+        }
+
+    }
+
     
     
 protected:
-    InputPointer refContainer;
-}; // 
 
+    RunTimeVariables runtimeVars;
+    ValuePointer ptr;
+    ChildType childView;
+}; // struct View
 
+#if 0
 /** ****************************************************************************
  *@brief specialisation for Particle in frames
  ******************************************************************************/
@@ -103,56 +227,62 @@ template<
     typename TPos,
     hzdr::Direction TDirection,
     size_t jumpSize,
-    unsigned Dim,
+    uint32_t Dim,
     typename TCollective,
-    unsigned nbParticleInFrame
+    uint32_t nbParticleInFrame
     >
-struct DeepView<
+struct View<
             hzdr::Frame<Particle<TPos, Dim>, nbParticleInFrame>, 
             hzdr::Particle<TPos, Dim>, 
             TDirection, 
             TCollective,
             jumpSize>
 {
-    typedef Particle<TPos, Dim>                                                                 ValueType;
-    typedef ValueType                                                                           ReturnType;
-    typedef Frame<ValueType, nbParticleInFrame>                                                 FrameType;
-    typedef FrameType                                                                           InputType;
-    typedef Navigator<FrameType, TDirection, jumpSize>                                          NavigatorType;
-    typedef Accessor<FrameType>                                                                 AccessorType;
-    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>     iterator;
-    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>     Iterator;
+    typedef Particle<TPos, Dim>                                                                             ValueType;
+    typedef ValueType                                                                                       ReturnType;
+    typedef Frame<ValueType, nbParticleInFrame>                                                             FrameType;
+    typedef FrameType                                                                                       InputType;
+    typedef typename std::conditional<traits::IsIndexable<FrameType>::value, Indexable, FrameType>::type    IndexableType;
+    typedef Navigator<IndexableType, TDirection, jumpSize>                                                  NavigatorType;
+    typedef Accessor<IndexableType>                                                                         AccessorType;
+    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>                 iterator;
+    typedef DeepIterator<FrameType, AccessorType, NavigatorType, TCollective,hzdr::NoChild>                 Iterator;
     /**
      * FrameType 
      */
-    DeepView(FrameType& container, unsigned nbElem):
-        refContainer(&container), nbElem(nbElem)
+    
+    View(FrameType* container, uint32_t nbElem):
+        conPtr(container), nbElem(nbElem)
     {}
     
-    DeepView(const  DeepView& other):
-        refContainer(other.refContainer),
+    View(FrameType& container, uint32_t nbElem):
+        conPtr(&container), nbElem(nbElem)
+    {}
+    
+    View(const View& other):
+        conPtr(other.conPtr),
         nbElem(other.nbElem)
     {}
     
-    DeepView(nullptr_t, unsigned):
-        refContainer(nullptr), 
+    View(nullptr_t, uint32_t):
+        conPtr(nullptr), 
         nbElem(0)
         {}
     
-    DeepView& operator=(const DeepView&) = default;
+    View& operator=(const View&) = default;
     
     iterator begin() {
-        return iterator(*refContainer, 0);
+        return iterator(*conPtr, 0);
     }
     
     template<typename TOffset>
     iterator begin(const TOffset& offset) {
-        return iterator(*refContainer, offset);
+        return iterator(*conPtr, offset);
     }
     
     
     iterator end() {
-        if(refContainer->nextFrame != nullptr)
+        if(conPtr->nextFrame != nullptr)
         {
             return iterator(nbParticleInFrame);
         }
@@ -162,8 +292,8 @@ struct DeepView<
         }
     }
     
-    FrameType* refContainer;
-    unsigned nbElem;
+    FrameType* conPtr;
+    uint32_t nbElem;
 }; // 
 
 /** ****************************************************************************
@@ -174,10 +304,10 @@ template<
     typename TParticle,
     hzdr::Direction TDirection,
     size_t jumpSize,
-    unsigned nbParticleInFrame,
+    uint32_t nbParticleInFrame,
     typename TCollective
     >
-struct DeepView<
+struct View<
         hzdr::SuperCell<hzdr::Frame<TParticle, nbParticleInFrame> >,
         hzdr::Frame<TParticle, nbParticleInFrame>,
         TDirection,
@@ -191,39 +321,39 @@ struct DeepView<
     typedef Accessor<ContainerType>                                                                     AccessorType;
     typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  hzdr::NoChild>       iterator;
     typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective,  hzdr::NoChild>       Iterator;
-    typedef DeepView<ContainerType, ValueType, TDirection, hzdr::Collectivity::NonCollectiv, jumpSize>  ThisType;
+    typedef View<ContainerType, ValueType, TDirection, hzdr::Collectivity::NonCollectiv, jumpSize>  ThisType;
     typedef ContainerType                                                                               InputType;
     
-    DeepView():
-        refContainer(nullptr),
+    View():
+        conPtr(nullptr),
         nbElem(0)
     {}
     
-    DeepView(ContainerType& container):
-        refContainer(&container)
+    View(ContainerType& container):
+        conPtr(&container)
     {}
     
-    DeepView(ContainerType* container):
-        refContainer(container)
+    View(ContainerType* container):
+        conPtr(container)
     {}
     
-    DeepView& operator=(const DeepView&) = default;
+    View& operator=(const View&) = default;
     
     iterator begin() {
-        return iterator(refContainer->firstFrame);
+        return iterator(conPtr->firstFrame);
     }
     
     template<typename TOffset>
     iterator begin(const TOffset& offset) {
-        return iterator(refContainer->firstFrame, offset);
+        return iterator(conPtr->firstFrame, offset);
     }
     
     iterator end() {
         return iterator(nullptr);
     }
     
-    ContainerType* refContainer;
-    unsigned nbElem;
+    ContainerType* conPtr;
+    uint32_t nbElem;
 }; // 
-
+#endif
 } // namespace hzdr

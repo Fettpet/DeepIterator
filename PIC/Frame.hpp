@@ -5,17 +5,18 @@ namespace hzdr
 {
 template<
     typename TParticle,
-    unsigned nbParticles>
+    uint_fast32_t nbParticles>
 struct Frame
 {
+    typedef TParticle                           ValueType;
     typedef TParticle                           ParticleType;
     typedef ParticleType*                       ParticlePointer;
     typedef ParticleType&                       ParticleReference;
     typedef typename TParticle::position_type   particle_position_type;
     typedef Frame<TParticle, nbParticles>       FrameType;
     
-    constexpr static unsigned Dim = TParticle::Dim;
-    constexpr static unsigned nbParticleInFrame = nbParticles;
+    constexpr static uint_fast32_t Dim = TParticle::Dim;
+    constexpr static uint_fast32_t nbParticleInFrame = nbParticles;
     
    
     Frame(...):
@@ -23,7 +24,7 @@ struct Frame
     {
         for(auto &par: particles)
         {
-           for(int i=0; i<Dim; ++i)
+           for(uint_fast32_t i=0; i<Dim; ++i)
            {
                par.data[i] = rand() % 100;
            }
@@ -34,19 +35,19 @@ struct Frame
     template<typename TIndex>
     inline
     ParticleReference
-    operator[] (const TIndex& idx)
+    operator[] (const TIndex& pos)
     {
-        return particles[idx];
+        return particles[pos];
     }
     
     template<typename TIndex>
     inline
     const
     ParticleReference
-    operator[] (const TIndex& idx)
+    operator[] (const TIndex& pos)
     const
     {
-        return particles[idx];
+        return particles[pos];
     }
 
     
@@ -61,11 +62,11 @@ struct Frame
 
 template<
     typename TParticle,
-    unsigned nbParticles>
+    uint_fast32_t nbParticles>
 std::ostream& operator<<(std::ostream& out, const Frame<TParticle, nbParticles>& f)
 {
     out << "[";
-    for(int i=0; i< nbParticles; ++i)
+    for(uint_fast32_t i=0; i< nbParticles; ++i)
     {
         out << f.particles[i] << ", ";
     }
