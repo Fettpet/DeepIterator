@@ -107,7 +107,7 @@ public:
                  const TRuntimeVariables& runtimeVariables
                 ):
                  ptr(ptr),
-                 index(Navigator::first(runtimeVariables.offset, runtimeVariables.nbRuntimeElements)),
+                 index(Navigator::first(runtimeVariables)),
                  nbElemsInLast(nbElemsInLast),
                  runtimeVariables(runtimeVariables)
                  
@@ -229,7 +229,7 @@ public:
                  const uint_fast32_t& nbElemsInLast, 
                  const TRuntimeVariables& runtimeVariables
                 ):
-                 ptr(Navigator::first(ptr)),
+                 ptr(Navigator::first(ptr, runtimeVariables)),
                  runtimeVariables(runtimeVariables)
                  
     {}
@@ -335,25 +335,22 @@ public:
                  const uint_fast32_t& nbElems
     ):
         ptr(nullptr),
-        index(nbElems),
-        nbElems(0)
+        index(nbElems)
 
     {}
 
     DeepIterator():
         ptr(nullptr),
-        index(0),
-        nbElems(0)
+        index(0)
         {}
     
     
     DeepIterator(ElementType* ptr, 
                  const uint_fast32_t& nbElemsInLast,
-                 TRuntimeVariables runtimeVariables,
+                 const TRuntimeVariables& runtimeVariables,
                  ChildView view):
                  ptr(ptr),
-                 index(Navigator::first(runtimeVariables.offset, nbElems)),
-                 nbElems(nbElems),
+                 index(Navigator::first(runtimeVariables)),
                  runtimeVariables(runtimeVariables),
                  childView(view),
                  childIter(view.begin())
@@ -411,11 +408,11 @@ public:
     }
     
 protected:
-    TRuntimeVariables runtimeVariables;
+    
     Collecter coll;
     ElementType* ptr;
     uint_fast32_t index;
-    const uint_fast32_t nbElems;
+    TRuntimeVariables runtimeVariables;
     ChildView childView;
     ChildIterator childIter;
     
@@ -495,7 +492,7 @@ public:
                  const uint_fast32_t& nbElems,
                  TRuntimeVariables runtimeVariables,
                  ChildView view):
-                 ptr(Navigator::first(ptr2)),
+                 ptr(Navigator::first(ptr2, runtimeVariables)),
                  childView(view),
                  childIter(view.begin()),
                  runtimeVariables(runtimeVariables)
