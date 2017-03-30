@@ -79,6 +79,8 @@ public:
     typedef TCollective                             Collecter;
     typedef Wrapper< ValueType, TCollective>        WrapperType;
     typedef traits::NeedRuntimeSize<ElementType>    RuntimeSize;
+
+ 
 // functios
 public:
 
@@ -208,7 +210,8 @@ public:
     typedef TNavigator                          Navigator;
     typedef TCollective                         Collecter;
     typedef Wrapper< ValueType, TCollective>    WrapperType;
-// functios
+// functions 
+    static_assert(std::is_same<typename TAccessor::ReturnType, ValueType>::value, "Returntype of accessor must be the same as Valuetype of TElement");
 public:
 
 /**
@@ -441,6 +444,7 @@ struct DeepIterator<TElement,
                     typename std::enable_if<not hzdr::traits::IsIndexable<TElement>::value>::type >
 {
 // datatypes
+    
 public:
     typedef TElement                                ElementType;
     typedef typename std::remove_reference<typename TElement::ValueType>::type            ValueType;
@@ -457,7 +461,12 @@ public:
     typedef typename TChild::Iterator               ChildIterator;
     typedef typename ChildIterator::ReturnType      ReturnType;
     typedef Wrapper< ReturnType, TCollective>       WrapperType;
-// functios
+
+    // tests
+    static_assert(std::is_same<typename TAccessor::ReturnType, ValueType>::value, "Returntype of accessor must be the same as Valuetype of TElement");
+    
+    // functions
+    
 public:
 
 /**

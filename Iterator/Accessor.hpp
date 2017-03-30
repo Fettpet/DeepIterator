@@ -5,7 +5,10 @@
  * condition that the datastructure has operator [] overloaded. If the condition
  * is satisfied, you doesnt need to implement an own Accessor. In other cases, 
  * you need to write one. 
- * 
+ * The accessor has a function 
+ * C* get( T*). T is the input datatype and is the output datatype. You need to 
+ * declare C as ReturnType. i.e 
+ * typedef C ReturnType;
  */
 
 #pragma once
@@ -24,16 +27,7 @@ struct Accessor;
 template<>
 struct Accessor<Indexable> 
 {
-    
-    template<typename TContainer, typename TIndex>
-    static
-    auto 
-    get(TContainer& con, const TIndex& pos)
-    -> typename TContainer::ValueType*
-    {
-        return &(con[pos]);
-    }
-    
+
     
     template<typename TContainer, typename TIndex>
     static
@@ -56,9 +50,7 @@ struct Accessor<SuperCell<TFrame> >
     typedef FrameType                       ReturnType;
     typedef ReturnType&                     ReturnReference;
     typedef ReturnType*                     ReturnPtr;
-    
-    Accessor() = default;
-    
+
 
     static
     ReturnPtr
@@ -68,16 +60,6 @@ struct Accessor<SuperCell<TFrame> >
         return frame;
     }
     
-    
-
-    static
-    ReturnPtr
-    inline
-    get(FrameType& frame)
-    {
-        return &frame;
-    }
- 
 }; // Accessor < SuperCell >
 
 }// namespace hzdr
