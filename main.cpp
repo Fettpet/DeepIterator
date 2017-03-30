@@ -5,13 +5,11 @@
 #include <algorithm>
 #include <typeinfo>
 #include <memory>
-#include "deepForeach.hpp"
-#include "Traits/isContainer.hpp"
 #include <cstdlib>
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
-#include "DeepView.hpp"
+#include "View.hpp"
 #include "Traits/HasOffset.hpp"
 #include "Iterator/RuntimeTuple.hpp"
 template<

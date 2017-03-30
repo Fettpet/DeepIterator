@@ -4,7 +4,7 @@
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
 #include "DeepIterator.hpp"
-#include "DeepView.hpp"
+#include "View.hpp"
 #include "Iterator/RuntimeTuple.hpp"
 using namespace boost::unit_test;
 typedef hzdr::Particle<int, 2> Particle;

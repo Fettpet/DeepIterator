@@ -224,7 +224,7 @@ template<typename TIndex, typename TContainer, uint_fast32_t jumps = jumpSize>
         if(supercell != nullptr)
         {
             auto ptr = supercell->firstFrame;
-            for(auto i=0; i < runtimeVariables.offset; ++i)
+            for(uint i=0; i < runtimeVariables.offset; ++i)
             {
                 ptr = ptr->nextFrame;
             }
