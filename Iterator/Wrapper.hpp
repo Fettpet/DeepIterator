@@ -1,6 +1,9 @@
 /**
- * 
- * @brief 
+ * @brief While the collectiv iteration over all values in the container, it is
+ * possible, that the element is not valid. But after calling ++operator it is
+ * valid. This class has two function:
+ * operator bool: return true if the value is valid and false otherwise
+ * operator* return the value.
  * 
  */
 #pragma once
