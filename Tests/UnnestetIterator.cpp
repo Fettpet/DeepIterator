@@ -1,4 +1,4 @@
-#if 0
+
 #define BOOST_TEST_MODULE UnnestedIterator
 #include <boost/test/included/unit_test.hpp>
 #include "PIC/Supercell.hpp"
@@ -48,14 +48,19 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNonCollectiv)
 
 /**
  *@brief 2. test: Backward with jumpsize 2
-
-    hzdr::View<Particle, hzdr::Direction::Backward, 2, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con2(&test1, static_cast<uint_fast32_t>(2));
+   */   
+    const int jumpsize2 = 2;
+    const int offset2 = 0;
+    const int nbElements2 = 2;
+    
+    const RuntimeTuple runtimeVar2(jumpsize2, nbElements2, offset2);
+    hzdr::View<Particle, hzdr::Direction::Backward,  hzdr::Collectivity::NonCollectiv, RuntimeTuple> con2(&test1, runtimeVar2);
     auto it2 = con2.begin();
     BOOST_TEST(*(*it2) == 4);
     ++it2;
     // since there are only two elements, its at the end
     BOOST_TEST(not (it2 != con2.end()));
-   */   
+
 }
 
 
@@ -84,15 +89,17 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
     hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(*cell.firstFrame, runtimeVar);
 
     uint_fast32_t counter(0);
+    std::cout << *(cell.firstFrame) << std::endl;
     for(auto it = con.begin(); it != con.end(); ++it)
     {   
         auto wrap = *it;
         if(wrap)
         {
-            counter++;
+            counter += (*wrap).data[0] + (*wrap).data[1];
         }
     }
-    BOOST_TEST(counter == 10);
+    // sum [0, 19])
+    BOOST_TEST(counter == 190);
     /** ******************
     // @brief 2. Test Forward with Jumpsize 3 nonCollectiv
     ********************/
@@ -110,10 +117,11 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
         auto wrap = *it;
         if(wrap)
         {
-            counter++;
+            counter += (*wrap).data[0] + (*wrap).data[1];
         }
     }
-    BOOST_TEST(counter == 4);
+    // the first particle (0, 1), fourth ( 6, 7) seventh ( 12, 13) and last (18, 19) add together
+    BOOST_TEST(counter == 76);
     
     /** ******************
     // @brief 3. Test backward with Jumpsize 3 nonCollectiv
@@ -131,10 +139,11 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
         auto wrap = *it;
         if(wrap)
         {
-            counter++;
+            counter += (*wrap).data[0] + (*wrap).data[1];
         }
     }
-    BOOST_TEST(counter == 4);
+    // the first particle (0, 1), fourth ( 6, 7) seventh ( 12, 13) and last (18, 19) add together
+    BOOST_TEST(counter == 76);
 
 
 }
@@ -164,4 +173,3 @@ BOOST_AUTO_TEST_CASE(FrameInSuperCell)
     }
     BOOST_TEST(counter == 5);
 }
-#endif

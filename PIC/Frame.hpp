@@ -22,11 +22,12 @@ struct Frame
     Frame(...):
         nextFrame(nullptr), previousFrame(nullptr)
     {
+        static uint_fast32_t value{0};
         for(auto &par: particles)
         {
            for(uint_fast32_t i=0; i<Dim; ++i)
            {
-               par.data[i] = rand() % 100;
+               par.data[i] = value++;
            }
         }
         

@@ -45,11 +45,14 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     for(auto it=test.begin(); it!=test.end(); ++it)
     {
         if(*it)
-            ++counter;
+        {
+            counter += (**it);
+            
+        }
     }
     
-    // 10 Particles with 2 variables
-    BOOST_TEST(counter == 20); 
+    // sum([0, 19]) = 190
+    BOOST_TEST(counter == 190); 
  
 }
 
@@ -58,9 +61,6 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
 {
 
-
-
-    
 
     Supercell cell(5, 2);
     
@@ -80,8 +80,11 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
      *///////////////////////////////////////////////////////////////////
     hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(&cell, runtimeSupercell);
      
+    auto it=con.begin();
+
+    BOOST_TEST((**it).particles[0] == Particle(100, 101));
     uint counter(0);
-    for(auto it=con.begin(); it!=con.end(); ++it)
+    for(; it!=con.end(); ++it)
     {
         
      //   std::cout << "Hello world" << std::endl;
@@ -114,9 +117,14 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
     for(auto it=test.begin(); it!=test.end(); ++it)
     {
         if(*it)
-            counter++;
+        {
+            counter += (**it).data[0] + (**it).data[1];
+            
+        }
     }
-     BOOST_TEST(counter == 42);
+    // the first position starts at 100
+    // sum ( [100, 184] )
+     BOOST_TEST(counter == 11886);
     // Second test: 
 
 }
