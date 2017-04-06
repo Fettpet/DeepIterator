@@ -14,7 +14,7 @@ namespace Collectivity
 /**
  * @brief The iterator doesn't 
  * */
-struct NonCollectiv
+struct None
 {
     constexpr 
     bool 

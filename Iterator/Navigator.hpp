@@ -95,7 +95,7 @@ public:
     inline 
     first( const TRuntimeVariables& runtime)
     {
-        return runtime.nbRuntimeElements - 1 - runtime.offset;
+        return runtime.getNbElements() - 1 - runtime.getOffset();
     }
     
 }; // Navigator<Forward, Frame, jumpSize>

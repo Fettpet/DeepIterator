@@ -10,9 +10,8 @@ using namespace boost::unit_test;
 typedef hzdr::Particle<int, 2> Particle;
 typedef hzdr::Frame<Particle, 10> Frame;
 typedef hzdr::SuperCell<Frame> Supercell;
-    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
-                               hzdr::runtime::nbElements::enabled,
-                               hzdr::runtime::jumpsize::enabled> RuntimeTuple;
+typedef hzdr::runtime::TupleFull RuntimeTuple;
+
 BOOST_AUTO_TEST_CASE(PositionsInFrames)
 {
  
@@ -30,12 +29,12 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     
     const RuntimeTuple runtimeFrame(jumpsizeFrame, nbElementsFrame, offsetFrame);
     
-    typedef hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> PositionInParticleContainer;
+    typedef hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> PositionInParticleContainer;
     
     hzdr::View< Frame, 
                     hzdr::Direction::Forward, 
                     
-                    hzdr::Collectivity::NonCollectiv, 
+                    hzdr::Collectivity::None, 
                     RuntimeTuple,
                     PositionInParticleContainer > test(cell.firstFrame, 
                                                        runtimeFrame,
@@ -78,27 +77,33 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
     /** //////////////////////////////////////////////////////////////////
      * First Test with two loops and unnested Iterator
      *///////////////////////////////////////////////////////////////////
-    hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(&cell, runtimeSupercell);
+    hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(&cell, runtimeSupercell);
      
     auto it=con.begin();
-
+    std:: cout << cell;
     BOOST_TEST((**it).particles[0] == Particle(100, 101));
     uint counter(0);
     for(; it!=con.end(); ++it)
     {
         
      //   std::cout << "Hello world" << std::endl;
+        
         auto wrap = *it;
         if(wrap)
         {
-            
+            std::cout << **it << std::endl;
             auto t = (*wrap);
-            hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv,RuntimeTuple> innerCon(&t,runtimeVarParticle);
+            hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None,RuntimeTuple> innerCon(&t,runtimeVarParticle);
             for(auto it2=innerCon.begin(); it2 != innerCon.end(); ++it2)
             {
+                std::cout << "T" << std::endl;
                 auto wrapInner = *it2;
                 if(wrapInner)
+                {
                     counter++;
+                    std::cout << *wrapInner << std::endl;
+                    
+                }
             }
         }
     }
@@ -109,9 +114,9 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
      * Second test with a nested Iterator
      * ************************/
     // All Particle within a Supercell
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::NonCollectiv,RuntimeTuple> ParticleInFrame;
+    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
     
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::NonCollectiv, RuntimeTuple,ParticleInFrame> test(cell, runtimeSupercell, ParticleInFrame(nullptr, runtimeVarParticle)); 
+    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> test(cell, runtimeSupercell, ParticleInFrame(nullptr, runtimeVarParticle)); 
     
     counter = 0;
     for(auto it=test.begin(); it!=test.end(); ++it)

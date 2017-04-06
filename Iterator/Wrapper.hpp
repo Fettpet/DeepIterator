@@ -50,7 +50,7 @@ protected:
 
 
 template<typename TElement>
-struct Wrapper<TElement, Collectivity::NonCollectiv>
+struct Wrapper<TElement, Collectivity::None>
 {
     typedef TElement        ElementType;
     typedef ElementType*    ElementPtr;

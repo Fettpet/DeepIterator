@@ -195,18 +195,8 @@ public:
     }
 */
     Iterator end() {
-        if(hzdr::traits::HasNbRuntimeElementst<RunTimeVariables>::value)
-        {
-            const uint_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.nbRuntimeElements  : traits::NumberElements< TElement>::value;
-
+            const uint_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.getNbElements()  : traits::NumberElements< TElement>::value;
             return Iterator(nullptr, elem);
-        }
-        else 
-        {
-            const uint_fast32_t elem = RuntimeSize::test(ptr)? 0  :traits::NumberElements< TElement>::value;
-            return Iterator(nullptr, elem);
-        }
-
     }
 
     

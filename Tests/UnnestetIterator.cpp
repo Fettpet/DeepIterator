@@ -12,13 +12,11 @@ using namespace boost::unit_test;
     typedef hzdr::Frame<Particle, 10> Frame;
     typedef hzdr::SuperCell<Frame> Supercell;
 
-    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
-                               hzdr::runtime::nbElements::enabled,
-                               hzdr::runtime::jumpsize::enabled> RuntimeTuple;
+    typedef hzdr::runtime::TupleFull RuntimeTuple;
 /**
  * @brief This test iterate over all Positions in a Particle
  */
-BOOST_AUTO_TEST_CASE(PositionsInFrameNonCollectiv)
+BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
 {
 
     
@@ -34,9 +32,10 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNonCollectiv)
     const int nbElements = 2;
     
     const RuntimeTuple runtimeVar(jumpsize, nbElements, offset);
-    hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(&test1, runtimeVar);
+    hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(&test1, runtimeVar);
     auto it = con.begin();
     auto wrap = *it;
+    
     BOOST_TEST(*wrap == 1);
     ++it;
     wrap = *it;
@@ -52,9 +51,8 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNonCollectiv)
     const int jumpsize2 = 2;
     const int offset2 = 0;
     const int nbElements2 = 2;
-    
     const RuntimeTuple runtimeVar2(jumpsize2, nbElements2, offset2);
-    hzdr::View<Particle, hzdr::Direction::Backward,  hzdr::Collectivity::NonCollectiv, RuntimeTuple> con2(&test1, runtimeVar2);
+    hzdr::View<Particle, hzdr::Direction::Backward,  hzdr::Collectivity::None, RuntimeTuple> con2(&test1, runtimeVar2);
     auto it2 = con2.begin();
     BOOST_TEST(*(*it2) == 4);
     ++it2;
@@ -71,7 +69,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNonCollectiv)
  * 2. Forward with jumpsize 3
  * 3. Backward with jumpsize 6
  */
-BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
+BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
 {
 
     Supercell cell(5, 2);
@@ -86,10 +84,9 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
     
     const RuntimeTuple runtimeVar(jumpsize, nbElements, offset); 
     // the 2 is the number of elements in Last Frame
-    hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(*cell.firstFrame, runtimeVar);
+    hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(*cell.firstFrame, runtimeVar);
 
     uint_fast32_t counter(0);
-    std::cout << *(cell.firstFrame) << std::endl;
     for(auto it = con.begin(); it != con.end(); ++it)
     {   
         auto wrap = *it;
@@ -109,7 +106,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
     const int nbElements2 = 2;
     
     const RuntimeTuple runtimeVar2(jumpsize2, nbElements2, offset2); 
-    hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con2(*cell.firstFrame, runtimeVar2);
+    hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con2(*cell.firstFrame, runtimeVar2);
 
     counter = 0;
     for(auto it = con2.begin(); it != con2.end(); ++it)
@@ -132,7 +129,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
     const int nbElements3 = 10;
     
     const RuntimeTuple runtimeVar3(jumpsize3, nbElements3, offset3); 
-    hzdr::View<Frame, hzdr::Direction::Backward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con3(*cell.firstFrame, runtimeVar3);
+    hzdr::View<Frame, hzdr::Direction::Backward, hzdr::Collectivity::None, RuntimeTuple> con3(*cell.firstFrame, runtimeVar3);
     counter = 0;
     for(auto it = con3.begin(); it != con3.end(); ++it)
     {   
@@ -148,7 +145,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNonCollectiv)
 
 }
 
-BOOST_AUTO_TEST_CASE(FrameInSuperCell)
+BOOST_AUTO_TEST_CASE(FrameInSuperCellNotCollectiv)
 {
     typedef hzdr::Particle<int, 2> Particle;
     typedef hzdr::Frame<Particle, 10> Frame;
@@ -160,7 +157,7 @@ BOOST_AUTO_TEST_CASE(FrameInSuperCell)
     const int nbElements3 = 2;
     
     const RuntimeTuple runtimeVar2(jumpsize3, nbElements3, offset3); 
-    hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, RuntimeTuple> con(&cell, runtimeVar2);
+    hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(&cell, runtimeVar2);
 
     uint_fast32_t counter(0);
     for(auto it=con.begin(); it!=con.end(); ++it)

@@ -65,25 +65,21 @@ int main(int argc, char **argv) {
     Supercell cell(5, 2);
     std::cout << cell << std::endl; 
     // All Particle within a Supercell
-    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
-                               hzdr::runtime::nbElements::enabled,
-                               hzdr::runtime::jumpsize::enabled> RuntimeTupleParticleInFrame;
+
     typedef hzdr::View<Frame, 
                        hzdr::Direction::Forward, 
-                       hzdr::Collectivity::NonCollectiv, 
-                       RuntimeTupleParticleInFrame> ParticleInFrame;
+                       hzdr::Collectivity::None, 
+                       hzdr::runtime::TupleFull> ParticleInFrame;
     
-    typedef hzdr::RuntimeTuple<hzdr::runtime::offset::enabled,
-                               hzdr::runtime::nbElements::enabled,
-                               hzdr::runtime::jumpsize::enabled> RuntimeTupleParticleInSupercell;
+
     typedef hzdr::View<Supercell,
                        hzdr::Direction::Forward, 
-                       hzdr::Collectivity::NonCollectiv, 
-                       RuntimeTupleParticleInSupercell,
+                       hzdr::Collectivity::None, 
+                       hzdr::runtime::TupleFull,
                        ParticleInFrame> ParticleInSuperCell;
                        
-    RuntimeTupleParticleInFrame runtimeFrame(0, 1, 1);
-    RuntimeTupleParticleInSupercell runtimeSupercell(1, 1, 1);
+    hzdr::runtime::TupleFull runtimeFrame(0, 1, 1);
+    hzdr::runtime::TupleFull runtimeSupercell(1, 1, 1);
 
    ParticleInSuperCell test(cell, runtimeSupercell, ParticleInFrame(cell.firstFrame, runtimeSupercell));
    ParticleInFrame t(cell.firstFrame, runtimeFrame);
