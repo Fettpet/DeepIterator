@@ -28,10 +28,13 @@ namespace hzdr
    
 /** *********************************************
  * @brief This view is the connector between two layers. 
- * @tparam TContainer The datatype of the input type: At the moment we have
- * Frame and Supercell Implemented.
- * @tparam TElement The return type. Implemented are particle frames and container
- * @tparam TDirection The direction of the iteration. 
+ * @tparam TElement The input container. It must have a typedef ValueType which 
+ * is the typedef of elements within the container. The next requirement is that
+ * the traits NeedRuntimeSize and NumberElements are specified for this container.
+ * @tparam TDirection The direction of the iteration. There are to posibilities:
+ * 1. Forward and; 2. Backward \see Policies.hpp 
+ * @tparam TCollective is used to determine the collective properties of your 
+ * iterator.
  * @tparam TRuntimeVariables A tupble with variables which are know at runtime. 
  * This should be a struct with the following possible public accessable vari-
  * ables: 
@@ -42,11 +45,12 @@ namespace hzdr
  * given, offset=1 will be assumed.
  * 3. jumpsize: Size of the jump when called ++, i.e. What is the next element. 
  * If this value is not given, jumpsize=1 will be assumed.
+ * @tparam 
  * ********************************************/
 template<
     typename TElement,
     hzdr::Direction TDirection,
-    typename TColl,
+    typename TCollective,
     typename TRuntimeVariables,
     typename TChild = NoChild>
 struct View
@@ -59,7 +63,7 @@ public:
     typedef typename std::conditional<traits::IsIndexable<ValueType>::value, Indexable, ValueType>::type        IndexableType;
     typedef Navigator<IndexableType, TDirection, 0>                                                             NavigatorType;
     typedef Accessor<IndexableType>                                                                             AccessorType;
-    typedef DeepIterator<ValueType, AccessorType, NavigatorType, TColl, TRuntimeVariables, ChildType>           iterator; 
+    typedef DeepIterator<ValueType, AccessorType, NavigatorType, TCollective, TRuntimeVariables, ChildType>     iterator; 
     typedef iterator                                                                                            Iterator; 
     typedef traits::NeedRuntimeSize<TElement>                                                                   RuntimeSize;
     typedef TRuntimeVariables                                                                                   RunTimeVariables;
@@ -195,7 +199,7 @@ public:
     }
 */
     Iterator end() {
-            const uint_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.getNbElements()  : traits::NumberElements< TElement>::value;
+            const int_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.getNbElements()  : traits::NumberElements< TElement>::value;
             return Iterator(nullptr, elem);
     }
 

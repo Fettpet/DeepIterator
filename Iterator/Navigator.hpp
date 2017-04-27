@@ -37,14 +37,14 @@ namespace hzdr
  */
 template<typename TData,
          hzdr::Direction TDirection,
-         uint_fast32_t jumpSize=0>
+         int_fast32_t jumpSize=0>
 struct Navigator;
     
 /** ****************
  * @brief The first implementation of the Navigator. This one is used for indexable
  * datatypes. It started at the last element and go to the first one.
  *****************/
-template<uint_fast32_t jumpSize>
+template<int_fast32_t jumpSize>
 struct Navigator<Indexable,
                  hzdr::Direction::Backward, 
                  jumpSize>
@@ -57,7 +57,7 @@ public:
  */
     template<typename TIndex, 
              typename TContainer,
-             uint_fast32_t size=jumpSize,
+             int_fast32_t size=jumpSize,
              typename TRuntimeVariables>
     static
     typename std::enable_if<size != 0>::type
@@ -77,7 +77,7 @@ public:
     template<typename TIndex, 
              typename TContainer,  
              typename TRuntimeVariables,
-             uint_fast32_t size=jumpSize>
+             int_fast32_t size=jumpSize>
     inline
     static
     typename std::enable_if<size == 0>::type
@@ -86,12 +86,12 @@ public:
          const TRuntimeVariables& run)
     
     {
-        index -= run.jumpsize;
+        index -= run.getJumpsize();
     }
     
     template<typename TRuntimeVariables>
     static
-    uint_fast32_t 
+    int_fast32_t 
     inline 
     first( const TRuntimeVariables& runtime)
     {
@@ -107,7 +107,7 @@ public:
  * go to the last one.
  *
  *****************/////    
-template<uint_fast32_t jumpSize>
+template<int_fast32_t jumpSize>
 struct Navigator<Indexable,
                  hzdr::Direction::Forward, 
                  jumpSize>
@@ -118,7 +118,7 @@ public:
  * @brief compiletime implementation of next element implementation. This function
  * is called if the template parameter jumpsize != 0.
  */
-    template<typename TIndex, typename TContainer, uint_fast32_t size=jumpSize>
+    template<typename TIndex, typename TContainer, int_fast32_t size=jumpSize>
     static
     typename std::enable_if<size != 0>::type
     inline
@@ -136,7 +136,7 @@ public:
     template<typename TIndex, 
              typename TContainer,  
              typename TRuntimeVariables,
-             uint_fast32_t size=jumpSize>
+             int_fast32_t size=jumpSize>
     inline
     static
     typename std::enable_if<size == 0>::type
@@ -146,16 +146,16 @@ public:
     
     {
 
-        index += run.jumpsize;
+        index += run.getJumpsize();
     }
     
     template<typename TRuntimeVariables>
     static
-    uint_fast32_t 
+    int_fast32_t 
     inline 
     first(const TRuntimeVariables& run)
     {
-        return run.offset;
+        return run.getOffset();
     }
     
 }; // Navigator<Backward, Frame, jumpSize>
@@ -167,7 +167,7 @@ public:
  *****************/
 
 template<typename TFrame,
-         uint_fast32_t jumpSize>
+         int_fast32_t jumpSize>
 struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Forward, jumpSize>
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
@@ -179,7 +179,7 @@ public:
     /**
  * @brief compiletime implementation of next element implementation. This function
  * is called if the template parameter jumpsize != 0.
-template<typename TIndex, typename TContainer, uint_fast32_t jumps = jumpSize>
+template<typename TIndex, typename TContainer, int_fast32_t jumps = jumpSize>
     static
     typename std::enable_if<jumps!=0>::type 
     inline
@@ -198,20 +198,29 @@ template<typename TIndex, typename TContainer, uint_fast32_t jumps = jumpSize>
     /**
      * @brief runtime implementation of next element implementation. This function
      * is called if the template parameter jumpsize == 0.
-     * 
+     * @return true: it is at the end, before the iterations are finished
+     *         false: it iterate until it is finished
      */
     template<typename TContainer, typename TRuntime>
     static
-    void
+    bool
     inline
     next(TContainer*& ptr, const TRuntime& runtimeVariables) 
     {
-        for(size_t i=0; i<runtimeVariables.jumpsize; ++i)
+
+        for(int_fast32_t i=0; i<runtimeVariables.getJumpsize(); ++i)
         {
             
-            if(ptr == nullptr) break;
+                       
+                        
+            if(ptr == nullptr)  {
+#pragma omp critical
+                std::cout << "I'm" << omp_get_thread_num() << " and " << std::boolalpha << (i + runtimeVariables.getOffset() >= runtimeVariables.getJumpsize()) <<std::endl;
+                return i + runtimeVariables.getOffset() >= runtimeVariables.getJumpsize();
+            }
             ptr = ptr->nextFrame;
         }
+        return false;
     }
 
     
@@ -224,7 +233,7 @@ template<typename TIndex, typename TContainer, uint_fast32_t jumps = jumpSize>
         if(supercell != nullptr)
         {
             auto ptr = supercell->firstFrame;
-            for(uint i=0; i < runtimeVariables.offset; ++i)
+            for(uint i=0; i < runtimeVariables.getOffset(); ++i)
             {
                 ptr = ptr->nextFrame;
             }
@@ -248,7 +257,7 @@ template<typename TIndex, typename TContainer, uint_fast32_t jumps = jumpSize>
 /**
  * @brief this implementation use supercells. The direction is backward. 
  */    
-template<typename TFrame, uint_fast32_t jumpSize>
+template<typename TFrame, int_fast32_t jumpSize>
 struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward, jumpSize>
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
@@ -261,9 +270,9 @@ public:
  * @brief compiletime implementation of next element implementation. This function
  * is called if the template parameter jumpsize != 0.
  */
-    template<typename TIndex, typename TContainer, typename TRuntime, uint_fast32_t size = jumpSize>
+    template<typename TIndex, typename TContainer, typename TRuntime, int_fast32_t size = jumpSize>
     static
-    typename std::enable_if<size != 0>::type
+    typename std::enable_if<size != 0, bool>::type
     inline
     next(TContainer* ptr, TIndex& index , const TRuntime& runtimeVariables) 
     {
@@ -271,9 +280,10 @@ public:
         for(size_t i=0; i<jumpSize; ++i)
         {
             
-            if(ptr == nullptr) break;
+            if(ptr == nullptr) return i + runtimeVariables.getOffset() < runtimeVariables.getJumpsize();
             ptr = ptr->previousFrame;
         }
+        return false;
     }
     
     
@@ -282,19 +292,25 @@ public:
      * is called if the template parameter jumpsize == 0.
      * 
      */
-    template<typename TIndex, typename TContainer, typename TRuntime, uint_fast32_t size = jumpSize>
+    template<typename TIndex, typename TContainer, typename TRuntime, int_fast32_t size = jumpSize>
     static
-    typename std::enable_if<size == 0>::type
+    typename std::enable_if<size == 0, bool>::type
     inline
     next(TContainer* ptr, TIndex& index, const TRuntime& run) 
     {
-        boost::ignore_unused(run);
+
         for(size_t i=0; i<jumpSize; ++i)
         {
             
-            if(ptr == nullptr) break;
+            if(ptr == nullptr)
+            {
+#pragma omp critical
+                std::cout << "I'm" << omp_get_thread_num() << " and " << std::boolalpha << (i + run.getOffset() < run.getJumpsize()) <<std::endl;
+                return i + run.getOffset() < run.getJumpsize();
+            }
             ptr = ptr->previousFrame;
         }
+        return false;
     }
     
     template<typename TRuntime>
@@ -306,7 +322,7 @@ public:
         if(supercell != nullptr)
         {
             auto ptr = supercell->lastFrame;
-            for(auto i=0; i < run.offset; ++i)
+            for(auto i=0; i < run.getOffset(); ++i)
             {
                 ptr = ptr->previousFrame;
             }

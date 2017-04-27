@@ -7,9 +7,10 @@
 #include "View.hpp"
 #include "Iterator/RuntimeTuple.hpp"
 using namespace boost::unit_test;
-typedef hzdr::Particle<int, 2> Particle;
+typedef hzdr::Particle<int_fast32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 10> Frame;
 typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 typedef hzdr::runtime::TupleFull RuntimeTuple;
 
 BOOST_AUTO_TEST_CASE(PositionsInFrames)
@@ -132,5 +133,80 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
      BOOST_TEST(counter == 11886);
     // Second test: 
 
+}
+
+BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
+{
+    const int nbSuperCells = 5;
+    const int nbFramesInSupercell = 2;
+    SupercellContainer supercellContainer(nbSuperCells, nbFramesInSupercell);
+    
+    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
+    
+// create the first iterator
+    const int jumpsizeFrame1 = 1;
+    const int offsetFrame1 = 0;
+    const int nbElementsFrame1 = 0;
+    
+    const RuntimeTuple runtimeSupercell1(jumpsizeFrame1, nbElementsFrame1, offsetFrame1);
+    
+    const int jumpsizeParticle1 = 1;
+    const int offsetParticle1 = 0;
+    const int nbElementsParticle1 = supercellContainer[0].nbParticlesInLastFrame;
+    
+    const RuntimeTuple runtimeVarParticle1(jumpsizeParticle1, nbElementsParticle1, offsetParticle1);
+    
+    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell1(supercellContainer[0], 
+                                                                                                                            runtimeSupercell1,
+                                                                                                                            ParticleInFrame(nullptr, runtimeVarParticle1)); 
+    
+// create the second iteartor
+    const int jumpsizeFrame2 = 1;
+    const int offsetFrame2 = 0;
+    const int nbElementsFrame2 = 0;
+    
+    const RuntimeTuple runtimeSupercell2(jumpsizeFrame2, nbElementsFrame2, offsetFrame2);
+    
+    const int jumpsizeParticle2 = 1;
+    const int offsetParticle2 = 0;
+    const int nbElementsParticle2 = supercellContainer[0].nbParticlesInLastFrame;
+    
+    const RuntimeTuple runtimeVarParticle2(jumpsizeParticle2, nbElementsParticle2, offsetParticle2);
+    
+    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell2(supercellContainer[1], 
+                                                                                                                            runtimeSupercell2,
+                                                                                                                            ParticleInFrame(nullptr, runtimeVarParticle2)); 
+    
+// first add all 
+    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+    {
+        if(*it)
+        {
+            (**it).data[0] = 0;
+        }
+
+        for(auto it2 = iterSuperCell2.begin(); it2 != iterSuperCell2.end(); ++it2)
+        {
+            // check wheter both are valid
+            if(*it and *it2)
+            {
+                (**it).data[0] += (**it2).data[1];
+            }
+        }
+    }
+    
+// second all particles within the first supercell must have the same value
+    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+    {
+        for(auto it2 = iterSuperCell1.begin(); it2 != iterSuperCell1.end(); ++it2)
+        {
+            // check wheter both are valid
+            if(*it and *it2)
+            {
+                BOOST_TEST((**it).data[0] == (**it2).data[0]);
+            }
+        }
+    }
+    
 }
 

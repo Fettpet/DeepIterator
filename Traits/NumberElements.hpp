@@ -10,19 +10,19 @@ namespace traits
 template<typename T>
 struct NumberElements
 {
-    static const uint_fast32_t value = 0;
+    static const int_fast32_t value = 0;
 }; // NumberElements
   
-template<typename TParticle, uint_fast32_t nb>
+template<typename TParticle, int_fast32_t nb>
 struct NumberElements<hzdr::Frame<TParticle, nb> >
 {
-    static const uint_fast32_t value = nb;
+    static const int_fast32_t value = nb;
 }; // struct NumberElements
 
-template<typename TPos, uint_fast32_t nb>
+template<typename TPos, int_fast32_t nb>
 struct NumberElements<hzdr::Particle<TPos, nb> >
 {
-    static const uint_fast32_t value = nb;
+    static const int_fast32_t value = nb;
 }; // struct NumberElements
 
     

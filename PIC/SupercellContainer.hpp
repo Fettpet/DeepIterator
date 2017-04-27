@@ -21,14 +21,14 @@ public:
     /**
      * 
      */
-    SupercellContainer(const uint_fast32_t& nbSupercells, 
-                       const uint_fast32_t& nbFramesInSupercell):
+    SupercellContainer(const int_fast32_t& nbSupercells, 
+                       const int_fast32_t& nbFramesInSupercell):
         supercells(nbSupercells)
     {
         
-        for(uint_fast32_t i=0; i<nbSupercells; ++i)
+        for(int_fast32_t i=0; i<nbSupercells; ++i)
         {
-            uint_fast32_t nbParticleInLastFrame = rand() % nbFramesInSupercell;
+            int_fast32_t nbParticleInLastFrame = rand() % nbFramesInSupercell;
             supercells[i] = new TSupercell(nbFramesInSupercell, nbParticleInLastFrame);
         }
     }
@@ -48,7 +48,7 @@ public:
     SupercellType&
     operator[] (const TIndex& pos)
     {
-        return supercells[pos];
+        return *(supercells[pos]);
     }
     
     template<typename TIndex>
@@ -58,7 +58,7 @@ public:
     operator[] (const TIndex& pos)
     const
     {
-        return supercells[pos];
+        return *(supercells[pos]);
     }
     
 protected:

@@ -17,7 +17,7 @@
  * This implementation is special for the datastructurs of PIConGPU. 
  * 
  */
-
+#include <sstream>
 #pragma once
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
@@ -29,7 +29,9 @@
 #include "Iterator/Wrapper.hpp"
 #include "Traits/IsIndexable.hpp"
 #include <limits>
+#include <cassert>
 #include <type_traits>
+#include "Traits/NumberElements.hpp"
 
 
 namespace hzdr 
@@ -89,29 +91,33 @@ public:
  * @param nbElems number of elements within the datastructure
  */
     DeepIterator(nullptr_t, 
-                 const uint_fast32_t& nbElems
+                 const int_fast32_t& nbElems
     ):
-        ptr(nullptr),
         index(nbElems),
         nbElemsInLast(0)
     {}
 
     DeepIterator():
-        ptr(nullptr),
         index(0),
         nbElemsInLast(0)
         {}
     
-    DeepIterator(ElementType* ptr, 
-                 const uint_fast32_t& nbElemsInLast, 
+    DeepIterator(ElementType* _ptr, 
+                 const int_fast32_t& nbElemsInLast, 
                  const TRuntimeVariables& runtimeVariables
                 ):
-                 ptr(ptr),
                  index(Navigator::first(runtimeVariables)),
                  nbElemsInLast(nbElemsInLast),
                  runtimeVariables(runtimeVariables)
                  
-    {}
+    {
+  //      assert(not (std::is_same<TCollective, Collectivity::None>::value and runtimeVariables.getJumpsize() == 1));
+        if(coll.isMover())
+        {
+            ptr = _ptr;
+        }
+        coll.sync();
+    }
     
     /**
      * @brief goto the next element
@@ -120,7 +126,7 @@ public:
     DeepIterator&
     operator++()
     {
-        
+        coll.sync();
         if(coll.isMover())
         {
             Navigator::next(ptr, index, runtimeVariables);
@@ -134,8 +140,16 @@ public:
     WrapperType
     operator*()
     {
-
-        return WrapperType(Accessor::get(ptr, index));
+        if(RuntimeSize::test(ptr))
+        {
+            return WrapperType(Accessor::get(ptr, index, runtimeVariables.getNbElements()));
+        }
+        else 
+        {
+            
+            auto elem =  traits::NumberElements<ElementType>::value;
+            return WrapperType(Accessor::get(ptr, index, elem));
+        }
     }
     
     
@@ -143,7 +157,12 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
-        return index < other.index;
+// #pragma omp critical
+//         std::cout << std::boolalpha << "first test " << (index < other.index + runtimeVariables.getJumpsize() - index % runtimeVariables.getJumpsize()) << " 2. test" << (index > -1 * runtimeVariables.getJumpsize()) << " index " << index <<std::endl;  
+        // ceil index such that all threads work
+        
+        return index < other.index + runtimeVariables.getJumpsize() - other.index % runtimeVariables.getJumpsize()
+             and index >= -1 * (runtimeVariables.getJumpsize() - other.index % runtimeVariables.getJumpsize());
     }
 
         
@@ -172,14 +191,13 @@ public:
 protected:
     Collecter coll;
     ElementType* ptr;
-    uint_fast32_t index;
-    const uint_fast32_t nbElemsInLast;
+    int index;
+    const int_fast32_t nbElemsInLast;
     TRuntimeVariables runtimeVariables;
     
 private:
 
 }; // struct DeepIterator
-
 
 
 
@@ -219,20 +237,27 @@ public:
  * @param nbElems number of elements within the datastructure
  */
     DeepIterator(nullptr_t, 
-                 const uint_fast32_t& nbElems
+                 const int_fast32_t& nbElems
     ):
-        ptr(nullptr)
+    waitAtEnd(false)
     {}
 
     
-   DeepIterator(ElementType* ptr, 
-                 const uint_fast32_t& nbElemsInLast, 
+   DeepIterator(ElementType* _ptr, 
+                 const int_fast32_t& nbElemsInLast, 
                  const TRuntimeVariables& runtimeVariables
                 ):
-                 ptr(Navigator::first(ptr, runtimeVariables)),
-                 runtimeVariables(runtimeVariables)
                  
-    {}
+                 runtimeVariables(runtimeVariables),
+                 waitAtEnd(false)
+                 
+    {
+        if(coll.isMover())
+        {
+            ptr = Navigator::first(_ptr, runtimeVariables);
+        }
+        coll.sync();
+    }
     
     /**
      * @brief goto the next element
@@ -241,11 +266,14 @@ public:
     DeepIterator&
     operator++()
     {
+
+        coll.sync();
         if(coll.isMover())
         {
-            Navigator::next(ptr, runtimeVariables);
+            waitAtEnd = Navigator::next(ptr, runtimeVariables);
         }
         coll.sync();
+
         return *this;
     }
     
@@ -261,7 +289,9 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
-        return ptr != nullptr;
+#pragma omp critical
+            std::cout << "waitAtEnd " << waitAtEnd << " id " << omp_get_thread_num() << std::endl;
+        return ptr != nullptr and not waitAtEnd;
     }
 
         
@@ -279,8 +309,9 @@ public:
     
 protected:
     Collecter coll;
-    ValueType* ptr;
+    ValueType* ptr = nullptr;
     TRuntimeVariables runtimeVariables;
+    bool waitAtEnd;
 private:
 }; // struct DeepIterator
 
@@ -332,31 +363,42 @@ public:
  * @param nbElems number of elements within the datastructure
  */
     DeepIterator(nullptr_t, 
-                 const uint_fast32_t& nbElems
+                 const int_fast32_t& nbElems
     ):
-        ptr(nullptr),
         index(nbElems)
 
     {}
 
     DeepIterator():
-        ptr(nullptr),
         index(0)
         {}
     
     
-    DeepIterator(ElementType* ptr, 
-                 const uint_fast32_t& nbElemsInLast,
+    DeepIterator(ElementType* _ptr, 
+                 const int_fast32_t& nbElemsInLast,
                  const TRuntimeVariables& runtimeVariables,
                  ChildView view):
-                 ptr(ptr),
                  index(Navigator::first(runtimeVariables)),
                  runtimeVariables(runtimeVariables),
                  childView(view),
                  childIter(view.begin())
                  
     {
-        childView = ChildView(Accessor::get(ptr, index));
+        if(coll.isMover())
+        {
+            ptr = _ptr;
+        }
+        coll.sync();
+        if(traits::NeedRuntimeSize<ElementType>::test(ptr))
+        {
+            childView = ChildView(Accessor::get(ptr, index, runtimeVariables.getNbElements()));
+
+        }
+        else 
+        {
+            auto elem =  traits::NumberElements<ElementType>::value;
+            childView = ChildView(Accessor::get(ptr, index, elem));
+        }
         childIter = childView.begin();
     }
     
@@ -367,14 +409,24 @@ public:
     DeepIterator&
     operator++()
     {
-        
+        coll.sync();
         if(coll.isMover())
         {
              ++childIter;
             if(not (childIter != childView.end()))
             {
                 Navigator::next(ptr, index, runtimeVariables);
-                childView = ChildView(Accessor::get(ptr, index));
+                if(traits::NeedRuntimeSize<ElementType>::test(ptr))
+                {
+                    childView = ChildView(Accessor::get(ptr, index, runtimeVariables.getNbElements()));
+                }
+                else 
+                {
+                    auto elem =  traits::NumberElements<ElementType>::value;
+                    childView = ChildView(Accessor::get(ptr, index, elem));
+                    
+                }
+             //   childView = ChildView(Accessor::get(ptr, index));
                 childIter = childView.begin();
             }
                 
@@ -396,7 +448,10 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
-        return index < other.index;
+        std::cout << "index " << index << " other.index " << other.index << std::endl;
+    //    if(ptr == nullptr) return false;
+        return index < other.index + runtimeVariables.getJumpsize() - 1;
+        
     }
 
         
@@ -410,8 +465,8 @@ public:
 protected:
     
     Collecter coll;
-    ElementType* ptr;
-    uint_fast32_t index;
+    ElementType* ptr = nullptr;
+    int_fast32_t index;
     TRuntimeVariables runtimeVariables;
     ChildView childView;
     ChildIterator childIter;
@@ -457,7 +512,7 @@ public:
     typedef TChild                                  ChildView;
     typedef typename TChild::Iterator               ChildIterator;
     typedef typename ChildIterator::ReturnType      ReturnType;
-    typedef Wrapper< ReturnType, TCollective>       WrapperType;
+    typedef typename ChildIterator::WrapperType     WrapperType;
 
     // tests
     static_assert(std::is_same<typename TAccessor::ReturnType, ValueType>::value, "Returntype of accessor must be the same as Valuetype of TElement");
@@ -471,34 +526,43 @@ public:
  * @param nbElems number of elements within the datastructure
  */
     DeepIterator(nullptr_t, 
-                 const uint_fast32_t& nbElems
-    ):
-        ptr(nullptr)
+                 const int_fast32_t& nbElems
+    )
 
     {}
 
-    DeepIterator():
-        ptr(nullptr)
+    DeepIterator()
         {}
     
-    DeepIterator(ElementType* ptr, 
-                 const uint_fast32_t& nbElems,
-                 const uint_fast32_t& nbElemsInLast):
-                 ptr(Navigator::first(ptr))       
-    {}
+    DeepIterator(ElementType* _ptr, 
+                 const int_fast32_t& nbElems,
+                 const int_fast32_t& nbElemsInLast)
+    {
+        if(coll.isMover())
+        {
+            ptr = Navigator::first(_ptr);
+        }
+        coll.sync();
+        
+    }
     
     
     DeepIterator(ElementType* ptr2, 
-                 const uint_fast32_t& nbElems,
+                 const int_fast32_t& nbElems,
                  TRuntimeVariables runtimeVariables,
                  ChildView view):
-                 ptr(Navigator::first(ptr2, runtimeVariables)),
+                 
                  childView(view),
                  childIter(view.begin()),
                  runtimeVariables(runtimeVariables)
                 
                  
     {
+        if(coll.isMover())
+        {
+            ptr = Navigator::first(ptr2, runtimeVariables);
+        }
+        coll.sync();
         childView = ChildView(ptr);
         childIter = childView.begin();
     }
@@ -510,7 +574,7 @@ public:
     DeepIterator&
     operator++()
     {
-        
+        coll.sync();
         if(coll.isMover())
         {
 
@@ -542,6 +606,7 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
+        
         return ptr != nullptr;
     }
 

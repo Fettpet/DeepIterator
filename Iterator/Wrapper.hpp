@@ -1,4 +1,5 @@
 /**
+ * @author Sebastian Hahn ( t.hahn@hzdr.de )
  * @brief While the collectiv iteration over all values in the container, it is
  * possible, that the element is not valid. But after calling ++operator it is
  * valid. This class has two function:
@@ -71,11 +72,11 @@ struct Wrapper<TElement, Collectivity::None>
         return *ptr;
     }
     
-    constexpr 
+     
     explicit
     operator bool()
     {
-        return true;
+        return ptr != nullptr;
     }
     
 protected:

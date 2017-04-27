@@ -11,6 +11,7 @@
 #include "PIC/Particle.hpp"
 #include "View.hpp"
 #include "Traits/HasOffset.hpp"
+#include <omp.h>
 #include "Iterator/RuntimeTuple.hpp"
 template<
     typename TElement>
@@ -58,7 +59,7 @@ struct testTrue
 int main(int argc, char **argv) {
 
 
-    typedef hzdr::Particle<int, 2> Particle;
+    typedef hzdr::Particle<int_fast32_t, 2> Particle;
     typedef hzdr::Frame<Particle, 10> Frame;
     typedef hzdr::SuperCell<Frame> Supercell;
 
@@ -66,131 +67,30 @@ int main(int argc, char **argv) {
     std::cout << cell << std::endl; 
     // All Particle within a Supercell
 
-    typedef hzdr::View<Frame, 
-                       hzdr::Direction::Forward, 
-                       hzdr::Collectivity::None, 
-                       hzdr::runtime::TupleFull> ParticleInFrame;
     
 
+
+                       
+    
+    
+    hzdr::runtime::TupleFull runtimeSupercell(2, 0, 0);
+    hzdr::runtime::TupleOpenMP runtimeFrame(2);
+
+   
+   
     typedef hzdr::View<Supercell,
                        hzdr::Direction::Forward, 
                        hzdr::Collectivity::None, 
-                       hzdr::runtime::TupleFull,
-                       ParticleInFrame> ParticleInSuperCell;
+                       hzdr::runtime::TupleFull> supercellView;
                        
-    hzdr::runtime::TupleFull runtimeFrame(0, 1, 1);
-    hzdr::runtime::TupleFull runtimeSupercell(1, 1, 1);
-
-   ParticleInSuperCell test(cell, runtimeSupercell, ParticleInFrame(cell.firstFrame, runtimeSupercell));
-   ParticleInFrame t(cell.firstFrame, runtimeFrame);
-   t.begin();
-   t.end();
-   for(auto it=test.begin(); it!=test.end(); ++it)
-   {
-        std::cout << **it;
-   }
-/*
-   for(auto it=test.begin(); it!=test.end(); ++it)
-   {
-        std::cout << **it;
-   }
-    /*
-    for(auto it=test.begin(); it!=test.end(); ++it)
+    supercellView view(cell, runtimeSupercell);
+    std::cout << cell << std::endl;
+    for(auto it=view.begin(); it!=view.end(); ++it)
     {
         if(*it)
-        {
-            std::cout << **it << std::endl;
-        }
+            std::cout << "Frame: " << **it << std::endl;
     }
-  //  ParticleInFrame(2);
-   //  test(cell, 2, ParticleInFrame(nullptr, 2)); 
-    
 
-//    std::cout << std::endl << counter << std::endl;
-    /**
-     * Wie stelle ich mir den Aufruf des Verschachtelten Iterators vor?
-     * 1. Beispiel: Alle Particles in Superzellen:
-     * 
-     * View < Supercell, jumpsize, Direction, View< Frame, jumpsize, Direction, Collectivity> >
-     */
-    
-    
-
-   // Particle test(5,4);
-  /*  
-    hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::NonCollectiv, 1> con(&test, static_cast<uint_fast32_t>(2));
-
-
-    for(auto it=con.begin(); it!=con.end(); ++it)
-    {
-        auto wrap = *it;
-        if(wrap)
-        {
-            std::cout << *wrap << std::endl;
-        }
-        
-    }
-    
-    
- //   hzdr::Frame<hzdr::Particle<int, 2u>, 10u> t;
- //   hzdr::Accessor<hzdr::Frame<hzdr::Particle<int, 2u>, 10u> > test(2);
-  // std::cout << test;
-  //  con.begin();
-  
-  /*
-
-    std::cout << std::endl <<"output of frames in supercell" << std::endl;
-    
-    hzdr::View<Supercell, Frame, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1 > con2(cell);
-    
-    for(auto it = con2.begin(); it != con2.end(); ++it)
-    {
-        auto wrap =*it;
-        if(wrap)
-        {
-            std::cout << *(wrap) << std::endl;
-        }
-    }
-    
-*/
-    /*
-    
-    typedef hzdr::View<Frame, Particle, hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> ParticleInFrameContainer;
-    typedef hzdr::View<Supercell, Frame,  hzdr::Direction::Forward,hzdr::Collectivity::NonCollectiv, 1> FrameInSuperCellContainer;
-    
-    
-    typedef hzdr::View<Supercell, 
-                                ParticleInFrameContainer,
-                                hzdr::Direction::Forward, 
-                                hzdr::Collectivity::NonCollectiv,
-                                1
-                        > ParticleInSuperCellContainer;
-                        
-    
-    /**
-     * Ich gebe eine Superzelle rein und erhalte einen Particle zurück
-     * Superzelle -> frame -> particle
-     * 
-     * Durch den Container wird die Reihenfolge
-     * Container < Superzelle, Frame > -> Container < Frame, Particle >
-     *
-     * Also wäre die sinnvollste Reihenfolge
-     * Container < Superzelle, Container< Frame, Particle > >
-     * 
-     */ 
-   /*
-    
-    ParticleInSuperCellContainer con3(cell);
-    
-    for(auto it = con3.begin(); it != con3.end(); ++it)
-    {
-        auto wrap =*it;
-        if(wrap)
-        {
-            std::cout << *wrap << std::endl;
-        }
-    }
-*/
     return EXIT_SUCCESS;
     
 }

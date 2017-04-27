@@ -34,7 +34,7 @@ struct NeedRuntimeSize<hzdr::SupercellContainer<Supercell> >
 };
 
 
-template<typename TParticle, uint_fast32_t nb>
+template<typename TParticle, int_fast32_t nb>
 struct NeedRuntimeSize<hzdr::Frame<TParticle, nb> >
 {
     typedef hzdr::Frame<TParticle, nb>  Frame;
@@ -49,7 +49,7 @@ struct NeedRuntimeSize<hzdr::Frame<TParticle, nb> >
     }
 }; // struct NeedRuntimeSize
 
-template<typename TPosition, uint_fast32_t dim>
+template<typename TPosition, int_fast32_t dim>
 struct NeedRuntimeSize<hzdr::Particle<TPosition, dim> >
 {
     typedef hzdr::Particle<TPosition, dim>  Particle;

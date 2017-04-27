@@ -17,13 +17,13 @@ namespace traits
     template<typename T>
     struct IsIndexable;
   
-    template<typename TParticle, uint_fast32_t nb>
+    template<typename TParticle, int_fast32_t nb>
     struct IsIndexable<hzdr::Frame<TParticle, nb> >
     {
         static const bool value = true;
     };
 
-    template<typename TPos, uint_fast32_t dim>
+    template<typename TPos, int_fast32_t dim>
     struct IsIndexable<hzdr::Particle<TPos, dim> >
     {
         static const bool value = true;

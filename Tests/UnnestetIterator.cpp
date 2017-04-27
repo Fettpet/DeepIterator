@@ -3,16 +3,17 @@
 #include <boost/test/included/unit_test.hpp>
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
+#include "PIC/SupercellContainer.hpp"
 #include "PIC/Particle.hpp"
 #include "DeepIterator.hpp"
 #include "View.hpp"
 #include "Iterator/RuntimeTuple.hpp"
 using namespace boost::unit_test;
-    typedef hzdr::Particle<int, 2> Particle;
-    typedef hzdr::Frame<Particle, 10> Frame;
-    typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Particle<int_fast32_t, 2> Particle;
+typedef hzdr::Frame<Particle, 10> Frame;
+typedef hzdr::SuperCell<Frame> Supercell;
 
-    typedef hzdr::runtime::TupleFull RuntimeTuple;
+typedef hzdr::runtime::TupleFull RuntimeTuple;
 /**
  * @brief This test iterate over all Positions in a Particle
  */
@@ -42,11 +43,15 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
     BOOST_TEST(*wrap == 4);
     
     ++it;
-    BOOST_TEST(not(it != con.end()));
+    auto wrapper = *it;
+    bool result(wrapper);
+    BOOST_TEST(not result);
+    ++it;
+    BOOST_TEST(not (it != con.end()));
     
 
 /**
- *@brief 2. test: Backward with jumpsize 2
+ *@brief 2. test: Backward 
    */   
     const int jumpsize2 = 2;
     const int offset2 = 0;
@@ -55,9 +60,6 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
     hzdr::View<Particle, hzdr::Direction::Backward,  hzdr::Collectivity::None, RuntimeTuple> con2(&test1, runtimeVar2);
     auto it2 = con2.begin();
     BOOST_TEST(*(*it2) == 4);
-    ++it2;
-    // since there are only two elements, its at the end
-    BOOST_TEST(not (it2 != con2.end()));
 
 }
 
@@ -86,16 +88,17 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     // the 2 is the number of elements in Last Frame
     hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(*cell.firstFrame, runtimeVar);
 
-    uint_fast32_t counter(0);
+    int_fast32_t counter(0);
     for(auto it = con.begin(); it != con.end(); ++it)
     {   
         auto wrap = *it;
         if(wrap)
         {
+
             counter += (*wrap).data[0] + (*wrap).data[1];
         }
     }
-    // sum [0, 19])
+    // sum [0, 19]
     BOOST_TEST(counter == 190);
     /** ******************
     // @brief 2. Test Forward with Jumpsize 3 nonCollectiv
@@ -112,8 +115,10 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     for(auto it = con2.begin(); it != con2.end(); ++it)
     {   
         auto wrap = *it;
+            
         if(wrap)
         {
+
             counter += (*wrap).data[0] + (*wrap).data[1];
         }
     }
@@ -147,9 +152,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
 
 BOOST_AUTO_TEST_CASE(FrameInSuperCellNotCollectiv)
 {
-    typedef hzdr::Particle<int, 2> Particle;
-    typedef hzdr::Frame<Particle, 10> Frame;
-    typedef hzdr::SuperCell<Frame> Supercell;
+
     Supercell cell(5, 2);
     
     const int jumpsize3 = 1;
@@ -159,7 +162,7 @@ BOOST_AUTO_TEST_CASE(FrameInSuperCellNotCollectiv)
     const RuntimeTuple runtimeVar2(jumpsize3, nbElements3, offset3); 
     hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(&cell, runtimeVar2);
 
-    uint_fast32_t counter(0);
+    int_fast32_t counter(0);
     for(auto it=con.begin(); it!=con.end(); ++it)
     {
         auto wrap = *it;
@@ -170,3 +173,4 @@ BOOST_AUTO_TEST_CASE(FrameInSuperCellNotCollectiv)
     }
     BOOST_TEST(counter == 5);
 }
+

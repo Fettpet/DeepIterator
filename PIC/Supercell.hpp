@@ -1,3 +1,12 @@
+/**
+ * @author Sebastian Hahn
+ * @brief A PIConGPU like datastructure. The supercell contains some frames.
+ * The frames are in a linked list. Each frame has the pointer nextFrame and 
+ * previousFrame. Only the last frame is not full with particles. The supercell
+ * stores the number of particles in the last frame. Each supercell has two 
+ * pointers to frame: firstFrame and lastFrame.
+ * 
+ */
 #pragma once
 #include <iostream>
 

@@ -29,13 +29,22 @@ struct Accessor<Indexable>
 {
 
     
-    template<typename TContainer, typename TIndex>
+    template<typename TContainer, typename TIndex, typename TNbElem>
     static
     auto 
-    get(TContainer* con, const TIndex& pos)
+    get(TContainer* con, const TIndex& pos, const TNbElem& nbElem)
     -> typename TContainer::ValueType*
     {
-        return &((*con)[pos]);
+        
+        if(pos < nbElem && pos >= 0)
+        {
+            return &((*con)[pos]); 
+        }
+        else 
+        {
+            return nullptr;
+        }
+        
     }
 }; // Accessor< Indexable >
 
