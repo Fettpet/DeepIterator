@@ -32,7 +32,7 @@
 #include <cassert>
 #include <type_traits>
 #include "Traits/NumberElements.hpp"
-
+#include "Traits/ValueType.hpp"
 
 namespace hzdr 
 {
@@ -72,7 +72,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                                ElementType;
-    typedef typename std::remove_reference<typename TElement::ValueType>::type            ValueType;
+    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;
     typedef ValueType                               ReturnType;
@@ -220,7 +220,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                            ElementType;
-    typedef typename TElement::ValueType        ValueType;
+    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
     typedef ValueType*                          ValuePointer;
     typedef ValueType&                          ValueReference;
     typedef ValueType                           ReturnType;
@@ -289,8 +289,6 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
-#pragma omp critical
-            std::cout << "waitAtEnd " << waitAtEnd << " id " << omp_get_thread_num() << std::endl;
         return ptr != nullptr and not waitAtEnd;
     }
 
@@ -341,7 +339,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                                ElementType;
-    typedef typename TElement::ValueType            ValueType;
+    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
 
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;
@@ -499,7 +497,7 @@ struct DeepIterator<TElement,
     
 public:
     typedef TElement                                ElementType;
-    typedef typename std::remove_reference<typename TElement::ValueType>::type            ValueType;
+    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
 
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;
