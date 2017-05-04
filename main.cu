@@ -16,7 +16,15 @@
 template<
     typename TElement>
 struct DeepIterator;
-
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) 
+   {
+      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
 
 /**
  * @brief Der  ist ein virtueller Container, welcher zusätzliche 
@@ -54,43 +62,142 @@ struct testTrue
     float offset;
 };
 
+#define HDINLINE __device__ __forceinline__
+#define DINLINE __device__ __forceinline__
 
+struct SyncerCuda
+{
+    
+    DINLINE void sync()
+    {
+        __syncthreads();
+    }
+    
+    
+    
+    DINLINE
+    void 
+    allocSharedMem(int*& sharedMem, int* globalMem)
+    {
+        
+        __shared__ int arr[256];
+        sharedMem=arr;
+    }
+    
+    DINLINE
+    void 
+    loadInSharedMemory(int* sharedMem, int const * const globMem, int const & myId)
+    {
+        sharedMem[myId] = globMem[myId];
+    }
+    
+    __device__ 
+    __forceinline__
+    void
+    storeInGlobalMemory(int* globMem, int* sharedMem, int const & myId)
+    {
+        globMem[myId] = sharedMem[myId];
+    }
+    
+};
+
+template<typename TCollective>
+class Iterator
+{
+public:
+    typedef TCollective Collective;
+public:
+    HDINLINE
+    Iterator(int *ptr, int myID):
+        globalMem(ptr),
+        myId(myID)
+    {
+        collective.allocSharedMem(sharedMem, ptr);
+        collective.loadInSharedMemory(sharedMem, globalMem, myId);
+        collective.sync();
+    }
+    
+    HDINLINE
+    ~Iterator()
+    {
+        globalMem[myId] = sharedMem[myId];
+    }
+    
+    HDINLINE
+    Iterator& 
+    operator++()
+    {
+        globalMem[myId] = sharedMem[myId];
+        collective.sync();
+        globalMem += 256;
+        collective.loadInSharedMemory(sharedMem, globalMem, myId);
+        collective.sync();
+        return *this;
+    }
+    HDINLINE
+    int& 
+    operator*()
+    {
+        return sharedMem[myId];
+    }
+    
+protected:
+    Collective collective;
+    int *globalMem;
+    int *sharedMem;
+    int myId;
+};
+
+__global__
+void 
+myKernel(int* array, const int dim)
+{
+    const int myId = threadIdx.x; 
+    Iterator<SyncerCuda> it(array, myId);
+    
+    *it += 4;
+    ++it; 
+    *it += 1;
+}
 
 int main(int argc, char **argv) {
-
-
-    typedef hzdr::Particle<int_fast32_t, 2> Particle;
-    typedef hzdr::Frame<Particle, 10> Frame;
-    typedef hzdr::SuperCell<Frame> Supercell;
-
-    Supercell cell(5, 2);
-    std::cout << cell << std::endl; 
-    // All Particle within a Supercell
-
+/** 1. erstellen eines 2d Arrays auf der GPU. Die zweite Dimension ist dabei 256
+ * Elemente groß.
+ * 2. Einen Kernel schreiben, der diese Datenstruktur als eingabe parameter nimmt
+ * 3. Die Datenstruktur einer Klasse übergeben 
+ * 4. Über die datenstruktur iterieren
+*/
+    const int dim = 2;
+    int *array_h;
+    int *array_d;
     
-
-
-                       
+    array_h = new int[dim*256];
     
-    
-    hzdr::runtime::TupleFull runtimeSupercell(2, 0, 0);
-    hzdr::runtime::TupleOpenMP runtimeFrame(2);
-
-   
-   
-    typedef hzdr::View<Supercell,
-                       hzdr::Direction::Forward, 
-                       hzdr::Collectivity::None, 
-                       hzdr::runtime::TupleFull> supercellView;
-                       
-    supercellView view(cell, runtimeSupercell);
-    std::cout << cell << std::endl;
-    for(auto it=view.begin(); it!=view.end(); ++it)
+    for(int i=0; i< dim*256; ++i)
     {
-        if(*it)
-            std::cout << "Frame: " << **it << std::endl;
+        array_h[i] = 1;
     }
+    
+    gpuErrchk(cudaMalloc(&array_d, sizeof(int) * dim * 256));
+    gpuErrchk(cudaMemcpy(array_d, array_h, sizeof(int) * dim * 256, cudaMemcpyHostToDevice));
+    myKernel<<<1, 256>>>(array_d, dim);
+    
+    
+    std::cout << "It works" << std::endl;
+    
+    gpuErrchk(cudaMemcpy(array_h, array_d, sizeof(int) * dim * 256, cudaMemcpyDeviceToHost));
+    
+    for(int i=0; i<dim; ++i)
+    {
+        for(int j=0; j<256; ++j)
+        {
+            std::cout << array_h[j + i*256] << " ";
+        }
+        std::cout << std::endl;
+    }
+    
 
+    delete [] array_h;
     return EXIT_SUCCESS;
     
 }

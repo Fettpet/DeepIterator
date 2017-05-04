@@ -214,8 +214,6 @@ template<typename TIndex, typename TContainer, int_fast32_t jumps = jumpSize>
                        
                         
             if(ptr == nullptr)  {
-#pragma omp critical
-                std::cout << "I'm" << omp_get_thread_num() << " and " << std::boolalpha << (i + runtimeVariables.getOffset() >= runtimeVariables.getJumpsize()) <<std::endl;
                 return i + runtimeVariables.getOffset() >= runtimeVariables.getJumpsize();
             }
             ptr = ptr->nextFrame;
@@ -304,8 +302,6 @@ public:
             
             if(ptr == nullptr)
             {
-#pragma omp critical
-                std::cout << "I'm" << omp_get_thread_num() << " and " << std::boolalpha << (i + run.getOffset() < run.getJumpsize()) <<std::endl;
                 return i + run.getOffset() < run.getJumpsize();
             }
             ptr = ptr->previousFrame;

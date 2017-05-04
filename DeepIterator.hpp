@@ -72,7 +72,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                                ElementType;
-    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
+    typedef typename hzdr::traits::ComponentType<ElementType>::type  ValueType;
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;
     typedef ValueType                               ReturnType;
@@ -220,7 +220,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                            ElementType;
-    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
+    typedef typename hzdr::traits::ComponentType<ElementType>::type  ValueType;
     typedef ValueType*                          ValuePointer;
     typedef ValueType&                          ValueReference;
     typedef ValueType                           ReturnType;
@@ -339,7 +339,7 @@ struct DeepIterator<TElement,
 // datatypes
 public:
     typedef TElement                                ElementType;
-    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
+    typedef typename hzdr::traits::ComponentType<ElementType>::type  ValueType;
 
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;
@@ -497,7 +497,7 @@ struct DeepIterator<TElement,
     
 public:
     typedef TElement                                ElementType;
-    typedef typename hzdr::traits::ValueType<ElementType>::type  ValueType;
+    typedef typename hzdr::traits::ComponentType<ElementType>::type  ValueType;
 
     typedef ValueType*                              ValuePointer;
     typedef ValueType&                              ValueReference;

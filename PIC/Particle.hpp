@@ -118,7 +118,7 @@ template<typename TPos>
 std::ostream& operator<<(std::ostream& out, Particle<TPos, 1> const & par)
 {
     out << "(" << par[0] << ")";
-    return 0;
+    return out;
 }
 
 template<typename TPos>
