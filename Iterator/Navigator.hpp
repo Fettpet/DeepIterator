@@ -1,5 +1,5 @@
 /**
- * @author Sebastian Hahn (t.hahn<at>hzdr.de)
+ * @author Sebastian Hahn (t.hahn< at >hzdr.de )
  * @brief The navigator is used to go to the next element. It has three templates:
  * 1. TData: The datatype of the datastructure. If the datastructure is indexable
  * you doesnt need to write your own navigator. TData must have a Valutype typename.
@@ -26,6 +26,9 @@
 #include <boost/core/ignore_unused.hpp>
 #include "PIC/Supercell.hpp"
 #include <type_traits>
+#include "Definitions/hdinline.hpp"
+#include "Traits/Componenttype.hpp"
+#include "Traits/IsIndexable.hpp"
 namespace hzdr 
 {
 
@@ -37,37 +40,20 @@ namespace hzdr
  */
 template<typename TData,
          hzdr::Direction TDirection,
-         int_fast32_t jumpSize=0>
+         typename SFIANE = void>
 struct Navigator;
     
 /** ****************
  * @brief The first implementation of the Navigator. This one is used for indexable
  * datatypes. It started at the last element and go to the first one.
  *****************/
-template<int_fast32_t jumpSize>
-struct Navigator<Indexable,
-                 hzdr::Direction::Backward, 
-                 jumpSize>
+template<typename TData>
+struct Navigator<TData,
+                 hzdr::Direction::Backward,
+                 typename std::enable_if<traits::IsIndexable<TData>::value>::type >
 {
 public:
-    
-/**
- * @brief compiletime implementation of next element implementation. This function
- * is called if the template parameter jumpsize != 0.
- */
-    template<typename TIndex, 
-             typename TContainer,
-             int_fast32_t size=jumpSize,
-             typename TRuntimeVariables>
-    static
-    typename std::enable_if<size != 0>::type
-    inline
-    next(TContainer* ptr, TIndex& index, const TRuntimeVariables& runtime) 
-    {
-        boost::ignore_unused(runtime);
-        index -= jumpSize;
-    }
-    
+ 
     
     /**
      * @brief runtime implementation of next element implementation. This function
@@ -76,26 +62,36 @@ public:
      */
     template<typename TIndex, 
              typename TContainer,  
-             typename TRuntimeVariables,
-             int_fast32_t size=jumpSize>
-    inline
+             typename TComponent,
+             typename TRuntimeVariables>
+    HDINLINE
     static
-    typename std::enable_if<size == 0>::type
+    void 
     next(TContainer* ptr, 
+         TComponent* elem,
          TIndex& index, 
          const TRuntimeVariables& run)
     
     {
+
         index -= run.getJumpsize();
     }
     
-    template<typename TRuntimeVariables>
+    template<typename TRuntimeVariables,
+            typename TComponent,
+            typename TIndex,
+            typename TContainer>
     static
-    int_fast32_t 
-    inline 
-    first( const TRuntimeVariables& runtime)
+    void 
+    HDINLINE 
+    first(TContainer* conPtrIn,
+          TContainer*& conPtrOut, 
+          TComponent*& compontPtr,
+          TIndex& index, 
+          const TRuntimeVariables& run)
     {
-        return runtime.getNbElements() - 1 - runtime.getOffset();
+        conPtrOut = conPtrIn;
+        index = run.getNbElements() - 1 - run.getOffset();
     }
     
 }; // Navigator<Forward, Frame, jumpSize>
@@ -107,26 +103,14 @@ public:
  * go to the last one.
  *
  *****************/////    
-template<int_fast32_t jumpSize>
-struct Navigator<Indexable,
-                 hzdr::Direction::Forward, 
-                 jumpSize>
+template<typename TData>
+struct Navigator<TData,
+                 hzdr::Direction::Forward,
+                 typename std::enable_if<traits::IsIndexable<TData>::value>::type > 
 {
 public:
     
-/**
- * @brief compiletime implementation of next element implementation. This function
- * is called if the template parameter jumpsize != 0.
- */
-    template<typename TIndex, typename TContainer, int_fast32_t size=jumpSize>
-    static
-    typename std::enable_if<size != 0>::type
-    inline
-    next(TContainer* ptr, TIndex& index) 
-    {
-        index += jumpSize;
-    }
-    
+
     
     /**
      * @brief runtime implementation of next element implementation. This function
@@ -135,27 +119,36 @@ public:
      */
     template<typename TIndex, 
              typename TContainer,  
-             typename TRuntimeVariables,
-             int_fast32_t size=jumpSize>
-    inline
+             typename TComponent,
+             typename TRuntimeVariables>
+    HDINLINE
     static
-    typename std::enable_if<size == 0>::type
+    void 
     next(TContainer* ptr, 
+         TComponent* elem,
          TIndex& index, 
          const TRuntimeVariables& run)
-    
     {
-
         index += run.getJumpsize();
+        
     }
     
-    template<typename TRuntimeVariables>
+    template<typename TRuntimeVariables,
+            typename TIndex,
+            typename TComponent,
+            typename TContainer>
     static
-    int_fast32_t 
-    inline 
-    first(const TRuntimeVariables& run)
+    void 
+    HDINLINE 
+    first(TContainer* conPtrIn,
+          TContainer*& conPtrOut, 
+          TComponent*& compontPtr,
+          TIndex& index, 
+          const TRuntimeVariables& run)
     {
-        return run.getOffset();
+
+        conPtrOut = conPtrIn;
+        index =run.getOffset();
     }
     
 }; // Navigator<Backward, Frame, jumpSize>
@@ -166,9 +159,11 @@ public:
  * forward.
  *****************/
 
-template<typename TFrame,
-         int_fast32_t jumpSize>
-struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Forward, jumpSize>
+template<typename TFrame>
+struct Navigator< 
+    hzdr::SuperCell<TFrame>, 
+    hzdr::Direction::Forward, 
+    void> 
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
@@ -176,76 +171,70 @@ struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Forward, jumpSize>
     
 public:
     
-    /**
- * @brief compiletime implementation of next element implementation. This function
- * is called if the template parameter jumpsize != 0.
-template<typename TIndex, typename TContainer, int_fast32_t jumps = jumpSize>
-    static
-    typename std::enable_if<jumps!=0>::type 
-    inline
-    next(TContainer*& ptr, TIndex& index) 
-    {
-        for(size_t i=0; i<jumpSize; ++i)
-        {
-            
-            if(ptr == nullptr) break;
-            ptr = ptr->nextFrame;
-        }
-    }
-     */
-    
     
     /**
      * @brief runtime implementation of next element implementation. This function
      * is called if the template parameter jumpsize == 0.
-     * @return true: it is at the end, before the iterations are finished
-     *         false: it iterate until it is finished
-     */
-    template<typename TContainer, typename TRuntime>
+    */
+    template<typename TIndex, 
+             typename TContainer,  
+             typename TComponent,
+             typename TRuntimeVariables>
+    HDINLINE
     static
-    bool
-    inline
-    next(TContainer*& ptr, const TRuntime& runtimeVariables) 
+    void 
+    next(TContainer*& ptr, 
+         TComponent*& elem,
+         TIndex& index, 
+         const TRuntimeVariables& run)
     {
 
-        for(int_fast32_t i=0; i<runtimeVariables.getJumpsize(); ++i)
+        for(int_fast32_t i=0; i<run.getJumpsize(); ++i)
         {
-            
-                       
-                        
-            if(ptr == nullptr)  {
-                return i + runtimeVariables.getOffset() >= runtimeVariables.getJumpsize();
-            }
-            ptr = ptr->nextFrame;
-        }
-        return false;
-    }
-
-    
-    template< typename TRuntime>
-    static 
-    FramePointer
-    inline
-    first(const SuperCellType* supercell, const TRuntime& runtimeVariables)
-    {
-        if(supercell != nullptr)
-        {
-            auto ptr = supercell->firstFrame;
-            for(uint i=0; i < runtimeVariables.getOffset(); ++i)
+                             
+            if(elem == nullptr) 
             {
-                ptr = ptr->nextFrame;
+                ptr = nullptr;
+                break;
             }
-            return ptr;
+            elem = elem->nextFrame;
         }
-        return nullptr;
     }
+
     
-    static 
-    FramePointer
-    inline
-    first(nullptr_t)
+    template<typename TRuntimeVariables,
+             typename TComponent,
+             typename TIndex,
+             typename TContainer>
+    static
+    void 
+    HDINLINE 
+    first(TContainer* conPtrIn,
+          TContainer*& conPtrOut, 
+          TComponent*& compontPtr,
+          TIndex& index, 
+          const TRuntimeVariables& run)
     {
-        return nullptr;
+         
+        if(conPtrIn != nullptr)
+        {
+            compontPtr = conPtrIn->firstFrame;
+            for(uint i=0; i < run.getOffset(); ++i)
+            {
+                if(compontPtr == nullptr) 
+                {
+                    conPtrOut = nullptr;
+                    break;
+                }
+                compontPtr = compontPtr->nextFrame;
+            }
+        } 
+        else 
+        {
+
+            compontPtr = nullptr;
+        }
+            
     }
     
 }; // Navigator<Forward, Frame, jumpSize>
@@ -255,8 +244,8 @@ template<typename TIndex, typename TContainer, int_fast32_t jumps = jumpSize>
 /**
  * @brief this implementation use supercells. The direction is backward. 
  */    
-template<typename TFrame, int_fast32_t jumpSize>
-struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward, jumpSize>
+template<typename TFrame>
+struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward, void>
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
@@ -268,63 +257,59 @@ public:
  * @brief compiletime implementation of next element implementation. This function
  * is called if the template parameter jumpsize != 0.
  */
-    template<typename TIndex, typename TContainer, typename TRuntime, int_fast32_t size = jumpSize>
+    template<typename TIndex, 
+             typename TContainer,  
+             typename TRuntimeVariables>
+    HDINLINE
     static
-    typename std::enable_if<size != 0, bool>::type
-    inline
-    next(TContainer* ptr, TIndex& index , const TRuntime& runtimeVariables) 
-    {
-        boost::ignore_unused(runtimeVariables);
-        for(size_t i=0; i<jumpSize; ++i)
-        {
-            
-            if(ptr == nullptr) return i + runtimeVariables.getOffset() < runtimeVariables.getJumpsize();
-            ptr = ptr->previousFrame;
-        }
-        return false;
-    }
-    
-    
-    /**
-     * @brief runtime implementation of next element implementation. This function
-     * is called if the template parameter jumpsize == 0.
-     * 
-     */
-    template<typename TIndex, typename TContainer, typename TRuntime, int_fast32_t size = jumpSize>
-    static
-    typename std::enable_if<size == 0, bool>::type
-    inline
-    next(TContainer* ptr, TIndex& index, const TRuntime& run) 
+    void 
+    next(TContainer*& ptr, 
+         typename traits::ComponentType<TContainer>::type*& elem,
+         TIndex& index, 
+         const TRuntimeVariables& run)
     {
 
-        for(size_t i=0; i<jumpSize; ++i)
+        for(size_t i=0; i<run.getJumpsize(); ++i)
         {
             
-            if(ptr == nullptr)
+            if(elem == nullptr) 
             {
-                return i + run.getOffset() < run.getJumpsize();
+                ptr = nullptr;
+                break;
             }
-            ptr = ptr->previousFrame;
+            elem = elem->previousFrame;
         }
-        return false;
+
     }
     
-    template<typename TRuntime>
-    static 
-    FramePointer
-  
-    first(const SuperCellType* supercell, const TRuntime& run)
+    template<typename TRuntimeVariables,
+             typename TIndex,
+             typename TComponent,
+             typename TContainer>
+    static
+    void 
+    HDINLINE 
+    first(TContainer* conPtrIn,
+          TContainer*& conPtrOut, 
+          TComponent*& compontPtr,
+          TIndex& index, 
+          const TRuntimeVariables& run)
     {
-        if(supercell != nullptr)
+       
+        if(conPtrIn != nullptr)
         {
-            auto ptr = supercell->lastFrame;
+
+            compontPtr = conPtrIn->lastFrame;
             for(auto i=0; i < run.getOffset(); ++i)
             {
-                ptr = ptr->previousFrame;
+                if(compontPtr != nullptr)
+                    compontPtr = compontPtr ->previousFrame;
             }
-            return ptr;
         }
-        return nullptr;
+        else
+        {
+            compontPtr = nullptr;
+        }
     }
     
     static 

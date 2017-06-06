@@ -1,4 +1,4 @@
-
+#if 0
 #define BOOST_TEST_MODULE CollectiveOpenMP
 #include <boost/test/included/unit_test.hpp>
 #include "PIC/Supercell.hpp"
@@ -7,6 +7,7 @@
 #include "DeepIterator.hpp"
 #include "View.hpp"
 #include "Iterator/RuntimeTuple.hpp"
+#include "Definitions/hdinline.hpp"
 #include <omp.h>
 using namespace boost::unit_test;
 typedef hzdr::Particle<int_fast32_t, 2> Particle;

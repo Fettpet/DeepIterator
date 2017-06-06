@@ -1,0 +1,50 @@
+\section{DeepIterator}
+Wir nennen den Iterator DeepIterator, da er mehrere hierachieebenen (deep) verbindet. Der DeepIterator wird benutzt um über verschachtelte hierachiche Datencontainer zu iterieren. Das einfachste Beispiel für eine Hierachieche Datenstruktur ist
+\begin{lstlisting}[language=c++, numbers=left] 
+std::vector< std::vector< int > > interleavedVector;
+\end{lstlisting}
+Der Deepiterator iteriert über alle int innerhalb des doppelt verschachtelten Vektors. Der Iterator benutzt den Trait \textit{IsIndexable} um zu entscheiden ob eine Datenstruktur Listen oder Array ähnlich aufgebaut ist. Der Deepiterator wird mit mehreren Templateparametern konfiguriert:
+\begin{lstlisting}[language=c++, numbers=left]
+template<typename TContainer, 
+         typename TAccessor, 
+         typename TNavigator, 
+         typename TCollective, 
+         typename TRuntimeVariables,
+         typename TChild>
+struct DeepIterator;
+\end{lstlisting}
+
+Der erste Parameter \textit{TContainer} gibt den Datentyp des Containers an, über dessen Componenten iteriert werden soll. TContainer muss mehrere Anforderungen erfüllen: 1. Das Trait \textit{IsIndexable} (siehe Abschnitt \ref{sec-IsIndexable}) muss eine Ausprägung für den Typ TContainer haben; 2. Der Trait \textit{ComponentType} (siehe Abschnitt \ref{sec-ComponentType}) muss für TContainer ausgeprägt sein und; 3. Die Funktion \textit{NeedRuntimeSize<TContainer>} muss geschrieben werden (siehe Abschnitt \ref{sec-NeedRuntimeSize}).
+
+
+\subsection{Accessor}
+Der Accessor beschreibt wie ein Element aus dem Container ``geholt'' wird. Für indexierbare Datencontainer existiert eine Überladung (siehe Abschnitt \ref{sec-IsIndexable}). Für andere Datenstrukturen muss eine eigener Accessor geschrieben werden. Der Accessor muss eine Funktion get besitzen:
+\begin{lstlisting}[language=c++, numbers=left]
+ static TComponent* Accessor::get(TContainer* con, TComponent*, TIndex&, const RuntimeVariables&)
+\end{lstlisting}
+
+
+\subsection{Navigator}
+Der Navigator wird benutzt um das nachfolge Element zu bestimmen. Zusätzlich muss er noch eine Funktion bereitstellen um das erste Element zu bestimmen. Die Funktionen sind
+\begin{lstlisting}[language=c++, numbers=left]
+ static void first(TContainer* in, TContainer* out , TComponent* out, TIndex& out, RuntimeVarialbes& out);
+ static void next(TContainer*, TComponent*, TIndex&, RuntimeVarialbes); 
+\end{lstlisting}
+Um indexierbare Funktionen bereitzustellen, benutzen wir den TIndex Parameter.\\
+Wir haben eine Standardimplementierung des Navigator. Diese wird innerhalb der View (Abschnitt \ref{sec-View}) benutzt. 
+
+
+\begin{lstlisting}[language=c++, numbers=left]
+template<typename TContainer,
+         Direction TDirection>
+struct Navigator;
+\end{lstlisting}
+Die \textit{Direction} ist ein Parmeter um die Iterationsrichtung auf 1D Datenstruktur zu bestimmen. Forward startet beim ersten Element und endet beim letzten. Backward startet beim letzten Element und endet beim ersten.
+
+\subsection{Collective}
+
+
+\subsection{RuntimeVariables}
+
+
+\subsection{Child}

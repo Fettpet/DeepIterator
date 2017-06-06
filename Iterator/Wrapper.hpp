@@ -9,6 +9,7 @@
  */
 #pragma once
 #include "Iterator/Collective.hpp"
+#include "Definitions/hdinline.hpp"
 
 namespace hzdr
 {
@@ -20,22 +21,24 @@ struct Wrapper
     typedef TElement            ElementType;
     typedef ElementType* const  ElementPtr;
     
+    HDINLINE
     Wrapper(ElementPtr ptr):
         ptr(ptr)
     {}
     
+    HDINLINE
     Wrapper(std::nullptr_t):
         ptr(nullptr)
     {}
     
-    inline 
+    HDINLINE
     ElementType&
     operator*()
     {
         return *ptr;
     }
     
-    inline
+    HDINLINE
     explicit
     operator bool()
     {
@@ -56,23 +59,24 @@ struct Wrapper<TElement, Collectivity::None>
     typedef TElement        ElementType;
     typedef ElementType*    ElementPtr;
     
-    
+    HDINLINE
     Wrapper(ElementPtr ptr):
         ptr(ptr)
     {}
     
+    HDINLINE
     Wrapper(std::nullptr_t):
         ptr(nullptr)
     {}
     
-    inline 
+    HDINLINE
     ElementType&
     operator*()
     {
         return *ptr;
     }
     
-     
+    HDINLINE
     explicit
     operator bool()
     {

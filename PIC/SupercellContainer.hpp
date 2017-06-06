@@ -1,7 +1,7 @@
 #pragma once
 #include "PIC/Supercell.hpp"
 #include <vector>
-
+#include "Definitions/hdinline.hpp"
 namespace hzdr
 {
 template<typename TSupercell>
@@ -21,6 +21,7 @@ public:
     /**
      * 
      */
+    HDINLINE
     SupercellContainer(const int_fast32_t& nbSupercells, 
                        const int_fast32_t& nbFramesInSupercell):
         supercells(nbSupercells)
@@ -33,6 +34,7 @@ public:
         }
     }
     
+    HDINLINE
     ~SupercellContainer()
     {
         for(uint_fast32_t i=0; i<supercells.size(); ++i)
@@ -44,7 +46,7 @@ public:
     
     
     template<typename TIndex>
-    inline
+    HDINLINE
     SupercellType&
     operator[] (const TIndex& pos)
     {
@@ -52,7 +54,7 @@ public:
     }
     
     template<typename TIndex>
-    inline
+    HDINLINE
     const
     SupercellType&
     operator[] (const TIndex& pos)

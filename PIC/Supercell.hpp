@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <iostream>
-
+#include "Definitions/hdinline.hpp"
 
 namespace hzdr
 {
@@ -24,15 +24,16 @@ struct SuperCell
      * @param nbFrames: number of frames within the supercell,
      * @param nbParticle number of particles in the last frame
      */
+    HDINLINE
     SuperCell(uint32_t nbFrames, uint32_t nbParticles):
-        firstFrame(new TFrame(0)),
+        firstFrame(new TFrame()),
         nbParticlesInLastFrame(nbParticles)
     {
         TFrame *curFrame;
         curFrame = firstFrame;
         for(uint32_t i=1; i<nbFrames; ++i)
         {
-            curFrame->nextFrame = new TFrame(0);
+            curFrame->nextFrame = new TFrame();
             curFrame->nextFrame->previousFrame = curFrame;
             curFrame = curFrame->nextFrame;
         }
@@ -52,6 +53,7 @@ struct SuperCell
 }; // struct SuperCell
 
 template<typename TFrame>
+HDINLINE
 std::ostream& operator<<(std::ostream& out, const SuperCell<TFrame>& SuperCell)
 {
     TFrame *curFrame;
@@ -60,7 +62,7 @@ std::ostream& operator<<(std::ostream& out, const SuperCell<TFrame>& SuperCell)
     
     while(curFrame != nullptr)
     {
-        std::cout << *curFrame << std::endl;
+        out << *curFrame << std::endl;
         curFrame = curFrame->nextFrame;
     }
     

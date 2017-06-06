@@ -10,7 +10,7 @@
 #include <PIC/Particle.hpp>
 #include <PIC/Supercell.hpp>
 #include <PIC/SupercellContainer.hpp>
-
+#include "Definitions/hdinline.hpp"
 namespace hzdr 
 {
 
@@ -40,7 +40,7 @@ struct NeedRuntimeSize<hzdr::Frame<TParticle, nb> >
     typedef hzdr::Frame<TParticle, nb>  Frame;
     typedef Frame*                      FramePtr;
     
-    inline 
+    HDINLINE
     static
     bool 
     test(FramePtr ptr)

@@ -1,6 +1,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include "Definitions/hdinline.hpp"
 /**
  * @brief The Collectiv policy needs two functions: 
  * 1. bool isMover() specifies the worker which moves the current element within
@@ -19,14 +20,16 @@ namespace Collectivity
  * */
 struct None
 {
+    HDINLINE
     constexpr 
     bool 
     isMover()
+    const
     {
         return true;
     }
     
-    inline 
+    HDINLINE 
     void 
     sync()
     {}
@@ -36,14 +39,14 @@ struct None
 #ifdef _OPENMP
 struct OpenMPNotIndexable
 {
-    inline
+    HDINLINE
     bool 
     isMover()
     {
         return true;
     }
     
-    inline 
+    HDINLINE 
     void 
     sync()
     {
@@ -58,11 +61,12 @@ struct OpenMPIndexable
     constexpr 
     bool 
     isMover()
+    const
     {
         return true;
     }
     
-    inline 
+    HDINLINE 
     void 
     sync()
     {
@@ -71,5 +75,51 @@ struct OpenMPIndexable
     
 };
 #endif
-}
-}
+
+
+
+struct CudaIndexable
+{
+#ifdef __CUDACC__
+    __device__
+    void 
+    sync()
+    {
+        __syncthreads();
+    }
+    
+    __device__
+    void 
+    allocSharedMem(int**& sharedMem, int* globalMem)
+    {
+        __shared__ int* arr[1];
+        sharedMem=arr;
+    }
+#else
+    HDINLINE
+    sync()
+    {
+
+    }
+    
+    HDINLINE
+    void 
+    allocSharedMem(int**& , int* )
+    {
+    }
+
+    
+#endif
+    
+
+    
+    HDINLINE
+    bool
+    isMover(int ID)
+    {
+        return ID == 0;
+    }
+};
+
+}// namespace Collectiv
+}// namespace hzdr

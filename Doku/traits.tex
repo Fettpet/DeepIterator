@@ -1,0 +1,17 @@
+\section{Traits}
+
+\subsection{IsIndexable}
+\label{sec-IsIndexable}
+Das Trait IsIndexable gibt an, ob ein Datencontainer eine Array-ähnliche Struktur hat. Die Vorraussetzung ist, das der Operator [] überladen ist. Ein Beispiel: t[i] gibt das i-te Element des Datencontainers t zurück. 
+
+
+\subsection{ComponentType}
+\label{sec-ComponentType}
+Der \textit{ComponentType<T>} Trait gibt den Datentyp der Compontenten von T an. 
+\begin{lstlisting}[language=c++, numbers=left]
+ typedef std::vector<int> TIntVector;
+\end{lstlisting}
+
+
+\subsection{NeedRuntimeSize}
+\label{sec-NeedRuntimeSize}

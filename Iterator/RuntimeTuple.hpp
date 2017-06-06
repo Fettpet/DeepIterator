@@ -10,35 +10,41 @@
 
 #pragma once
 #include <type_traits>
-
+#include "Definitions/hdinline.hpp"
 namespace hzdr 
 {
 namespace runtime 
 {
     struct TupleFull
     {
+        HDINLINE
         TupleFull() = default;
         
+        HDINLINE
         TupleFull(const TupleFull& other) = default;
         
-        TupleFull(const int_fast32_t& jumpsize, 
+        HDINLINE
+        TupleFull(const int_fast32_t& offset, 
                   const int_fast32_t& nbElements,
-                  const int_fast32_t& offset):
+                  const int_fast32_t& jumpsize):
             nbElements(nbElements),
             offset(offset), 
             jumpsize(jumpsize)
         {}
         
+        HDINLINE
         int_fast32_t getOffset() const
         {
             return offset;
         }
         
+        HDINLINE
         int_fast32_t getNbElements() const
         {
             return nbElements;
         }
         
+        HDINLINE
         int_fast32_t getJumpsize() const 
         {
             return jumpsize;
@@ -52,24 +58,30 @@ namespace runtime
 #ifdef _OPENMP
     struct TupleOpenMP
     {
+        HDINLINE
         TupleOpenMP() = default;
         
+        HDINLINE
         TupleOpenMP(const TupleOpenMP& other) = default;
         
+        HDINLINE
         TupleOpenMP( const int_fast32_t& nbElements):
             nbElements(nbElements)
         {}
         
+        HDINLINE
         int_fast32_t getOffset() const
         {
             return omp_get_thread_num();
         }
         
+        HDINLINE
         int_fast32_t getNbElements() const
         {
             return nbElements;
         }
         
+        HDINLINE
         int_fast32_t getJumpsize() const 
         {
             return omp_get_num_threads();

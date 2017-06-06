@@ -13,152 +13,59 @@
 #include "Traits/HasOffset.hpp"
 #include <omp.h>
 #include "Iterator/RuntimeTuple.hpp"
-template<
-    typename TElement>
-struct DeepIterator;
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
-{
-   if (code != cudaSuccess) 
-   {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
+#include "Definitions/hdinline.hpp"
+#include "Iterator/Collective.hpp"
+#include "PIC/SupercellManager.hpp"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+template<typename Supercell>
+ __global__
+ void 
+ myKernel(Supercell *supercell, const int nbParticleInLastFrame)
+ {   
+    typedef typename Supercell::FrameType Frame;
+    const int jumpsizeParticle = 256;
+    const int offsetParticle = threadIdx.x;
+    const int nbElementsParticle = nbParticleInLastFrame;
+    typedef hzdr::runtime::TupleFull RuntimeTuple;
+    
+    const RuntimeTuple runtimeVarParticle(offsetParticle, nbElementsParticle, jumpsizeParticle);
+    
+    
+    const int jumpsizeFrame = 1;
+    const int offsetFrame = 0;
+    const int nbElementsFrame = 0;
+    const RuntimeTuple runtimeFrame(offsetFrame, nbElementsFrame, jumpsizeFrame);
+    
+    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
+    
+    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::CudaIndexable, RuntimeTuple, ParticleInFrame> view(supercell, runtimeFrame, ParticleInFrame(nullptr, runtimeVarParticle)); 
+    
+     auto it=view.begin();
+
+     for(auto it=view.begin(); it!=view.end(); ++it)
+     {
+         if(*it)
+         {
+             (**it).data[0] += 1;
+        }
+     }
 }
 
-/**
- * @brief Der  ist ein virtueller Container, welcher zusätzliche 
- * Informationen bereithält. Beispielsweiße benötigt ein Frame die Information,
- * wie viele Particle in diesem Frame drin sind. 
- * In diesem Beispiel wollen wir einen  schreiben, welcher nur das 
- * n-te Element betrachtet. Als erstes betrachten wir hierfür den .
- * 
- * Zu betrachtende Beispiele
- * 1. 1d Fall (done
- * 2. 2d Fall
- * 3. nd Fall
- * 4. 1d Fall nur jedes zweites Element
- * 
- * 
- * 
- * 1. Fall
- * Arbeitsreihenfolge:
- * 1. Ich überlege mir, wie ich den  auf den std::vector abbilde
- * 
- * Bedingungen:
- * Damit der Deepcontainer mit DeepForeach arbeitet benötigt er
- * 1. begin() und end()
- * 2. einen definierten iterator datentype (innerhalb der Klasse)
- * 
- * 2. Fall
- * 
- * @tparam TContainer ist der Container Der Daten
- * @tparam TElement Der Rückgabetyp des Iterator. in unserem ersten Beispiel ist
- * es ein int
- */
 
-struct testTrue 
-{
-    float offset;
-};
 
-#define HDINLINE __device__ __forceinline__
-#define DINLINE __device__ __forceinline__
-
-struct SyncerCuda
-{
-    
-    DINLINE void sync()
-    {
-        __syncthreads();
-    }
-    
-    
-    
-    DINLINE
-    void 
-    allocSharedMem(int*& sharedMem, int* globalMem)
-    {
-        
-        __shared__ int arr[256];
-        sharedMem=arr;
-    }
-    
-    DINLINE
-    void 
-    loadInSharedMemory(int* sharedMem, int const * const globMem, int const & myId)
-    {
-        sharedMem[myId] = globMem[myId];
-    }
-    
-    __device__ 
-    __forceinline__
-    void
-    storeInGlobalMemory(int* globMem, int* sharedMem, int const & myId)
-    {
-        globMem[myId] = sharedMem[myId];
-    }
-    
-};
-
-template<typename TCollective>
-class Iterator
-{
-public:
-    typedef TCollective Collective;
-public:
-    HDINLINE
-    Iterator(int *ptr, int myID):
-        globalMem(ptr),
-        myId(myID)
-    {
-        collective.allocSharedMem(sharedMem, ptr);
-        collective.loadInSharedMemory(sharedMem, globalMem, myId);
-        collective.sync();
-    }
-    
-    HDINLINE
-    ~Iterator()
-    {
-        globalMem[myId] = sharedMem[myId];
-    }
-    
-    HDINLINE
-    Iterator& 
-    operator++()
-    {
-        globalMem[myId] = sharedMem[myId];
-        collective.sync();
-        globalMem += 256;
-        collective.loadInSharedMemory(sharedMem, globalMem, myId);
-        collective.sync();
-        return *this;
-    }
-    HDINLINE
-    int& 
-    operator*()
-    {
-        return sharedMem[myId];
-    }
-    
-protected:
-    Collective collective;
-    int *globalMem;
-    int *sharedMem;
-    int myId;
-};
-
-__global__
-void 
-myKernel(int* array, const int dim)
-{
-    const int myId = threadIdx.x; 
-    Iterator<SyncerCuda> it(array, myId);
-    
-    *it += 4;
-    ++it; 
-    *it += 1;
-}
 
 int main(int argc, char **argv) {
 /** 1. erstellen eines 2d Arrays auf der GPU. Die zweite Dimension ist dabei 256
@@ -167,6 +74,105 @@ int main(int argc, char **argv) {
  * 3. Die Datenstruktur einer Klasse übergeben 
  * 4. Über die datenstruktur iterieren
 */
+    typedef hzdr::Particle<int32_t, 2> Particle;
+    typedef hzdr::Frame<Particle, 256> Frame;
+    typedef hzdr::SuperCell<Frame> Supercell;
+    
+    SupercellHandle<Supercell> supercellHandler(1, 100);
+    std::cout << "Supercell before calcluation" << std::endl;
+    std::cout << *(supercellHandler.supercellCPU);
+    myKernel<<<1, 256>>>(supercellHandler.supercellGPU, 100);
+    gpuErrchk( cudaDeviceSynchronize() );
+    gpuErrchk( cudaPeekAtLastError() );
+     supercellHandler.copyDeviceToHost();
+     std::cout << "Supercell after Calculation" << std::endl;
+     std::cout << *(supercellHandler.supercellCPU);
+    
+     
+//     Supercell cell(5, 2), cell2(4, 4);
+//     const int nbSuperCells = 5;
+//     const int nbFramesInSupercell = 2;
+// 
+//     
+//     typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
+//     
+// // create the first iterator
+//     const int jumpsizeFrame1 = 1;
+//     const int offsetFrame1 = 0;
+//     const int nbElementsFrame1 = -1;
+//     
+//     const RuntimeTuple runtimeSupercell1(offsetFrame1, nbElementsFrame1, jumpsizeFrame1);
+//     
+//     const int jumpsizeParticle1 = 1;
+//     const int offsetParticle1 = 0;
+//     const int nbElementsParticle1 = cell.nbParticlesInLastFrame;
+//     
+//     const RuntimeTuple runtimeVarParticle1(offsetParticle1, nbElementsParticle1, jumpsizeParticle1);
+//     
+//   //  hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell1(cell, 
+//   //                                                                                                                          runtimeSupercell1,
+//   //                                                                                                                          ParticleInFrame(nullptr, runtimeVarParticle1)); 
+//     
+// // create the second iteartor
+// 
+//     std::cout << "First Supercell " <<std::endl << cell << std::endl;
+//     
+//     ParticleInFrame view(cell.firstFrame, runtimeVarParticle1);
+//     
+//    // view.begin();
+//    // view.end();
+//     
+//     for(auto it=view.begin(); it!=view.end();++it)
+//     {
+//         if(*it)
+//         {
+//             std::cout << **it << std::endl;
+//         }
+//     }
+//     
+//   //  std::cout << "Second Supercell " << cell2 << std::endl;
+// // first add all 
+//     const uint nbThreads = 5;
+//     int count = 0;
+//     const int i=0;
+// //     for(int i=0; i<5; ++i)
+// //     {   
+//         const int jumpsizeFrame2 = 1;
+//         const int offsetFrame2 = 0;
+//         const int nbElementsFrame2 = 0;
+//         
+//         const RuntimeTuple runtimeSupercell2(offsetFrame2, nbElementsFrame2, jumpsizeFrame2);
+//         
+//         const int jumpsizeParticle2 = nbThreads;
+//         const int offsetParticle2 = i;
+//         const int nbElementsParticle2 = cell.nbParticlesInLastFrame;
+//         
+//         const RuntimeTuple runtimeVarParticle2(offsetParticle2, nbElementsParticle2, jumpsizeParticle2);
+//         
+//         hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell(cell, 
+//                                                                                                                                 runtimeSupercell2,
+//                                                                                                                                 ParticleInFrame(nullptr, runtimeVarParticle2)); 
+//         
+//         /// @todo doesnt work
+//         for(auto it=iterSuperCell.begin(); it != iterSuperCell.end(); ++it)
+//         {
+//             if(*it)
+//             {
+//                 (**it).data[0] = i;
+//             }
+//             else 
+//             {
+//                
+//             }
+//              ++count;
+//         }   
+// //     }
+//     std::cout << "Number of invalids " << count << std::endl;
+//     std::cout << "First Supercell after Calc" << cell << std::endl;
+// 
+//    
+
+/*
     const int dim = 2;
     int *array_h;
     int *array_d;
@@ -180,8 +186,8 @@ int main(int argc, char **argv) {
     
     gpuErrchk(cudaMalloc(&array_d, sizeof(int) * dim * 256));
     gpuErrchk(cudaMemcpy(array_d, array_h, sizeof(int) * dim * 256, cudaMemcpyHostToDevice));
-    myKernel<<<1, 256>>>(array_d, dim);
-    
+    createSuperCell<<<1, 1>>>();
+    myKernel<<<1, 256>>>();
     
     std::cout << "It works" << std::endl;
     
@@ -199,5 +205,6 @@ int main(int argc, char **argv) {
 
     delete [] array_h;
     return EXIT_SUCCESS;
+    */
     
 }

@@ -6,6 +6,7 @@
 #include <array>
 #include <iostream>
 
+#include "Definitions/hdinline.hpp"
 namespace hzdr 
 {
 template<typename TPosition, int_fast32_t dim>
@@ -19,19 +20,24 @@ struct Particle<TPosition, 1>
     typedef Particle<TPosition, 1>      particle_type;
     typedef TPosition                   position_type;
     static constexpr uint32_t Dim = 1;
-    Particle():
-        data({++currentValue}){}
     
+    HDINLINE
+    Particle():
+        data(++currentValue){}
+    
+    HDINLINE
     Particle(const TPosition& x):
-        data({x})
+        data(x)
     {}
     
+    HDINLINE
     Particle(const Particle& par):
         data(par.data)
     {}
     
     
     template<typename TIndex>
+    HDINLINE
     TPosition& 
     operator[] (const TIndex& pos)
     {
@@ -39,6 +45,7 @@ struct Particle<TPosition, 1>
     }
     
     template<typename TIndex>
+    HDINLINE
     const 
     TPosition& 
     operator[] (const TIndex& pos)
@@ -47,14 +54,14 @@ struct Particle<TPosition, 1>
         return data[pos];
     }
     
-    inline 
+    HDINLINE
     bool 
     operator==(const Particle& other)
     {
         return other.data[0] == data[0];
     }
     
-    std::array<TPosition, 1> data;
+    TPosition data[1];
 }; // struct Particle<TPosition, 1>
 
 
@@ -67,18 +74,31 @@ struct Particle<TPosition, 2>
     typedef TPosition                   position_type;
     static constexpr uint32_t Dim = 2;
     
-    Particle():
-        data({++currentValue, ++currentValue}){}
+    HDINLINE
+    Particle()
+    {
+        data[0] = 0;
+        data[1] = 0;
+        
+    }
     
-    Particle(const TPosition& x, const TPosition& y):
-        data({x, y})
-    {}
+    HDINLINE
+    Particle(const TPosition& x, const TPosition& y)
+    {
+        data[0] = x;
+        data[1] = y;
+    }
     
-    Particle(const Particle& par):
-        data(par.data)
-    {}
+    HDINLINE
+    Particle(const Particle& par)
+    {
+        data[0] = par.data[0];
+        data[1] = par.data[1];
+    }
+    
     
     template<typename TIndex>
+    HDINLINE
     TPosition& 
     operator[] (const TIndex& pos)
     {
@@ -86,6 +106,7 @@ struct Particle<TPosition, 2>
     }
     
     template<typename T>
+    HDINLINE
     Particle&
     operator*=(const T& m)
     {
@@ -95,6 +116,7 @@ struct Particle<TPosition, 2>
     }
     
     template<typename TIndex>
+    HDINLINE
     const 
     TPosition& 
     operator[] (const TIndex& pos)
@@ -103,7 +125,7 @@ struct Particle<TPosition, 2>
         return data[pos];
     }
     
-    inline 
+    HDINLINE
     bool 
     operator==(const Particle& other)
     const
@@ -111,10 +133,12 @@ struct Particle<TPosition, 2>
         return other.data[0] == data[0] and other.data[1] == data[1];
     }
     
-    std::array<TPosition, 2> data;
+    TPosition data[2];
+
 }; // struct Particle<TPosition, 2>
 
 template<typename TPos>
+HDINLINE
 std::ostream& operator<<(std::ostream& out, Particle<TPos, 1> const & par)
 {
     out << "(" << par[0] << ")";
@@ -122,6 +146,7 @@ std::ostream& operator<<(std::ostream& out, Particle<TPos, 1> const & par)
 }
 
 template<typename TPos>
+HDINLINE
 std::ostream& operator<<(std::ostream& out, Particle<TPos, 2> const & par)
 {
     out << "(" << par[0] << ", " << par[1] << ")";

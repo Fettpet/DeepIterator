@@ -8,6 +8,7 @@
  
 
 #pragma once
+#include "Definitions/hdinline.hpp"
 #include <iostream>
 #include <iomanip>
 namespace hzdr
@@ -21,14 +22,13 @@ struct Frame
     typedef TParticle                           ParticleType;
     typedef ParticleType*                       ParticlePointer;
     typedef ParticleType&                       ParticleReference;
-    typedef typename TParticle::position_type   particle_position_type;
     typedef Frame<TParticle, nbParticles>       FrameType;
     
     constexpr static int_fast32_t Dim = TParticle::Dim;
     constexpr static int_fast32_t nbParticleInFrame = nbParticles;
     
-   
-    Frame(...):
+    HDINLINE
+    Frame():
         nextFrame(nullptr), previousFrame(nullptr)
     {
         static int_fast32_t value{0};
@@ -43,7 +43,7 @@ struct Frame
     }
     
     template<typename TIndex>
-    inline
+    HDINLINE
     ParticleReference
     operator[] (const TIndex& pos)
     {
@@ -60,9 +60,9 @@ struct Frame
         
         return result;
     }
+    
     template<typename TIndex>
-    inline
-    const
+    HDINLINE
     ParticleReference
     operator[] (const TIndex& pos)
     const
@@ -70,19 +70,22 @@ struct Frame
         return particles[pos];
     }
 
-    
-    FrameType& operator=(const FrameType& other)
+    HDINLINE
+    FrameType& 
+    operator=(const FrameType& other)
     {
         particles = other.particles;
     }
     
-    std::array<TParticle, nbParticles> particles;
+    TParticle particles[nbParticles];
+
     FrameType *nextFrame, *previousFrame;
 }; // struct Frame
 
 template<
     typename TParticle,
     int_fast32_t nbParticles>
+
 std::ostream& operator<<(std::ostream& out, const Frame<TParticle, nbParticles>& f)
 {
     out << "[";

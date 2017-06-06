@@ -1,0 +1,66 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{xcolor}
+% \lstset{numbers=left}
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Der DeepIterator}
+Wir nennen den Iterator DeepIterator, da er mehrere hierachieebenen (deep) verbindet. Der DeepIterator wird benutzt um über verschachtelte hierachiche Datencontainer zu iterieren. Das einfachste Beispiel für eine Hierachieche Datenstruktur ist
+\begin{lstlisting}[language=c++, numbers=left] 
+std::vector< std::vector< int > > interleavedVector;
+\end{lstlisting}
+Der Deepiterator iteriert über alle int innerhalb des doppelt verschachtelten Vektors. Der Iterator benutzt den Trait \textit{IsIndexable} um zu entscheiden ob eine Datenstruktur Listen oder Array ähnlich aufgebaut ist. Der Deepiterator wird mit mehreren Templateparametern konfiguriert:
+\begin{lstlisting}[language=c++, numbers=left]
+template<typename TContainer, 
+         typename TAccessor, 
+         typename TNavigator, 
+         typename TCollective, 
+         typename TRuntimeVariables,
+         typename TChild,
+         typename TEnable = void>
+struct DeepIterator;
+\end{lstlisting}
+
+Der erste Parameter \textit{TContainer} gibt den Datentyp des Containers an, über dessen Componenten iteriert werden soll. TContainer muss mehrere Anforderungen erfüllen: 1. Das Trait \textit{IsIndexable} (siehe Abschnitt \ref{sec-IsIndexable}) muss eine Ausprägung für den Typ TContainer haben; 2. Der Trait \textit{ComponentType} (siehe Abschnitt \ref{sec-ComponentType}) muss für TContainer ausgeprägt sein und; 3. Die Funktion \textit{NeedRuntimeSize<TContainer>} muss geschrieben werden (siehe Abschnitt \ref{sec-NeedRuntimeSize}).
+
+
+\subsection{Navigator}
+Der Navigator wird benutzt um das nachfolge Element zu bestimmen. Wir stellen eine Implementierung mit drei Templateparametern bereit.
+\begin{lstlisting}[language=c++, numbers=left]
+template<typename TData,
+         Direction TDirection,
+         int_fast32_t jumpSize=0>
+struct Navigator;
+\end{lstlisting}
+
+
+\section{Die View}
+
+\section{Traits}
+
+\subsection{IsIndexable}
+\label{sec-IsIndexable}
+Das Trait IsIndexable gibt an, ob ein Datencontainer eine Array-ähnliche Struktur hat. Die Vorraussetzung ist, das der Operator [] überladen ist. Ein Beispiel: t[i] gibt das i-te Element des Datencontainers t zurück. 
+\end{document}
+
+\subsection{ComponentType}
+\label{sec-ComponentType}
+Der \textit{ComponentType<T>} Trait gibt den Datentyp der Compontenten von T an. 
+\begin{lstlisting}[language=c++, numbers=left]
+ typedef std::vector<int> TIntVector;
+\end{lstlisting}
+
+
+\subsection{NeedRuntimeSize}
+\label{sec-NeedRuntimeSize}

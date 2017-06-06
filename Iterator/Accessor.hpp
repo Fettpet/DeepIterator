@@ -17,25 +17,34 @@
 #include "PIC/Supercell.hpp"
 #include <iostream>
 #include <boost/core/ignore_unused.hpp>
+#include "Definitions/hdinline.hpp"
 namespace hzdr
 {
 class Indexable;
      
-template<typename TData>
+template<typename TData,
+        typename SFIANE = void>
 struct Accessor;
 
-template<>
-struct Accessor<Indexable> 
+template<typename TData >
+struct Accessor<TData, typename std::enable_if<traits::IsIndexable<TData>::value>::type> 
 {
 
     
-    template<typename TContainer, typename TIndex, typename TNbElem>
+    template<typename TContainer, 
+             typename TComponent,
+             typename TIndex, 
+             typename TNbElem>
+    HDINLINE
     static
     auto 
-    get(TContainer* con, const TIndex& pos, const TNbElem& nbElem)
+    get(TContainer* con, 
+        TComponent* com, 
+        const TIndex& pos, 
+        const TNbElem& nbElem)
     -> typename TContainer::ValueType*
     {
-        
+
         if(pos < nbElem && pos >= 0)
         {
             return &((*con)[pos]); 
@@ -52,7 +61,7 @@ struct Accessor<Indexable>
 
 
 template<typename TFrame>
-struct Accessor<SuperCell<TFrame> >
+struct Accessor<SuperCell<TFrame>, void >
 {
     typedef TFrame                          FrameType;
     typedef FrameType*                      FramePointer;
@@ -60,13 +69,17 @@ struct Accessor<SuperCell<TFrame> >
     typedef ReturnType&                     ReturnReference;
     typedef ReturnType*                     ReturnPtr;
 
-
+    template<typename TContainer, 
+             typename TComponent,
+             typename TIndex, 
+             typename TNbElem>
+    HDINLINE
     static
-    ReturnPtr
-    inline
-    get(FramePointer frame)
+    auto 
+    get(TContainer* con, TComponent* com, const TIndex& pos, const TNbElem& nbElem)
+    -> TComponent*
     {
-        return frame;
+        return com;
     }
     
 }; // Accessor < SuperCell >
