@@ -34,20 +34,21 @@ struct Accessor<TData, typename std::enable_if<traits::IsIndexable<TData>::value
     template<typename TContainer, 
              typename TComponent,
              typename TIndex, 
-             typename TNbElem>
+             typename TRuntime>
     HDINLINE
     static
     auto 
-    get(TContainer* con, 
-        TComponent* com, 
+    get(TContainer* containerPtr, 
+        TComponent* componentenPtr, 
         const TIndex& pos, 
-        const TNbElem& nbElem)
+        const TRuntime& runtimeVariables)
     -> typename TContainer::ValueType*
     {
-
+        const auto nbElem = traits::NeedRuntimeSize<TContainer>::test(containerPtr) * runtimeVariables.getNbElements() 
+                          + (1 - traits::NeedRuntimeSize<TContainer>::test(containerPtr)) * traits::NumberElements<TContainer>::value;
         if(pos < nbElem && pos >= 0)
         {
-            return &((*con)[pos]); 
+            return &((*containerPtr)[pos]); 
         }
         else 
         {
@@ -72,11 +73,11 @@ struct Accessor<SuperCell<TFrame>, void >
     template<typename TContainer, 
              typename TComponent,
              typename TIndex, 
-             typename TNbElem>
+             typename TRuntimeVariables>
     HDINLINE
     static
     auto 
-    get(TContainer* con, TComponent* com, const TIndex& pos, const TNbElem& nbElem)
+    get(TContainer* con, TComponent* com, const TIndex& pos, const TRuntimeVariables& runtime)
     -> TComponent*
     {
         return com;

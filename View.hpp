@@ -16,7 +16,6 @@
 #include "Iterator/Navigator.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Collective.hpp"
-#include "Traits/IsIndexable.hpp"
 #include "Traits/NumberElements.hpp"
 #include "Traits/HasJumpSize.hpp"
 #include "Traits/HasNbRuntimeElements.hpp"
@@ -58,12 +57,15 @@ struct View
 {
 public:
 // Datatypes    
-    typedef TContainer                                                                                              ContainerType; 
+    typedef TContainer                                                                                              ContainerType;
     typedef ContainerType*                                                                                          ContainerPtr;
+    typedef typename traits::ComponentType<ContainerType>::type                                                     ComponentType;
     typedef TChild                                                                                                  ChildType; 
     typedef Navigator<ContainerType, TDirection>                                                                    NavigatorType;
     typedef Accessor<ContainerType>                                                                                 AccessorType;
-    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective, TRuntimeVariables, ChildType>     iterator; 
+    typedef Wrapper< ComponentType, TCollective>                                                                    WrapperType;
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, WrapperType,
+                                                                     TCollective, TRuntimeVariables, ChildType>     iterator; 
     typedef iterator                                                                                                Iterator; 
     typedef traits::NeedRuntimeSize<TContainer>                                                                     RuntimeSize;
     typedef TRuntimeVariables                                                                                       RunTimeVariables;
@@ -109,8 +111,13 @@ public:
         ptr(con)
     {}
     
-    
-    
+    template<typename AccessorPointer>
+    HDINLINE
+    View(View oldView, AccessorPointer* accPtr):
+        runtimeVars(oldView.runtimeVars),
+        ptr(accPtr),
+        childView(oldView.childView)
+        {}
     
     
     /**
@@ -146,19 +153,11 @@ public:
     
     
     HDINLINE    
-    View& operator=(View&& other)
-    {
-        ptr = other.ptr;
-        return *this;
-    }
+    View& operator=(View&& other) = default;
+
     
     HDINLINE
-    View& operator=(const View& other)
-    {
-        ptr = other.ptr;
-        
-        return *this;
-    }
+    View& operator=(const View& other) = default;
     
     /**
      * 1. Iterator with runtime and offset
@@ -183,18 +182,10 @@ public:
     }
     
 
-    template< bool test = traits::IsIndexable<ContainerType>::value>
-    HDINLINE
-    typename std::enable_if<test, int_fast32_t>::type
-    end()
-    {
-        const int_fast32_t elem = RuntimeSize::test(ptr)? runtimeVars.getNbElements()  : traits::NumberElements< ContainerType>::value;
-        return elem;
-    }
     
-    template< bool test = not traits::IsIndexable<ContainerType>::value>
+    
     HDINLINE
-    typename std::enable_if<test, nullptr_t>::type
+    nullptr_t
     end() {
             return nullptr;
     }

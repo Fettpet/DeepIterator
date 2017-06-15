@@ -1,18 +1,20 @@
 #pragma once
-    
+#include <cstdio>
+#include <cuda.h>
+
 template<typename Supercell, typename Frame>
 __global__ 
 void
 appendFrame(Supercell* supercell, Frame* frame)
 {
-
-   if(supercell->firstFrame == nullptr)
-   {
-       printf("Supercell %d\n", frame->particles[6]); 
-       supercell->firstFrame = frame;
-       supercell->lastFrame = frame;
-       return;
-   }
+    frame->previousFrame = nullptr;
+    frame->nextFrame = nullptr;
+    if(supercell->firstFrame == nullptr)
+    {
+        supercell->firstFrame = frame;
+        supercell->lastFrame = frame;
+        return;
+    }
     Frame* buffer = supercell->firstFrame;
     while(buffer->nextFrame != nullptr)
     {
@@ -106,12 +108,12 @@ struct SupercellHandle
             gpuErrchk(cudaMemcpy(framePointerCPU[i], framePointerGPU[i], sizeof(Frame), cudaMemcpyDeviceToHost));
         }
         
-//                 // 2. Linked list wieder erstellen
-//         for(auto i=0; i<nbFrames-1; ++i)
-//             framePointerCPU[i]->nextFrame = framePointerCPU[i+1];
-//         
-//         for(auto i=1; i<nbFrames; ++i)
-//             framePointerCPU[i]->previousFrame = framePointerCPU[i-1];
+                // 2. Linked list wieder erstellen
+        for(auto i=0; i<nbFrames-1; ++i)
+            framePointerCPU[i]->nextFrame = framePointerCPU[i+1];
+        
+        for(auto i=1; i<nbFrames; ++i)
+            framePointerCPU[i]->previousFrame = framePointerCPU[i-1];
     }
     
     int nbFrames;

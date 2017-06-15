@@ -97,6 +97,7 @@ struct CudaIndexable
     }
 #else
     HDINLINE
+    void
     sync()
     {
 

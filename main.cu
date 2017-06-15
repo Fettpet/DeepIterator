@@ -16,77 +16,44 @@
 #include "Definitions/hdinline.hpp"
 #include "Iterator/Collective.hpp"
 #include "PIC/SupercellManager.hpp"
+#include "Tests/Cuda/cuda.hpp"
+#include "PIC/SupercellContainerManager.hpp"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-template<typename Supercell>
- __global__
- void 
- myKernel(Supercell *supercell, const int nbParticleInLastFrame)
- {   
-    typedef typename Supercell::FrameType Frame;
-    const int jumpsizeParticle = 256;
-    const int offsetParticle = threadIdx.x;
-    const int nbElementsParticle = nbParticleInLastFrame;
-    typedef hzdr::runtime::TupleFull RuntimeTuple;
-    
-    const RuntimeTuple runtimeVarParticle(offsetParticle, nbElementsParticle, jumpsizeParticle);
-    
-    
-    const int jumpsizeFrame = 1;
-    const int offsetFrame = 0;
-    const int nbElementsFrame = 0;
-    const RuntimeTuple runtimeFrame(offsetFrame, nbElementsFrame, jumpsizeFrame);
-    
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
-    
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::CudaIndexable, RuntimeTuple, ParticleInFrame> view(supercell, runtimeFrame, ParticleInFrame(nullptr, runtimeVarParticle)); 
-    
-     auto it=view.begin();
-
-     for(auto it=view.begin(); it!=view.end(); ++it)
-     {
-         if(*it)
-         {
-             (**it).data[0] += 1;
-        }
-     }
-}
 
 
 
 
 int main(int argc, char **argv) {
+
+        std::vector<int> nbFrames{2,3,4};
+        std::vector<int> nbParticles{100,200,150};
+    
+        typedef hzdr::Particle<int32_t, 2> Particle;
+        typedef hzdr::Frame<Particle, 256> Frame;
+        typedef hzdr::SuperCell<Frame> Supercell;
+        SupercellContainerManager<Supercell> test(3, nbFrames, nbParticles);
+        
+        test.copyDeviceToHost();
+
 /** 1. erstellen eines 2d Arrays auf der GPU. Die zweite Dimension ist dabei 256
  * Elemente groß.
  * 2. Einen Kernel schreiben, der diese Datenstruktur als eingabe parameter nimmt
  * 3. Die Datenstruktur einer Klasse übergeben 
  * 4. Über die datenstruktur iterieren
 */
-    typedef hzdr::Particle<int32_t, 2> Particle;
-    typedef hzdr::Frame<Particle, 256> Frame;
-    typedef hzdr::SuperCell<Frame> Supercell;
-    
-    SupercellHandle<Supercell> supercellHandler(1, 100);
-    std::cout << "Supercell before calcluation" << std::endl;
-    std::cout << *(supercellHandler.supercellCPU);
-    myKernel<<<1, 256>>>(supercellHandler.supercellGPU, 100);
-    gpuErrchk( cudaDeviceSynchronize() );
-    gpuErrchk( cudaPeekAtLastError() );
-     supercellHandler.copyDeviceToHost();
-     std::cout << "Supercell after Calculation" << std::endl;
-     std::cout << *(supercellHandler.supercellCPU);
+//     typedef hzdr::Particle<int32_t, 2> Particle;
+//     typedef hzdr::Frame<Particle, 256> Frame;
+//     typedef hzdr::SuperCell<Frame> Supercell;
+//     
+//     SupercellHandle<Supercell> supercellHandler(1, 100);
+//     std::cout << "Supercell before calcluation" << std::endl;
+//     std::cout << *(supercellHandler.supercellCPU);
+//     myKernel<<<1, 256>>>(supercellHandler.supercellGPU, 100);
+//     gpuErrchk( cudaDeviceSynchronize() );
+//     gpuErrchk( cudaPeekAtLastError() );
+//      supercellHandler.copyDeviceToHost();
+//      std::cout << "Supercell after Calculation" << std::endl;
+//      std::cout << *(supercellHandler.supercellCPU);
     
      
 //     Supercell cell(5, 2), cell2(4, 4);

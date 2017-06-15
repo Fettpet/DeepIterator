@@ -94,6 +94,23 @@ public:
         index = run.getNbElements() - 1 - run.getOffset();
     }
     
+    template<typename TRuntimeVariables,
+            typename TComponent,
+            typename TIndex,
+            typename TContainer>
+    static
+    bool 
+    HDINLINE 
+    isEnd(TContainer const * const containerPtr,
+          TComponent const * const compontPtr,
+          const TIndex& index, 
+          const TRuntimeVariables& run)
+    {
+        const int_fast32_t elem = traits::NeedRuntimeSize<TContainer>::test(containerPtr)? run.getNbElements()  : traits::NumberElements< TContainer>::value;
+
+        return index < -1  * ((run.getJumpsize() -  (elem % run.getJumpsize())) %run.getJumpsize());
+    }
+    
 }; // Navigator<Forward, Frame, jumpSize>
     
     
@@ -149,6 +166,23 @@ public:
 
         conPtrOut = conPtrIn;
         index =run.getOffset();
+    }
+    
+    template<typename TRuntimeVariables,
+            typename TComponent,
+            typename TIndex,
+            typename TContainer>
+    static
+    bool 
+    HDINLINE 
+    isEnd(TContainer const * const containerPtr,
+          TComponent const * const compontPtr,
+          const TIndex& index, 
+          const TRuntimeVariables& run)
+    {
+        const int_fast32_t elem = traits::NeedRuntimeSize<TContainer>::test(containerPtr)? run.getNbElements()  : traits::NumberElements< TContainer>::value;
+
+        return index >= elem + ((run.getJumpsize() -  (elem % run.getJumpsize())) %run.getJumpsize()) ;
     }
     
 }; // Navigator<Backward, Frame, jumpSize>
@@ -237,6 +271,21 @@ public:
             
     }
     
+    template<typename TRuntimeVariables,
+            typename TComponent,
+            typename TIndex,
+            typename TContainer>
+    static
+    bool 
+    HDINLINE 
+    isEnd(TContainer const * const containerPtr,
+          TComponent const * const compontPtr,
+          const TIndex& index, 
+          const TRuntimeVariables& run)
+    {
+        return (compontPtr == nullptr) and (containerPtr == nullptr);
+    }
+    
 }; // Navigator<Forward, Frame, jumpSize>
     
     
@@ -312,12 +361,23 @@ public:
         }
     }
     
-    static 
-    FramePointer
-    first(nullptr_t)
+
+    
+    template<typename TRuntimeVariables,
+            typename TComponent,
+            typename TIndex,
+            typename TContainer>
+    static
+    bool 
+    HDINLINE 
+    isEnd(TContainer const * const containerPtr,
+          TComponent const * const componentPtr,
+          const TIndex& index, 
+          const TRuntimeVariables& run)
     {
-        return nullptr;
+        return (componentPtr == nullptr) and (containerPtr == nullptr);
     }
+    
 }; // Navigator<Forward, Frame, jumpSize>
 
 }// namespace hzdr

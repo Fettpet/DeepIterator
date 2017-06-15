@@ -4,18 +4,28 @@
  * structures. The simplest example is for an interleaved data structure is 
  * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
  * within the structure.
- * The iterator support lists and index based access. Both are specialised. 
- * Because the implementation of interleaved and flat is different, we need four
- * implemtations of the iterator:
- * 1. flat and list based
- * 2. flat and index based
- * 3. interleaved and list based
- * 4. interleaved and index based
- *
- * The iterator use the trait \b IsIndexable to decide wether the datastructure 
- * is array like or list like. 
- * This implementation is special for the datastructurs of PIConGPU. 
-
+ * The iterator has a list of template:
+ * 1. \b TContainer : This one describes the container, over wich elements you 
+ * would like to iterate. This Templeate need has some Conditions: I. The Trait 
+ * \b IsIndexable need a shape for TContainer. This Traits, says wheter 
+ * TContainer is array like (has []-operator overloaded) or list like; II. The
+ * trait \b ComponentType has a shape for TContainer. This trait gives the type
+ * of the components of TContainer; III. The Funktion \b NeedRuntimeSize<TContainer>
+ * need to be specified \see NeedRuntimeSize.
+ * 2. \b TAccessor The accessor descripe the access to the components of TContainer.
+ * The Accessor need a get Function: 
+ * static TComponent* Accessor::get(TContainer* , 
+ *                                  TComponent*, 
+ *                                  const TIndex&,
+ *                                  const RuntimeVariables&)
+ * The first parameter is a pointer to the container. The second pointer is a
+ * pointer to a component of the container. The third parameter is a index for
+ * array like datatypes. The last parameter is a set of runtime variables. This
+ * type is specified with the template TRuntimeVariables. The function get 
+ * returns a pointer to the current component.
+ * 3. \b TNavigator The navigator 
+ * 
+ * 
  */
 #include <sstream>
 #pragma once
@@ -27,11 +37,11 @@
 #include "Traits/NeedRuntimeSize.hpp"
 #include <boost/iterator/iterator_concepts.hpp>
 #include "Iterator/Wrapper.hpp"
-#include "Traits/IsIndexable.hpp"
 #include <limits>
 #include <cassert>
 #include <type_traits>
 #include "Traits/NumberElements.hpp"
+#include "Traits/IteratorType.hpp"
 #include "Traits/Componenttype.hpp"
 #include "Definitions/hdinline.hpp"
 
@@ -46,6 +56,7 @@ namespace hzdr
 template<typename TContainer, 
          typename TAccessor, 
          typename TNavigator, 
+         typename TWrapper,
          typename TCollective, 
          typename TRuntimeVariables,
          typename TChild,
@@ -62,11 +73,13 @@ struct DeepIterator;
 template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
+        typename TWrapper,
         typename TRuntimeVariables,
         typename TCollective>
 struct DeepIterator<TContainer, 
                     TAccessor, 
-                    TNavigator, 
+                    TNavigator,
+                    TWrapper,
                     TCollective, 
                     TRuntimeVariables,
                     hzdr::NoChild,
@@ -82,7 +95,7 @@ public:
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
     typedef TCollective                                                 Collecter;
-    typedef Wrapper< ComponentType, TCollective>                        WrapperType;
+    typedef TWrapper                                                    WrapperType;
 // functions 
 //    static_assert(std::is_same<typename TAccessor::ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
 public:
@@ -93,6 +106,10 @@ public:
  */
     HDINLINE
     DeepIterator(nullptr_t)
+    {}
+    
+    HDINLINE
+    DeepIterator()
     {}
 
     HDINLINE
@@ -133,9 +150,9 @@ public:
     operator*()
     {
 
-        const auto nbElem = traits::NeedRuntimeSize<ContainerType>::test(containerPtr) * runtimeVariables.getNbElements() 
-                          + (1 - traits::NeedRuntimeSize<ContainerType>::test(containerPtr)) * traits::NumberElements<ContainerType>::value;
-        return WrapperType(Accessor::get(containerPtr, componentPtr, index, nbElem));
+
+        return WrapperType(Accessor::get(containerPtr, componentPtr, index, runtimeVariables),
+                        containerPtr, componentPtr, index, runtimeVariables);
     }
     
     HDINLINE
@@ -153,17 +170,7 @@ public:
     operator!=(nullptr_t)
     const
     {
-        return componentPtr != nullptr or containerPtr != nullptr;
-    }
-    
-    
-    HDINLINE    
-    bool
-    operator!=(const int_fast32_t& maxIndex )
-    const
-    {
-        return index < maxIndex 
-            and index >= 0;
+         return not Navigator::isEnd(containerPtr, componentPtr, index, runtimeVariables);
     }
     
 protected:
@@ -189,10 +196,12 @@ template<typename TContainer,
         typename TNavigator,
         typename TCollective,
         typename TRuntimeVariables,
-        typename TChild>
+        typename TChild,
+        typename TWrapper>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator, 
+                    TWrapper,
                     TCollective, 
                     TRuntimeVariables,
                     TChild,
@@ -202,20 +211,20 @@ struct DeepIterator<TContainer,
     
 public:
     typedef TContainer                                                  ContainerType;
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type  ComponentType;
+    typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
 
-    typedef ComponentType*                              ComponentPointer;
-    typedef ComponentType&                              ComponentReference;
-    typedef TAccessor                               Accessor;
-    typedef TNavigator                              Navigator;
-    typedef TCollective                             Collecter;
+    typedef ComponentType*                                              ComponentPointer;
+    typedef ComponentType&                                              ComponentReference;
+    typedef TAccessor                                                   Accessor;
+    typedef TNavigator                                                  Navigator;
+    typedef TCollective                                                 Collecter;
 
-    typedef traits::NeedRuntimeSize<ContainerType>    RuntimeSize;
+    typedef traits::NeedRuntimeSize<ContainerType>                      RuntimeSize;
 // child things
-    typedef TChild                                  ChildView;
-    typedef typename TChild::Iterator               ChildIterator;
-    typedef typename ChildIterator::ReturnType      ReturnType;
-    typedef typename ChildIterator::WrapperType     WrapperType;
+    typedef TChild                                                      ChildView;
+    typedef typename ChildView::Iterator ChildIterator;
+    typedef typename ChildIterator::ReturnType                          ReturnType;
+    typedef typename ChildIterator::WrapperType                         WrapperType;
 
     // tests
   //  static_assert(std::is_same<typename TAccessor::ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
@@ -254,12 +263,7 @@ public:
     DeepIterator(ContainerType* ptr2, 
                  TRuntimeVariables runtimeVariables,
                  ChildView view):
-                 
-                 childView(view),
-                 childIter(view.begin()),
                  runtimeVariables(runtimeVariables)
-                
-                 
     {
 
 //        if(coll.isMover())
@@ -267,9 +271,8 @@ public:
             Navigator::first(ptr2, containerPtr, componentPtr, index, runtimeVariables);
 
  //       }
-        const auto nbElem = traits::NeedRuntimeSize<ContainerType>::test(containerPtr) * runtimeVariables.getNbElements() 
-                          + (1 - traits::NeedRuntimeSize<ContainerType>::test(containerPtr)) * traits::NumberElements<ContainerType>::value;
-        childView.setPtr(ChildView(Accessor::get(containerPtr, componentPtr, index, nbElem)));
+
+        childView = ChildView(view, Accessor::get(containerPtr, componentPtr, index, runtimeVariables));
         childIter = childView.begin();
     }
     
@@ -288,9 +291,7 @@ public:
             if(not (childIter != childView.end()))
             {
                 Navigator::next(containerPtr, componentPtr, index, runtimeVariables);
-                const auto nbElem = traits::NeedRuntimeSize<ContainerType>::test(containerPtr) * runtimeVariables.getNbElements() 
-                          + (1 - traits::NeedRuntimeSize<ContainerType>::test(containerPtr)) * traits::NumberElements<ContainerType>::value;
-                childView.setPtr(ChildView(Accessor::get(containerPtr, componentPtr, index, nbElem)));
+                childView = ChildView(childView, Accessor::get(containerPtr, componentPtr, index, runtimeVariables));
                 childIter = childView.begin();
             }
                 
@@ -325,19 +326,12 @@ public:
     operator!=(nullptr_t)
     const
     {
-        return (componentPtr != nullptr) or (containerPtr != nullptr);
+        
+        return not Navigator::isEnd(containerPtr, componentPtr, index, runtimeVariables);
     }
     
 
-    HDINLINE    
-    bool
-    operator!=(const int_fast32_t& maxIndex )
-    const
-    {
-        return index < maxIndex 
-            and index >= 0;
-    }
-    
+
 protected:
     Collecter coll;
     TContainer* containerPtr = nullptr;

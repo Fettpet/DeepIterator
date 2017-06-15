@@ -20,6 +20,15 @@ struct SuperCell
     typedef TFrame frame_type;
     typedef TFrame FrameType;
     typedef TFrame ValueType;
+    
+    HDINLINE 
+    SuperCell():
+        firstFrame(nullptr),
+        lastFrame(nullptr),
+        nbParticlesInLastFrame(0)
+    {}
+    
+    SuperCell& operator=(const SuperCell&) = default;
     /**
      * @param nbFrames: number of frames within the supercell,
      * @param nbParticle number of particles in the last frame

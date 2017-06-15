@@ -43,7 +43,7 @@ struct NeedRuntimeSize<hzdr::Frame<TParticle, nb> >
     HDINLINE
     static
     bool 
-    test(FramePtr ptr)
+    test(Frame const * const ptr)
     {
         return ptr->nextFrame == nullptr;
     }
@@ -79,7 +79,7 @@ struct NeedRuntimeSize<hzdr::SuperCell<TFrame> >
     static
     constexpr
     bool 
-    test(SupercellPtr ptr)
+    test(Supercell const * const ptr)
     {
         return false;
     }
