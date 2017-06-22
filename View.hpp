@@ -64,8 +64,8 @@ public:
     typedef Navigator<ContainerType, TDirection>                                                                    NavigatorType;
     typedef Accessor<ContainerType>                                                                                 AccessorType;
     typedef Wrapper< ComponentType, TCollective>                                                                    WrapperType;
-    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, WrapperType,
-                                                                     TCollective, TRuntimeVariables, ChildType>     iterator; 
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective, 
+                                                TRuntimeVariables,WrapperType, ChildType>                           iterator; 
     typedef iterator                                                                                                Iterator; 
     typedef traits::NeedRuntimeSize<TContainer>                                                                     RuntimeSize;
     typedef TRuntimeVariables                                                                                       RunTimeVariables;
@@ -119,7 +119,13 @@ public:
         childView(oldView.childView)
         {}
     
-    
+    template<typename TAccessorPointer>
+    HDINLINE
+    void 
+    refresh(TAccessorPointer* accPtr)
+    {
+        ptr = accPtr;
+    }
     /**
      * @param container The element 
      */
@@ -168,8 +174,7 @@ public:
     typename std::enable_if<test, Iterator>::type 
     begin() 
     {
-       const auto t =traits::NumberElements< ContainerType>::value;
-       return Iterator(ptr, t, runtimeVars);
+       return Iterator(ptr,  runtimeVars);
     }
     
     

@@ -151,8 +151,9 @@ struct Wrapper<TElement,
     }
     
 protected:
-    bool result;
     ElementPtr ptr;
+    bool result;
+   
     
 };
 

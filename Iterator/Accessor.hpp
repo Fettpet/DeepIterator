@@ -42,7 +42,7 @@ struct Accessor<TData, typename std::enable_if<traits::IsIndexable<TData>::value
         TComponent* componentenPtr, 
         const TIndex& pos, 
         const TRuntime& runtimeVariables)
-    -> typename TContainer::ValueType*
+    -> TComponent*
     {
         const auto nbElem = traits::NeedRuntimeSize<TContainer>::test(containerPtr) * runtimeVariables.getNbElements() 
                           + (1 - traits::NeedRuntimeSize<TContainer>::test(containerPtr)) * traits::NumberElements<TContainer>::value;

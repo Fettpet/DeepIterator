@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 include_directories("./")
 
-set(BOOST_ROOT "/home/s6303743/boost/")
+#set(BOOST_ROOT "/home/s6303743/boost/")
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 if(Boost_FOUND)
     message(STATUS "Boost Include Dirs ${Boost_INCLUDE_DIRS}")

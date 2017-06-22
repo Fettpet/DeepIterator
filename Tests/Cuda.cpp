@@ -70,12 +70,20 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 
 BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
 {
+    
     Supercell** super;
-    std::vector<int> nbFrames{1,1,1};
-    std::vector<int> nbParticles{100,100,100};
+    std::vector<int> nbFrames{2,3,1};
+    std::vector<int> nbParticles{100,150,100};
     callSupercellSquareAdd(&super, 3, nbFrames, nbParticles);
     
-
+    
+    // I have supercells, and I need 
+    std::cout <<"Superzelle 1" << std::endl;
     std::cout << *(super[0]);
     
+    std::cout <<"Superzelle 2" << std::endl;
+    std::cout << *(super[1]);
+    
+    std::cout <<"Superzelle 3" << std::endl;
+     std::cout << *(super[2]);
 }

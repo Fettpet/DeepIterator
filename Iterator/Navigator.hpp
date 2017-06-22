@@ -71,7 +71,6 @@ public:
          TComponent* elem,
          TIndex& index, 
          const TRuntimeVariables& run)
-    
     {
 
         index -= run.getJumpsize();

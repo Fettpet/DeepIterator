@@ -18,7 +18,6 @@ __global__
 void
 appendFrame(Supercell* supercell, Frame* frame, int i)
 {
-    printf("%f\n", frame->particles[0].data[0]);
     frame->previousFrame = nullptr;
     frame->nextFrame = nullptr;
     if(supercell[i].firstFrame == nullptr)
@@ -75,7 +74,7 @@ struct SupercellContainerManager
                 gpuErrchk(cudaMalloc(&framePointerGPU[i][j], sizeof(Frame)));
             }
             
-            framePointerCPU[i][0] = supercellCPU->firstFrame;
+            framePointerCPU[i][0] = supercellCPU[i].firstFrame;
             for(auto j=1; j<nbFramesSupercell[i]; ++j)
             {
                 framePointerCPU[i][j] = framePointerCPU[i][j-1]->nextFrame;
@@ -83,7 +82,7 @@ struct SupercellContainerManager
         }
         gpuErrchk(cudaMalloc(&supercellGPU, nbSupercells * sizeof(Supercell)));
         gpuErrchk(cudaMemcpy(supercellGPU, supercellCPU, nbSupercells * sizeof(Supercell), cudaMemcpyHostToDevice));
-        
+        gpuErrchk(cudaMemcpy(supercellCPU, supercellGPU, nbFramesSupercell.size() * sizeof(Supercell), cudaMemcpyDeviceToHost));
         
         
         
@@ -98,16 +97,15 @@ struct SupercellContainerManager
     {
         
         // 1. Alle Frames Kopieren 
-        for(auto i=0; i<nbFramesSupercell.size(); ++i)
+        for(uint i=0; i<nbFramesSupercell.size(); ++i)
         {
-                        resetSupercell<<<1,1>>>(supercellGPU, i);
+            resetSupercell<<<1,1>>>(supercellGPU, i);
             gpuErrchk( cudaDeviceSynchronize() );
             gpuErrchk( cudaPeekAtLastError() );
             for(auto j=0; j<nbFramesSupercell[i]; ++j)
             {
 
                 gpuErrchk(cudaMemcpy(framePointerGPU[i][j], framePointerCPU[i][j], sizeof(Frame), cudaMemcpyHostToDevice));
-                std::cout << *(framePointerCPU[i][j]) << std::endl;
                 appendFrame<<<1,1>>>(supercellGPU, framePointerGPU[i][j], i);
                 gpuErrchk( cudaDeviceSynchronize() );
                 gpuErrchk( cudaPeekAtLastError() );
@@ -120,10 +118,11 @@ struct SupercellContainerManager
     void 
     copyDeviceToHost()
     {
-       // gpuErrchk(cudaMemcpy(supercellCPU,  supercellGPU, nbFramesSupercell.size() * sizeof(Supercell), cudaMemcpyDeviceToHost));
+//         gpuErrchk(cudaMemcpy(supercellCPU, supercellGPU, nbFramesSupercell.size() * sizeof(Supercell), cudaMemcpyDeviceToHost));
                 // 1. Alle Frames Kopieren
-        for(auto i=0; i<nbFramesSupercell.size(); ++i)
+        for(uint i=0; i<nbFramesSupercell.size(); ++i)
         {
+            supercellCPU[i].firstFrame = framePointerCPU[i][0];
             for(auto j=0; j<nbFramesSupercell[i]; ++j)
             {
                 gpuErrchk(cudaMemcpy(framePointerCPU[i][j], framePointerGPU[i][j], sizeof(Frame), cudaMemcpyDeviceToHost));

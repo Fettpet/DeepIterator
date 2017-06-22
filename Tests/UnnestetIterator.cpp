@@ -38,10 +38,16 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
     const RuntimeTuple runtimeVar(offset, nbElements, jumpsize);
     hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::None, RuntimeTuple> con(&test1, runtimeVar);
     auto it = con.begin();
+    auto itTest = it+1;
     auto wrap = *it;
     
+   
     BOOST_TEST(*wrap == 1);
     ++it;
+    // check wheter ++ and == work
+    BOOST_TEST((it == itTest));
+    
+    
     wrap = *it;
     BOOST_TEST(*wrap == 4);
     

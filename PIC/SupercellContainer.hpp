@@ -11,22 +11,32 @@ struct SupercellContainer
 public:
     typedef TSupercell                                          SupercellType;
     typedef SupercellType*                                      SuperCellPtr;
-    typedef typename SupercellType::FrameType                   FrameType;
-    typedef typename FrameType::ParticleType                    ParticleType; 
     typedef SupercellContainer<TSupercell>                      ThisType;
 
     
 public:
+    
+    template<typename TIndex>
+    HDINLINE
+    SupercellContainer(SuperCellPtr supercell,
+                       const TIndex nbSupercells):
+        nbSupercells(nbSupercells)
+    {
+        supercells = new SuperCellPtr[nbSupercells];
+        for(TIndex i=0;i<nbSupercells; ++i)
+        {
+            supercells[i] = &(supercell[i]);
+        }
+    }
     
     /**
      * 
      */
     HDINLINE
     SupercellContainer(const int_fast32_t& nbSupercells, 
-                       const int_fast32_t& nbFramesInSupercell):
-        supercells(nbSupercells)
+                       const int_fast32_t& nbFramesInSupercell)
     {
-        
+        supercells = new SuperCellPtr[nbSupercells];
         for(int_fast32_t i=0; i<nbSupercells; ++i)
         {
             int_fast32_t nbParticleInLastFrame = rand() % nbFramesInSupercell;
@@ -37,7 +47,7 @@ public:
     HDINLINE
     ~SupercellContainer()
     {
-        for(uint_fast32_t i=0; i<supercells.size(); ++i)
+        for(uint_fast32_t i=0; i<nbSupercells; ++i)
         {
             delete supercells[i];
         }
@@ -64,6 +74,7 @@ public:
     }
     
 protected:
-    std::vector<SuperCellPtr> supercells;
+    int nbSupercells;
+    SuperCellPtr* supercells;
 }; // struct SupercellContainer
 }// namespace hzdr
