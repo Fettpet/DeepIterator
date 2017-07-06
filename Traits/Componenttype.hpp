@@ -1,8 +1,9 @@
 /**
- * @author Sebastian Hahn t.hahn@hzdr.de
+ * \struct ComponentType
+ * @author Sebastian Hahn t.hahn < at > hzdr.de
  * @brief The ComponentType trait gives information about the type of the 
- * components of a container. You need to implement a shape such that,
- * typedef ComponentType< ContainerType >::type YourComponentType;
+ * components of a container. You need to implement a specialication such that,
+ * <b> typedef ComponentType< ContainerType >::type YourComponentType;</b>
  * is a valid and correct statement.
  * 
  */

@@ -1,23 +1,35 @@
 /**
+ * \struct Navigator
  * @author Sebastian Hahn (t.hahn< at >hzdr.de )
- * @brief The navigator is used to go to the next element. It has three templates:
- * 1. TData: The datatype of the datastructure. If the datastructure is indexable
- * you doesnt need to write your own navigator. TData must have a Valutype typename.
- * 2. Direction: There are two possibilities: 
- *      Forward: The iterator start at the first element and go to the last one
- *      Backward: The iterator start at the last element and go to the first one
- * 3. jumpsize: spezify what the next element is. There are more possibilities:
- *      1. jumpsize == 0: The jumpsize is not known at compiletime. you need to
- *          specify the jumpsize at runtime
- *      2. jumpsize == 1: go over all elements within the datastructure
- *      3. jumpsize == c>1: overjump c-1 elemnts
- * The navigator has two function:
- *  void next( TData*, const RuntimeVariables&): specify how the next element is
- *    found. the pointer currelem is set to the next element. The RuntimeVariables
- *    have three members: jumpsize, nbRuntimeElements, offset. \see RuntimeTuple.hpp
- *  TData::Valuetype* first(TData*, RuntimeVariables): specify how the first element
- *    in the datastructure is found. The first element is returned.
  * 
+ * @brief The navigator is used to get the first element, the next element and
+ * a decision function, wheter the end is reached or not. 
+ * 
+ * @tparam TContainer The datatype of the datastructure. If the datastructure is
+ * indexable you doesnt need to write your own navigator. 
+ * It has three templates:
+ * 
+ * @tparam Direction There are two possibilities: Forward: The iterator start at
+ * the first element and go to the last one; Backward: The iterator start at the 
+ * last element and go to the first one
+ * 
+ * @tparam SFIANE used for SFIANE
+ * 
+ * The navigator has three function: One is used to get the entry point to an 
+ * container, the second gives the next component and the last one decides wheter
+ * the end is reached. The header of these functions are:
+ *  void first(TContainer* conPtrIn, TContainer*& conPtrOut, TComponent*& compontPtr, TIndex& index, const TOffset& offset) const
+    void next(TContainer* ptr, TComponent* elem, TIndex& index, const TJumpsize& jump) const
+    bool isEnd(TContainer const * const containerPtr, TComponent const * const compontPtr, const TIndex& index, const TJumpsize& jumpsize)
+ * The attributs function first has five parameter. The first one is a pointer to
+ the container given by the constructor of the DeepIterator. The second parameter
+ is pointer to the container, stored within the iterator. The third paramter is a
+ pointer to the current component. The DeepIterator use the index paramter to 
+ decide the position of the component within the container. The last paramter is
+ the offset, for parallel applications. The parameter conPtrOut, componentPtr and
+ index are the output of this function. 
+ The parameter for the second and third function are similar. The difference are: 
+ 1. There is no input container pointer and 2. the offset is replaced by the jumpsize. 
  */
 
 #pragma once
@@ -33,24 +45,20 @@ namespace hzdr
 {
 
     class Indexable;
-/**
- * @brief The navigator is used to go to the next element
- * It has a runtime and a compiletime implementation
- * 
- */
-template<typename TData,
+
+template<typename TContainer,
          hzdr::Direction TDirection,
          typename SFIANE = void>
 struct Navigator;
     
 /** ****************
- * @brief The first implementation of the Navigator. This one is used for indexable
+ * @brief This one is used for indexable
  * datatypes. It started at the last element and go to the first one.
  *****************/
-template<typename TData>
-struct Navigator<TData,
+template<typename TContainer>
+struct Navigator<TContainer,
                  hzdr::Direction::Backward,
-                 typename std::enable_if<traits::IsIndexable<TData>::value>::type >
+                 typename std::enable_if<traits::IsIndexable<TContainer>::value>::type >
 {
 public:
  
@@ -61,68 +69,68 @@ public:
      * 
      */
     template<typename TIndex, 
-             typename TContainer,  
              typename TComponent,
-             typename TRuntimeVariables>
+             typename TJumpsize>
     HDINLINE
-    static
+    
     void 
     next(TContainer* ptr, 
          TComponent* elem,
          TIndex& index, 
-         const TRuntimeVariables& run)
+         const TJumpsize& jump)
+    const
     {
 
-        index -= run.getJumpsize();
+        index -= jump;
     }
     
-    template<typename TRuntimeVariables,
+    template<typename TOffset,
             typename TComponent,
-            typename TIndex,
-            typename TContainer>
-    static
+            typename TIndex>
     void 
     HDINLINE 
     first(TContainer* conPtrIn,
           TContainer*& conPtrOut, 
           TComponent*& compontPtr,
           TIndex& index, 
-          const TRuntimeVariables& run)
+          const TOffset& offset)
+    const
     {
+        typedef traits::NumberElements< TContainer> NbElem;
+        NbElem nbElem;   
         conPtrOut = conPtrIn;
-        index = run.getNbElements() - 1 - run.getOffset();
+        index = nbElem.size(*conPtrOut) - 1 - offset;
     }
     
-    template<typename TRuntimeVariables,
+    template<typename TJumpsize,
             typename TComponent,
-            typename TIndex,
-            typename TContainer>
-    static
+            typename TIndex>
+    
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
           const TIndex& index, 
-          const TRuntimeVariables& run)
+          const TJumpsize& jumpsize)
+    const
     {
-        const int_fast32_t elem = traits::NeedRuntimeSize<TContainer>::test(containerPtr)? run.getNbElements()  : traits::NumberElements< TContainer>::value;
-
-        return index < -1  * ((run.getJumpsize() -  (elem % run.getJumpsize())) %run.getJumpsize());
+        typedef traits::NumberElements< TContainer> NbElem;
+        NbElem nbElem;       
+        return static_cast<int_fast32_t>(index) < -1  * ((static_cast<int_fast32_t>(jumpsize -  (nbElem.size(*containerPtr) % jumpsize) %jumpsize)));
     }
     
 }; // Navigator<Forward, Frame, jumpSize>
     
     
 /** *******************
- * @brief the second implementation of the navigator. This one is used for indexable
+ * @brief This one is used for indexable
  * datatypes. The direction is forwars i.e. is starts at the first element and
  * go to the last one.
- *
  *****************/////    
-template<typename TData>
-struct Navigator<TData,
+template<typename TContainer>
+struct Navigator<TContainer,
                  hzdr::Direction::Forward,
-                 typename std::enable_if<traits::IsIndexable<TData>::value>::type > 
+                 typename std::enable_if<traits::IsIndexable<TContainer>::value>::type > 
 {
 public:
     
@@ -134,54 +142,54 @@ public:
      * 
      */
     template<typename TIndex, 
-             typename TContainer,  
              typename TComponent,
-             typename TRuntimeVariables>
+             typename TJumpsize>
     HDINLINE
-    static
+    
     void 
     next(TContainer* ptr, 
          TComponent* elem,
          TIndex& index, 
-         const TRuntimeVariables& run)
+         const TJumpsize& jumpsize)
+    const
     {
-        index += run.getJumpsize();
+        index += jumpsize;
         
     }
     
-    template<typename TRuntimeVariables,
+    template<typename TOffset,
             typename TIndex,
-            typename TComponent,
-            typename TContainer>
-    static
+            typename TComponent>
+    
     void 
     HDINLINE 
     first(TContainer* conPtrIn,
           TContainer*& conPtrOut, 
           TComponent*& compontPtr,
           TIndex& index, 
-          const TRuntimeVariables& run)
+          const TOffset& offset)
+    const
     {
 
         conPtrOut = conPtrIn;
-        index =run.getOffset();
+        index = offset;
     }
     
-    template<typename TRuntimeVariables,
+    template<typename TJumpsize,
             typename TComponent,
-            typename TIndex,
-            typename TContainer>
-    static
+            typename TIndex>
+    
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
           const TIndex& index, 
-          const TRuntimeVariables& run)
+          const TJumpsize& jumpsize)
+    const
     {
-        const int_fast32_t elem = traits::NeedRuntimeSize<TContainer>::test(containerPtr)? run.getNbElements()  : traits::NumberElements< TContainer>::value;
-
-        return index >= elem + ((run.getJumpsize() -  (elem % run.getJumpsize())) %run.getJumpsize()) ;
+        typedef traits::NumberElements< TContainer> NbElem;
+        NbElem nbElem;        
+        return static_cast<int_fast32_t>(index) >= static_cast<int_fast32_t>(nbElem.size(*containerPtr) + (jumpsize -  (nbElem.size(*containerPtr) % jumpsize)) % jumpsize) ;
     }
     
 }; // Navigator<Backward, Frame, jumpSize>
@@ -212,17 +220,18 @@ public:
     template<typename TIndex, 
              typename TContainer,  
              typename TComponent,
-             typename TRuntimeVariables>
+             typename TJumpsize>
     HDINLINE
-    static
+    
     void 
     next(TContainer*& ptr, 
          TComponent*& elem,
          TIndex& index, 
-         const TRuntimeVariables& run)
+         const TJumpsize& jumpsize)
+    const
     {
 
-        for(int_fast32_t i=0; i<run.getJumpsize(); ++i)
+        for(uint_fast32_t i=0; i<jumpsize; ++i)
         {
                              
             if(elem == nullptr) 
@@ -235,24 +244,25 @@ public:
     }
 
     
-    template<typename TRuntimeVariables,
+    template<typename TOffset,
              typename TComponent,
              typename TIndex,
              typename TContainer>
-    static
+    
     void 
     HDINLINE 
     first(TContainer* conPtrIn,
           TContainer*& conPtrOut, 
           TComponent*& compontPtr,
           TIndex& index, 
-          const TRuntimeVariables& run)
+          const TOffset& offset)
+    const
     {
          
         if(conPtrIn != nullptr)
         {
             compontPtr = conPtrIn->firstFrame;
-            for(uint i=0; i < run.getOffset(); ++i)
+            for(uint i=0; i < offset; ++i)
             {
                 if(compontPtr == nullptr) 
                 {
@@ -274,13 +284,14 @@ public:
             typename TComponent,
             typename TIndex,
             typename TContainer>
-    static
+    
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
-          const TIndex& index, 
-          const TRuntimeVariables& run)
+          const TIndex&, 
+          const TRuntimeVariables&)
+    const
     {
         return (compontPtr == nullptr) and (containerPtr == nullptr);
     }
@@ -307,17 +318,18 @@ public:
  */
     template<typename TIndex, 
              typename TContainer,  
-             typename TRuntimeVariables>
+             typename TJumpsize>
     HDINLINE
-    static
+    
     void 
     next(TContainer*& ptr, 
          typename traits::ComponentType<TContainer>::type*& elem,
          TIndex& index, 
-         const TRuntimeVariables& run)
+         const TJumpsize& jumpsize)
+    const
     {
 
-        for(size_t i=0; i<run.getJumpsize(); ++i)
+        for(size_t i=0; i<jumpsize; ++i)
         {
             
             if(elem == nullptr) 
@@ -330,25 +342,26 @@ public:
 
     }
     
-    template<typename TRuntimeVariables,
+    template<typename TOffset,
              typename TIndex,
              typename TComponent,
              typename TContainer>
-    static
+    
     void 
     HDINLINE 
     first(TContainer* conPtrIn,
           TContainer*& conPtrOut, 
           TComponent*& compontPtr,
           TIndex& index, 
-          const TRuntimeVariables& run)
+          const TOffset& offset)
+    const
     {
        
         if(conPtrIn != nullptr)
         {
 
             compontPtr = conPtrIn->lastFrame;
-            for(auto i=0; i < run.getOffset(); ++i)
+            for(auto i=0; i < offset; ++i)
             {
                 if(compontPtr != nullptr)
                     compontPtr = compontPtr ->previousFrame;
@@ -366,13 +379,14 @@ public:
             typename TComponent,
             typename TIndex,
             typename TContainer>
-    static
+    
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const componentPtr,
           const TIndex& index, 
           const TRuntimeVariables& run)
+    const
     {
         return (componentPtr == nullptr) and (containerPtr == nullptr);
     }

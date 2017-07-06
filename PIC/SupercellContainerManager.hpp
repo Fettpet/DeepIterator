@@ -62,7 +62,7 @@ struct SupercellContainerManager
         
         for(auto i=0; i<nbSupercells; ++i)
         {
-            supercellCPU[i] = Supercell(nbFramesSupercell[i], nbParticlesInLastFrame[i]);
+            supercellCPU[i] = Supercell(nbFramesSupercell[i], nbParticlesInLastFrame[i]);// << std::endl;;
             framePointerCPU[i] = new Frame*[nbFramesSupercell[i]];
             framePointerGPU[i] = new Frame*[nbFramesSupercell[i]];
 
@@ -73,8 +73,8 @@ struct SupercellContainerManager
                 framePointerCPU[i][j] = new Frame();
                 gpuErrchk(cudaMalloc(&framePointerGPU[i][j], sizeof(Frame)));
             }
-            
             framePointerCPU[i][0] = supercellCPU[i].firstFrame;
+            
             for(auto j=1; j<nbFramesSupercell[i]; ++j)
             {
                 framePointerCPU[i][j] = framePointerCPU[i][j-1]->nextFrame;

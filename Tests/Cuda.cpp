@@ -1,3 +1,4 @@
+
 /**
  * @author Sebastian Hahn < t.hahn@hzdr.de >
  * @brief Within this file we test the cuda implementation of the DeepIterator. 
@@ -18,16 +19,15 @@
 #include "DeepIterator.hpp"
 #include "View.hpp"
 #include "Definitions/hdinline.hpp"
-#include "Iterator/RuntimeTuple.hpp"
 
 typedef hzdr::Particle<int32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 256> Frame;
 typedef hzdr::SuperCell<Frame> Supercell;
 
-
-/**
- * @brief Within this test, we touch all particles within a Frame 
- */
+// 
+// /**
+//  * @brief Within this test, we touch all particles within a Frame 
+//  */
 BOOST_AUTO_TEST_CASE(PositionsInFrames)
 {
     Supercell* super;
@@ -35,22 +35,14 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     auto nbFrames = 5;
     callSupercellAddOne(&super, nbFrames, nbParticleInLastFrame);
     
-    const int jumpsizeParticle = 1;
-    const int offsetParticle = 0;
-    const int nbElementsParticle = nbParticleInLastFrame;
-    typedef hzdr::runtime::TupleFull RuntimeTuple;
-    
-    const RuntimeTuple runtimeVarParticle(offsetParticle, nbElementsParticle, jumpsizeParticle);
+
+
     
     
-    const int jumpsizeFrame = 1;
-    const int offsetFrame = 0;
-    const int nbElementsFrame = 0;
-    const RuntimeTuple runtimeFrame(offsetFrame, nbElementsFrame, jumpsizeFrame);
     
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None,RuntimeTuple> ParticleInFrame;
+    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None> ParticleInFrame;
     
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::CudaIndexable, RuntimeTuple, ParticleInFrame> view(super, runtimeFrame, ParticleInFrame(nullptr, runtimeVarParticle)); 
+    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::CudaIndexable, ParticleInFrame> view(super); 
     
     auto counter=0;
     auto it=view.begin();
@@ -70,20 +62,63 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 
 BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
 {
-    
+    typedef hzdr::View<Frame, 
+                       hzdr::Direction::Forward,  
+                       hzdr::Collectivity::None> ParticleInFrame;
+    typedef  hzdr::View<Supercell,
+                        hzdr::Direction::Forward,  
+                        hzdr::Collectivity::CudaIndexable, 
+                        ParticleInFrame> FrameInSupercellView;
+    typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+    typedef hzdr::View<SupercellContainer, 
+                       hzdr::Direction::Forward, 
+                       hzdr::Collectivity::None> ViewSupercellContainer;
+    const int nbSupercells = 3;
     Supercell** super;
-    std::vector<int> nbFrames{2,3,1};
-    std::vector<int> nbParticles{100,150,100};
-    callSupercellSquareAdd(&super, 3, nbFrames, nbParticles);
+    std::vector<int> nbFrames, nbParticles;
+    for(int i=0; i<nbSupercells; ++i)
+    {
+        nbFrames.push_back(4);
+        nbParticles.push_back(rand()%256);
+    }
+
+    callSupercellSquareAdd(&super, nbSupercells, nbFrames, nbParticles);
+    
+    // all first elements need to have the same number of elements
+    SupercellContainer supercellContainer(*super, nbSupercells);  
     
     
-    // I have supercells, and I need 
-    std::cout <<"Superzelle 1" << std::endl;
-    std::cout << *(super[0]);
+
+    ViewSupercellContainer viewSupercellContainer(supercellContainer);
     
-    std::cout <<"Superzelle 2" << std::endl;
-    std::cout << *(super[1]);
+    for(auto it=viewSupercellContainer.begin();
+        it != viewSupercellContainer.end();
+        ++it)
+    {
     
-    std::cout <<"Superzelle 3" << std::endl;
-     std::cout << *(super[2]);
+        
+        FrameInSupercellView view(**it);
+        const auto value = (**(view.begin())).data[1];
+        
+        for(auto itElem=view.begin(); itElem != view.end(); ++itElem)
+        {
+            if(*itElem)
+            {
+                BOOST_TEST( (**itElem).data[1] == value);
+            }
+        }
+    }
+//     
+// 
+//     
+//     
+//     // I have supercells, and I need 
+// //     std::cout <<"Superzelle 1" << std::endl;
+// //     std::cout << *(super[0]);
+// //     
+// //     std::cout <<"Superzelle 2" << std::endl;
+// //     std::cout << *(super[1]);
+// //     
+// //     std::cout <<"Superzelle 3" << std::endl;
+// //      std::cout << *(super[2]);
 }

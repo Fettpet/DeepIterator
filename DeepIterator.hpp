@@ -1,44 +1,45 @@
 /**
+ * \class DeepIterator
  * @author Sebastian Hahn (t.hahn@hzdr.de )
+ * 
  * @brief The DeepIterator class is used to iterator over interleaved data 
- * structures. The simplest example is for an interleaved data structure is 
+ * structures. The simplest example for an interleaved data structure is 
  * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
- * within the structure. Inside the deepiterator are four variables. These are
+ * within the structure. 
+ * 
+ * Inside the deepiterator are three variables. These are
  * importent for the templates. These Variables are:
  * 1. componentPtr: represent is a pointer to the current component
  * 2. containerPtr: is the pointer to the container, given by the constructor
  * 3. index: the current element index within the container
- * 4. runtimevariables: some runtime variables
- * Inside the deepiterator there are no checks wheter the values are valid. This
- * is done in the templates.
  * 
- * # Template Parameter {#section1}
- * The iterator has a list of template:
- * 1. \b TContainer : This one describes the container, over wich elements you 
- * would like to iterate. This Templeate need has some Conditions: I. The Trait 
- * \b IsIndexable need a shape for TContainer. This traits, says wheter 
+ * 
+ * @tparam TContainer : This one describes the container, over whose elements you 
+ * would like to iterate. This templeate has some conditions: I. The trait 
+ * IsIndexable need a specialication for TContainer. This traits, says wheter 
  * TContainer is array like (has []-operator overloaded) or list like; II. The
- * trait \b ComponentType has a specialication for TContainer. This trait gives the type
- * of the components of TContainer; III. The Funktion \b NeedRuntimeSize<TContainer>
- * need to be specified \see NeedRuntimeSize.
- * 2. \b TAccessor The accessor descripe the access to the components of TContainer.
+ * trait ComponentType has a specialication for TContainer. This trait gives the type
+ * of the components of TContainer; III. The function \b NeedRuntimeSize<TContainer>
+ * need to be specified. For more details see NeedRuntimeSize.hpp ComponentType.hpp IsIndexable.hpp
+ * @tparam TAccessor The accessor descripe the access to the components of TContainer.
  * The Accessor need a get Function: 
- * static TComponent* Accessor::get(TContainer* , 
+ * static TComponent* accessor.get(TContainer* , 
                                     TComponent*, 
                                     const TIndex&,
                                     const RuntimeVariables&)
  * The function get returns a pointer to the current component. We have 
- * implementeted an Accessor \see Iterator/Accessor.hpp
- * 3. \b TNavigator The navigator describe the way to walk through the data. This
- * policy need three functions specified. The first function is the first 
- * function which gives an entry point in the container:
+ * implementeted an Accessor.
+   @tparam TNavigator The navigator describe the way to walk through the data. This
+ * policy need three functions specified. The first function gives an entry
+   point in the container:
  * static void first(TContainer* conPtrIn, 
                      TContainer*& conPtrOut, 
                      TComponent*& compontPtrOut,
                      TIndex& indexOut, 
-                     const TRuntimeVariables& runIn)
- * The function has two input parameter (conPtrIn and runIn), the first is a pointer 
- * to the container given by the constructor and the second is a runtime tupel. 
+                     const TOffset& offset)
+ * The function has two input parameter (conPtrIn and offset), the first is a pointer 
+ * to the container given by the constructor and the second is the number of elements
+ which are overjump by the navigator.
  * The other three paramter are output parameter. They are not given to the 
  * Accessor, so be sure, there are no conflict. 
  * The second function is the next function. These function goes to the next element
@@ -58,27 +59,34 @@
           TComponent const * const compontPtr,
           const TIndex& index, 
           const TRuntimeVariables& run);
- We have implemented a navigator \see Navigator.hpp
- 4. \b TWrapper The wrapper decides whether ein component is valid, or not. An 
+ We have implemented a navigator. For more details Navigator
+ @tparam TWrapper The wrapper decides whether a component is valid, or not. An 
  object is valid if it is part of the container. Otherwise it is not valid. This
  is importent for collective mutlithread programs. Some threads could have an 
  valid component, others havnt. Since all threads are collectiv, it could end in
  a dead look, since some threads are in the loop, others are not. A wrapper has 
  a constructor, an overloaded bool operator and an overloaded * operator. We 
  begin with the constructor. The constructor has five parameter: The first is 
- the result of the Accessor::get. The other four are the variables of the deep -
+ the result of the accessor.get. The other four are the variables of the deep -
  iterator:
- Wrapper(Accessor::get(containerPtr, componentPtr, index, runtimeVariables),
+ Wrapper(accessor.get(containerPtr, componentPtr, index, runtimeVariables),
          containerPtr, 
          componentPtr, 
          index, 
          runtimeVariables)
  The second function, the operator bool, is needed to check whether the value is
- valid. The operator* gives the elemnt.
- 5. \b TCollective The collective policy consists of a synchronisation function.
- The function has the header:    
- void sync();
- 6. \b Child The child is the template parameter to realize nested structures. 
+ valid. The operator* gives the elemnt. For more details see Wrapper
+ @tparam TCollective The collective policy does the stuff for parallel execution
+ of the Iterator. It defines an offset, a jumpsize and a synchronication function.
+ The offset is the distance from the first element within the container to the 
+ first element of the iterator. The jumpsize is the distance between two elements
+ of the iterator.
+ The functions have the headers:    
+ void sync(); // the function for synchronication
+ uint_fast32_t offset() const; // the offset
+ uint_fast32_t jumpsize() const; // the jumpsize
+ 
+ @tparam TChild The child is the template parameter to realize nested structures. 
  This template has several requirements: 
     1. it need to spezify an Iterator type. These type need operator++,  operator*,
         operator=, operator!= and a default constructor.
@@ -87,13 +95,14 @@
        have the same type as the operator= of the iterator. The result of the 
        end function must have the same type as the operator!= of the iterator.
     4. default constructor
-    5. constructor with childtype and containertype as variables
-    6. refresh(componentType*): for nested datastructures we start to iterate in
+    5. copy constructor
+    6. constructor with childtype and containertype as variables
+    7. refresh(componentType*): for nested datastructures we start to iterate in
     deeper layers. After the end is reached, in this layers, we need to go to the
     next element in the current layer. Therefore we had an new component. This 
     component is given to the child.
- To use the Child we recommed the View \see View.hpp
- # Usage {#section2}
+ To use the Child we recommed the View.
+ # Usage {#sectionD2}
  The first step to use the iterator is to define it. The template parameter are
  described above. After that you construct an instant of the iterator. To do this
  there are two constructors, one if you had a child and the second if you doesn't 
@@ -112,6 +121,8 @@
  2. operator!=(const deepIterator&): we compare the values of the variables 
  componenttype, index and containertype. If all of these are equal to the other
  instance of the iterator, the end is reached.
+ \see Wrapper \see View \see Navigator \see Accessor \see Collectivity 
+ \see IsIndexable \see NumberElements \see MaxElements
  */
 #include <sstream>
 #pragma once
@@ -120,14 +131,12 @@
 #include "PIC/Supercell.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Collective.hpp"
-#include "Traits/NeedRuntimeSize.hpp"
 #include <boost/iterator/iterator_concepts.hpp>
 #include "Iterator/Wrapper.hpp"
 #include <limits>
 #include <cassert>
 #include <type_traits>
 #include "Traits/NumberElements.hpp"
-#include "Traits/IteratorType.hpp"
 #include "Traits/Componenttype.hpp"
 #include "Definitions/hdinline.hpp"
 
@@ -143,7 +152,6 @@ template<typename TContainer,
          typename TAccessor, 
          typename TNavigator, 
          typename TCollective, 
-         typename TRuntimeVariables,
          typename TWrapper,
          typename TChild,
          typename TEnable = void>
@@ -160,13 +168,11 @@ template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
         typename TWrapper,
-        typename TRuntimeVariables,
         typename TCollective>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator,
                     TCollective, 
-                    TRuntimeVariables,
                     TWrapper,
                     hzdr::NoChild,
                     void>
@@ -183,7 +189,7 @@ public:
     typedef TCollective                                                 Collecter;
     typedef TWrapper                                                    WrapperType;
 // functions 
-//    static_assert(std::is_same<typename TAccessor::ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
+//    static_assert(std::is_same<typename Taccessor.ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
 public:
 
 /**
@@ -199,13 +205,10 @@ public:
     {}
 
     HDINLINE
-    DeepIterator(ContainerType* _ptr, 
-                 const TRuntimeVariables& runtimeVariables
-                ):
-        runtimeVariables(runtimeVariables)
+    DeepIterator(ContainerType* _ptr)
     {
 
-        Navigator::first(_ptr, containerPtr, componentPtr, index, runtimeVariables);
+        navigator.first(_ptr, containerPtr, componentPtr, index, coll.offset());
         coll.sync();
     }
     
@@ -223,7 +226,7 @@ public:
         coll.sync();
 //        if(coll.isMover())
 //        {
-            Navigator::next(containerPtr, componentPtr, index, runtimeVariables);
+            navigator.next(containerPtr, componentPtr, index, coll.nbThreads());
 //         }
         coll.sync();
 
@@ -236,8 +239,8 @@ public:
     {
 
 
-        return WrapperType(Accessor::get(containerPtr, componentPtr, index, runtimeVariables),
-                        containerPtr, componentPtr, index, runtimeVariables);
+        return WrapperType(accessor.get(containerPtr, componentPtr, index),
+                        containerPtr, componentPtr, index);
     }
     
     template<typename TIndex>
@@ -275,7 +278,15 @@ public:
     operator!=(nullptr_t)
     const
     {
-         return not Navigator::isEnd(containerPtr, componentPtr, index, runtimeVariables);
+         return not navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
+    }
+    
+    HDINLINE    
+    bool
+    operator==(nullptr_t)
+    const
+    {
+         return navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
     }
     
 protected:
@@ -283,7 +294,8 @@ protected:
     ComponentType* componentPtr = nullptr; 
     ContainerType* containerPtr = nullptr;
     int_fast32_t index = std::numeric_limits<int_fast32_t>::min();
-    TRuntimeVariables runtimeVariables;
+    Navigator navigator;
+    Accessor accessor;
 private:
 }; // struct DeepIterator
 
@@ -300,14 +312,12 @@ template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
         typename TCollective,
-        typename TRuntimeVariables,
         typename TChild,
         typename TWrapper>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator, 
                     TCollective, 
-                    TRuntimeVariables,
                     TWrapper,
                     TChild,
                     typename std::enable_if<not std::is_same<TChild, hzdr::NoChild>::value>::type >
@@ -324,16 +334,11 @@ public:
     typedef TNavigator                                                  Navigator;
     typedef TCollective                                                 Collecter;
 
-    typedef traits::NeedRuntimeSize<ContainerType>                      RuntimeSize;
 // child things
     typedef TChild                                                      ChildView;
-    typedef typename ChildView::Iterator ChildIterator;
+    typedef typename ChildView::Iterator                                ChildIterator;
     typedef typename ChildView::WrapperType                             WrapperType;
 
-    // tests
-  //  static_assert(std::is_same<typename TAccessor::ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
-    
-    // functions
     
 public:
 
@@ -341,27 +346,7 @@ public:
  * @brief creates an virtual iterator. This one is used to specify a last element
  * @param nbElems number of elements within the datastructure
  */
-    HDINLINE
-    DeepIterator(nullptr_t, 
-                 const int_fast32_t& nbElems
-    )
-    {}
-    
-    HDINLINE
-    DeepIterator()
-        {}
-    HDINLINE
-    DeepIterator(ContainerType* _ptr)
-    {
-//         if(coll.isMover())
-//         {
-                    
-            Navigator::first(_ptr, containerPtr, index, runtimeVariables);
 
-//         }
-        coll.sync();
-        
-    }
     
     template<typename TIndex>
     HDINLINE 
@@ -376,19 +361,13 @@ public:
     }
     
     HDINLINE
-    DeepIterator(ContainerType* ptr2, 
-                 TRuntimeVariables runtimeVariables,
-                 ChildView view):
-                 runtimeVariables(runtimeVariables)
+    DeepIterator(ContainerType* ptr2)
     {
 
-//        if(coll.isMover())
-//        {
-            Navigator::first(ptr2, containerPtr, componentPtr, index, runtimeVariables);
+        navigator.first(ptr2, containerPtr, componentPtr, index, coll.offset());
+        childView = ChildView(accessor.get(containerPtr, componentPtr, index));
         coll.sync();
- //       }
 
-        childView.refresh(Accessor::get(containerPtr, componentPtr, index, runtimeVariables));
         childIter = childView.begin();
     }
     
@@ -399,18 +378,16 @@ public:
     DeepIterator&
     operator++()
     {
-   //     if(coll.isMover())
-   //     {
 
-             ++childIter;
-            if(not (childIter != childView.end()))
-            {
-                Navigator::next(containerPtr, componentPtr, index, runtimeVariables);
-                childView.refresh(Accessor::get(containerPtr, componentPtr, index, runtimeVariables));
-                childIter = childView.begin();
-            }
-                
-    //    }
+
+        ++childIter;
+        if(not (childIter != childView.end()))
+        {
+            navigator.next(containerPtr, componentPtr, index, coll.nbThreads());
+            childView = ChildView(accessor.get(containerPtr, componentPtr, index));
+            childIter = childView.begin();
+        }
+
         coll.sync();
         return *this;
     }
@@ -419,8 +396,7 @@ public:
     WrapperType
     operator*()
     {
-      //  auto t = Accessor::get(componentPtr, index);
-//        std::cout << "ChildIter" << std::endl;
+
         return *childIter;
     }
     
@@ -442,7 +418,7 @@ public:
     const
     {
         
-        return not Navigator::isEnd(containerPtr, componentPtr, index, runtimeVariables);
+        return not navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
     }
     
 
@@ -454,8 +430,8 @@ protected:
     ComponentType* componentPtr= nullptr;
     ChildView childView;
     ChildIterator childIter;
-    TRuntimeVariables runtimeVariables;
-    
+    Navigator navigator;
+       Accessor accessor;
 private:
 
 }; // struct DeepIterator

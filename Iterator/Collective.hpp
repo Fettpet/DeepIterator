@@ -3,11 +3,19 @@
 #endif
 #include "Definitions/hdinline.hpp"
 /**
- * @brief The Collectiv policy needs two functions: 
- * 1. bool isMover() specifies the worker which moves the current element within
- * the iterator to the next one. 
- * 2. void sync() After the move all worker must be synchronised
+ * \namespace Collectivity
+ * @author Sebastian Hahn < t.hahn @ hzdr.de >
  * 
+ * @brief The collectivity is used to design the parallel stuff. It need to provide
+ * three functions: An offset, a jumpsize and a synchonization function. 
+ * 
+ * The offset is used to specfiy the first component, within the container. Each thread
+ * should have an unique offset. The offset should be smaller than the number of 
+ * threads. The jumpsize should be the number of threads.
+ * The heads of the collectivity functions are:
+ * 1. void sync() After the move all worker must be synchronised
+ * 2. uint_fast32_t offset(): returns the id of the thread within a warp
+ * 3. uint_fast32_t nbThreads(): number of threads within a warp
  */
 
 #pragma once
@@ -16,67 +24,47 @@ namespace hzdr
 namespace Collectivity
 {
 /**
- * @brief The iterator doesn't 
+ * @brief The None collectivity is used in a sequenciel application. The offset 
+ * is zero. The number of threads are 1. The sync function is empty.
  * */
 struct None
 {
-    HDINLINE
-    constexpr 
-    bool 
-    isMover()
-    const
-    {
-        return true;
-    }
-    
+
     HDINLINE 
     void 
     sync()
+    const
     {}
     
-    
-};
-#ifdef _OPENMP
-struct OpenMPNotIndexable
-{
     HDINLINE
-    bool 
-    isMover()
-    {
-        return true;
-    }
-    
-    HDINLINE 
-    void 
-    sync()
-    {
-#pragma omp barrier 
-    }
-    
-};
-
-
-struct OpenMPIndexable
-{
-    constexpr 
-    bool 
-    isMover()
+    constexpr
+    uint_fast32_t
+    offset()
     const
     {
-        return true;
+        return 0;
     }
     
-    HDINLINE 
-    void 
-    sync()
+    HDINLINE
+    constexpr
+    uint_fast32_t
+    nbThreads()
+    const
     {
-//#pragma omp barrier 
+        return 1;
     }
     
 };
-#endif
 
 
+/**
+ * @brief The CudaIndexable is used for a implementation on GPU with Cuda.
+ * 
+ * The CudaIndexable use only the thread level and only the x dimension. Because
+ * of problems with the compiler, you need to specify each function two times. 
+ * The first one is within an #ifdef __CUDACC__. These are functions for the GPU.
+ * The second implementation is for the CPU.
+ */
 
 struct CudaIndexable
 {
@@ -88,12 +76,21 @@ struct CudaIndexable
         __syncthreads();
     }
     
+    
     __device__
-    void 
-    allocSharedMem(int**& sharedMem, int* globalMem)
+    uint_fast32_t
+    offset()
+    const
     {
-        __shared__ int* arr[1];
-        sharedMem=arr;
+        return threadIdx.x;
+    }
+    
+    __device__
+    uint_fast32_t
+    nbThreads()
+    const
+    {
+        return blockDim.x;
     }
 #else
     HDINLINE
@@ -102,24 +99,25 @@ struct CudaIndexable
     {
 
     }
+
+    HDINLINE
+    uint_fast32_t
+    offset()
+    const
+    {
+        return 0;
+    }
     
     HDINLINE
-    void 
-    allocSharedMem(int**& , int* )
+    uint_fast32_t
+    nbThreads()
+    const
     {
+        return 1;
     }
-
-    
 #endif
     
 
-    
-    HDINLINE
-    bool
-    isMover(int ID)
-    {
-        return ID == 0;
-    }
 };
 
 }// namespace Collectiv

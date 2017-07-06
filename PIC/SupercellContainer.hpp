@@ -19,11 +19,12 @@ public:
     template<typename TIndex>
     HDINLINE
     SupercellContainer(SuperCellPtr supercell,
-                       const TIndex nbSupercells):
-        nbSupercells(nbSupercells)
+                       const TIndex& nbSupercells):
+        nbSupercells(nbSupercells),
+        supercells(new SuperCellPtr[nbSupercells])
     {
-        supercells = new SuperCellPtr[nbSupercells];
-        for(TIndex i=0;i<nbSupercells; ++i)
+
+        for(uint_fast32_t i=0;i<nbSupercells; ++i)
         {
             supercells[i] = &(supercell[i]);
         }
@@ -47,10 +48,6 @@ public:
     HDINLINE
     ~SupercellContainer()
     {
-        for(uint_fast32_t i=0; i<nbSupercells; ++i)
-        {
-            delete supercells[i];
-        }
     }
     
     
@@ -73,8 +70,15 @@ public:
         return *(supercells[pos]);
     }
     
+    HDINLINE
+    uint_fast32_t
+    getNbSupercells()
+    const
+    {
+        return nbSupercells;
+    }
 protected:
-    int nbSupercells;
+    uint_fast32_t nbSupercells;
     SuperCellPtr* supercells;
 }; // struct SupercellContainer
 }// namespace hzdr

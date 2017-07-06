@@ -1,7 +1,8 @@
 /**
- * @author Sebastian Hahn (t.hahn<at>hzdr) 
+ * \struct IsIndexable
+ * @author Sebastian Hahn (t.hahn < at > hzdr) 
  * @brief The function of this trait is to decide wheter a container is random 
- * accessable. A container is random accessable if it has the operator[] overloaded
+ * accessable. A container is random accessable if it has the operator[] overloaded.
  * 
  */
 

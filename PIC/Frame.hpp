@@ -1,4 +1,5 @@
 /**
+ * \struct Frame
  * @author Sebastian Hahn (t.hahn@hzdr.de)
  * @brief A PIConGPU like datastructure. It represent the frame in PIC. We use
  * a std::array to store some Particles. Both, the particle type and the number
@@ -15,20 +16,37 @@ namespace hzdr
 {
 template<
     typename TParticle,
-    int_fast32_t nbParticles>
+    int_fast32_t maxParticles>
 struct Frame
 {
     typedef TParticle                           ValueType;
     typedef TParticle                           ParticleType;
     typedef ParticleType*                       ParticlePointer;
     typedef ParticleType&                       ParticleReference;
-    typedef Frame<TParticle, nbParticles>       FrameType;
+    typedef Frame<TParticle, maxParticles>      FrameType;
     
     constexpr static int_fast32_t Dim = TParticle::Dim;
-    constexpr static int_fast32_t nbParticleInFrame = nbParticles;
+    constexpr static int_fast32_t maxParticlesInFrame = maxParticles;
     
     HDINLINE
     Frame():
+        
+        nextFrame(nullptr), previousFrame(nullptr),
+        nbParticlesInFrame(maxParticles)
+    {
+        static int_fast32_t value{0};
+        for(auto &par: particles)
+        {
+           for(int_fast32_t i=0; i<Dim; ++i)
+           {
+               par.data[i] = value++;
+           }
+        }
+    }
+    
+    HDINLINE
+    Frame(const uint_fast32_t& nbParticles):
+        nbParticlesInFrame(nbParticles),
         nextFrame(nullptr), previousFrame(nullptr)
     {
         static int_fast32_t value{0};
@@ -39,7 +57,6 @@ struct Frame
                par.data[i] = value++;
            }
         }
-        
     }
     
     template<typename TIndex>
@@ -77,19 +94,20 @@ struct Frame
         particles = other.particles;
     }
     
-    TParticle particles[nbParticles];
+    TParticle particles[maxParticles];
 
     FrameType *nextFrame, *previousFrame;
+    uint_fast32_t nbParticlesInFrame;
 }; // struct Frame
+
 
 template<
     typename TParticle,
-    int_fast32_t nbParticles>
-
-std::ostream& operator<<(std::ostream& out, const Frame<TParticle, nbParticles>& f)
+    int_fast32_t maxParticles>
+std::ostream& operator<<(std::ostream& out, const Frame<TParticle, maxParticles>& f)
 {
     out << "[";
-    for(int_fast32_t i=0; i< nbParticles; ++i)
+    for(uint_fast32_t i=0; i< maxParticles; ++i)
     {
         out << f.particles[i] << ", ";
     }

@@ -24,19 +24,66 @@ struct SuperCell
     HDINLINE 
     SuperCell():
         firstFrame(nullptr),
-        lastFrame(nullptr),
-        nbParticlesInLastFrame(0)
+        lastFrame(nullptr)
     {}
     
-    SuperCell& operator=(const SuperCell&) = default;
+    HDINLINE 
+    SuperCell(const SuperCell & other)
+    {
+        firstFrame = other.firstFrame;
+        lastFrame = other.lastFrame;
+    }
+    
+    HDINLINE 
+    SuperCell( SuperCell && other)
+    {
+        firstFrame = other.firstFrame;
+        lastFrame = other.lastFrame;
+        other.firstFrame = nullptr;
+        other.lastFrame = nullptr;
+    }
+    
+    HDINLINE
+    ~SuperCell() 
+    {
+//         TFrame* cur = firstFrame;
+//         while(cur != nullptr)
+//         {
+//             TFrame* buffer = cur->nextFrame;
+//             delete cur;
+//             cur = buffer;
+//         }
+    }
+    
+    HDINLINE
+    SuperCell& 
+    operator=(const SuperCell& other)
+    {
+        firstFrame = other.firstFrame;
+        lastFrame = other.lastFrame;
+        return *this;
+    }
+    
+        
+    HDINLINE
+    SuperCell& 
+    operator=( SuperCell&& other)
+    {
+        
+        firstFrame = other.firstFrame;
+        lastFrame = other.lastFrame;
+        other.firstFrame = nullptr;
+        other.lastFrame = nullptr;
+        return *this;
+    }
+    
     /**
      * @param nbFrames: number of frames within the supercell,
      * @param nbParticle number of particles in the last frame
      */
     HDINLINE
     SuperCell(uint32_t nbFrames, uint32_t nbParticles):
-        firstFrame(new TFrame()),
-        nbParticlesInLastFrame(nbParticles)
+        firstFrame(new TFrame())
     {
         TFrame *curFrame;
         curFrame = firstFrame;
@@ -46,10 +93,10 @@ struct SuperCell
             curFrame->nextFrame->previousFrame = curFrame;
             curFrame = curFrame->nextFrame;
         }
-        
+        curFrame->nbParticlesInFrame = nbParticles;
         lastFrame = curFrame;
         
-        for(uint32_t i=nbParticles; i<TFrame::nbParticleInFrame; ++i)
+        for(uint32_t i=nbParticles; i<TFrame::maxParticlesInFrame; ++i)
         {
             for(uint32_t dim=0; dim < TFrame::Dim; ++dim)
                 lastFrame->particles[i].data[dim] = -1;
@@ -58,7 +105,7 @@ struct SuperCell
     }
     
     TFrame *firstFrame, *lastFrame;
-    uint32_t nbParticlesInLastFrame;
+ //   uint32_t nbParticlesInLastFrame;
 }; // struct SuperCell
 
 template<typename TFrame>

@@ -1,14 +1,23 @@
 /**
+ * \struct Accessor
+ * 
  * @author Sebastian Hahn (t.hahn[at]hzdr.de) 
+ * 
  * @brief The accessor handle the access to a value. It is a policy in the 
- * DeepIterator. We had a trait called \see hzdr::traits::isIndexable. It has the
- * condition that the datastructure has operator [] overloaded. If the condition
+ * DeepIterator. 
+ * 
+ * We had a trait called IsIndexable. It has the condition that the datastructure 
+ * has operator [] overloaded. If the condition
  * is satisfied, you doesnt need to implement an own Accessor. In other cases, 
- * you need to write one. 
+ * you need to write one.
  * The accessor has a function 
- * C* get( T*). T is the input datatype and is the output datatype. You need to 
+ * <b>C* get( T*).</b> T is the input datatype and is the output datatype. You need to 
  * declare C as ReturnType. i.e 
- * typedef C ReturnType;
+ * <b>typedef C ReturnType;</b>
+ * 
+ * @tparam TContainer The container over which you like to iterate. 
+ * 
+ * @tparam SFIANE Used intern for sfiane.
  */
 
 #pragma once
@@ -22,31 +31,34 @@ namespace hzdr
 {
 class Indexable;
      
-template<typename TData,
+template<typename TContainer,
         typename SFIANE = void>
 struct Accessor;
 
-template<typename TData >
-struct Accessor<TData, typename std::enable_if<traits::IsIndexable<TData>::value>::type> 
+/**
+ * @brief This specialication implements the case, that the Container is indexable.
+ * @tparam The container over which you like to iterate. 
+ */
+template<typename TContainer >
+struct Accessor<TContainer, typename std::enable_if<traits::IsIndexable<TContainer>::value>::type> 
 {
 
     
-    template<typename TContainer, 
-             typename TComponent,
-             typename TIndex, 
-             typename TRuntime>
+    template<typename TComponent,
+             typename TIndex>
     HDINLINE
-    static
     auto 
     get(TContainer* containerPtr, 
         TComponent* componentenPtr, 
-        const TIndex& pos, 
-        const TRuntime& runtimeVariables)
+        const TIndex& pos)
+    const
     -> TComponent*
+    
     {
-        const auto nbElem = traits::NeedRuntimeSize<TContainer>::test(containerPtr) * runtimeVariables.getNbElements() 
-                          + (1 - traits::NeedRuntimeSize<TContainer>::test(containerPtr)) * traits::NumberElements<TContainer>::value;
-        if(pos < nbElem && pos >= 0)
+        typedef traits::NumberElements< TContainer> NbElem;
+        NbElem nbElem;        
+
+        if(pos < nbElem.size(*containerPtr) && pos >= 0)
         {
             return &((*containerPtr)[pos]); 
         }
@@ -60,7 +72,10 @@ struct Accessor<TData, typename std::enable_if<traits::IsIndexable<TData>::value
 
 
 
-
+/**
+ * @brief Frames in supercells are not indexable. This specialication implements
+ * the access to a frame within a supercell
+ */
 template<typename TFrame>
 struct Accessor<SuperCell<TFrame>, void >
 {
@@ -72,12 +87,11 @@ struct Accessor<SuperCell<TFrame>, void >
 
     template<typename TContainer, 
              typename TComponent,
-             typename TIndex, 
-             typename TRuntimeVariables>
+             typename TIndex>
     HDINLINE
-    static
     auto 
-    get(TContainer* con, TComponent* com, const TIndex& pos, const TRuntimeVariables& runtime)
+    get(TContainer* con, TComponent* com, const TIndex& pos)
+    const
     -> TComponent*
     {
         return com;
