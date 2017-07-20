@@ -151,7 +151,6 @@ namespace hzdr
 template<typename TContainer, 
          typename TAccessor, 
          typename TNavigator, 
-         typename TCollective, 
          typename TWrapper,
          typename TChild,
          typename TEnable = void>
@@ -167,12 +166,10 @@ struct DeepIterator;
 template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
-        typename TWrapper,
-        typename TCollective>
+        typename TWrapper>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator,
-                    TCollective, 
                     TWrapper,
                     hzdr::NoChild,
                     void>
@@ -186,7 +183,6 @@ public:
     typedef ComponentType                                               ReturnType;
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
-    typedef TCollective                                                 Collecter;
     typedef TWrapper                                                    WrapperType;
 // functions 
 //    static_assert(std::is_same<typename Taccessor.ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
@@ -205,11 +201,10 @@ public:
     {}
 
     HDINLINE
-    DeepIterator(ContainerType* _ptr)
+    DeepIterator(ContainerType* _ptr, const uint_fast32_t& offset)
     {
 
-        navigator.first(_ptr, containerPtr, componentPtr, index, coll.offset());
-        coll.sync();
+        navigator.first(_ptr, containerPtr, componentPtr, index,  offset);
     }
     
     HDINLINE DeepIterator(const DeepIterator&) = default;
@@ -223,12 +218,9 @@ public:
     operator++()
     {
 
-        coll.sync();
-//        if(coll.isMover())
-//        {
-            navigator.next(containerPtr, componentPtr, index, coll.nbThreads());
-//         }
-        coll.sync();
+
+        navigator.next(containerPtr, componentPtr, index);
+
 
         return *this;
     }
@@ -278,7 +270,7 @@ public:
     operator!=(nullptr_t)
     const
     {
-         return not navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
+         return not navigator.isEnd(containerPtr, componentPtr, index);
     }
     
     HDINLINE    
@@ -286,11 +278,10 @@ public:
     operator==(nullptr_t)
     const
     {
-         return navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
+         return navigator.isEnd(containerPtr, componentPtr, index);
     }
     
-protected:
-    Collecter coll;
+// protected:
     ComponentType* componentPtr = nullptr; 
     ContainerType* containerPtr = nullptr;
     int_fast32_t index = std::numeric_limits<int_fast32_t>::min();
@@ -311,13 +302,11 @@ private:
 template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
-        typename TCollective,
         typename TChild,
         typename TWrapper>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator, 
-                    TCollective, 
                     TWrapper,
                     TChild,
                     typename std::enable_if<not std::is_same<TChild, hzdr::NoChild>::value>::type >
@@ -332,7 +321,6 @@ public:
     typedef ComponentType&                                              ComponentReference;
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
-    typedef TCollective                                                 Collecter;
 
 // child things
     typedef TChild                                                      ChildView;
@@ -361,12 +349,21 @@ public:
     }
     
     HDINLINE
-    DeepIterator(ContainerType* ptr2)
+    DeepIterator(ContainerType* ptr2, const uint_fast32_t& offset)
     {
 
-        navigator.first(ptr2, containerPtr, componentPtr, index, coll.offset());
+        navigator.first(ptr2, containerPtr, componentPtr, index, offset);
         childView = ChildView(accessor.get(containerPtr, componentPtr, index));
-        coll.sync();
+
+        childIter = childView.begin();
+    }
+    
+        HDINLINE
+    DeepIterator(ContainerType* ptr2, const ChildView& child,const uint_fast32_t& offset)
+    {
+
+        navigator.first(ptr2, containerPtr, componentPtr, index, offset);
+        childView = ChildView(child, accessor.get(containerPtr, componentPtr, index));
 
         childIter = childView.begin();
     }
@@ -383,12 +380,11 @@ public:
         ++childIter;
         if(not (childIter != childView.end()))
         {
-            navigator.next(containerPtr, componentPtr, index, coll.nbThreads());
-            childView = ChildView(accessor.get(containerPtr, componentPtr, index));
+            navigator.next(containerPtr, componentPtr, index);
+            childView = ChildView(childView, accessor.get(containerPtr, componentPtr, index));
             childIter = childView.begin();
         }
 
-        coll.sync();
         return *this;
     }
     
@@ -418,20 +414,19 @@ public:
     const
     {
         
-        return not navigator.isEnd(containerPtr, componentPtr, index, coll.nbThreads());
+        return not navigator.isEnd(containerPtr, componentPtr, index);
     }
     
 
 
-protected:
-    Collecter coll;
+// protected:
     TContainer* containerPtr = nullptr;
     int_fast32_t index;
     ComponentType* componentPtr= nullptr;
     ChildView childView;
     ChildIterator childIter;
     Navigator navigator;
-       Accessor accessor;
+    Accessor accessor;
 private:
 
 }; // struct DeepIterator

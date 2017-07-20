@@ -19,18 +19,17 @@ FrameInSuperCell(Supercell *supercell, const int nbParticleInLastFrame)
     
     
 
-    
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::CudaIndexable> ParticleInFrame;
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, ParticleInFrame> view(supercell); 
-    
-     auto it=view.begin();
-
-     for(auto it=view.begin(); it!=view.end(); ++it)
+    const auto offset = threadIdx.x;
+    typedef hzdr::View<Frame, hzdr::Direction::Forward<256>> ParticleInFrame;
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> view(supercell, ParticleInFrame(offset)); 
+    auto it=view.begin();
+    printf("Offset %i\n", it.childIter.index);
+     for(; it!=view.end(); ++it)
      {
          if(*it)
          {
              (**it).data[0] += 1;
-        }
+         }
      }
 }
 
@@ -48,6 +47,7 @@ callSupercellAddOne(Supercell** supercell, int Frames, int nbParticleInFrame)
     gpuErrchk( cudaDeviceSynchronize() );
     gpuErrchk( cudaPeekAtLastError() );
     supercellHandler.copyDeviceToHost();
+
     *supercell = new Supercell(*(supercellHandler.supercellCPU));
 
 }
@@ -65,14 +65,11 @@ addAllParticlesInSupercell(Supercell *supercell, const int nbSupercells)
     typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
     typedef typename Supercell::FrameType Frame;
     typedef hzdr::View<SupercellContainer, 
-                       hzdr::Direction::Forward, 
-                       hzdr::Collectivity::None> ViewSupercellContainer;
+                       hzdr::Direction::Forward<1> > ViewSupercellContainer;
     typedef hzdr::View<Frame, 
-                       hzdr::Direction::Forward,  
-                       hzdr::Collectivity::None> ParticleInFrame;
+                       hzdr::Direction::Forward<1> > ParticleInFrame;
     typedef  hzdr::View<Supercell,
-                        hzdr::Direction::Forward,  
-                        hzdr::Collectivity::CudaIndexable, 
+                        hzdr::Direction::Forward<256>,  
                         ParticleInFrame> ParticleInSupercellView;
     // define shared variables
     __shared__ int32_t mem[256];

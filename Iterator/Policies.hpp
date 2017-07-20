@@ -21,8 +21,39 @@ namespace hzdr
  * 
  * \see Navigator
  */
-enum class Direction {Forward, Backward};
 
+namespace Direction
+{
+template<uint_fast32_t jumpsize>
+struct Forward 
+{
+    static_assert(jumpsize != 0, "Jumpsize need to be greater than 0");
+    
+    constexpr
+    uint_fast32_t 
+    getJumpsize()
+    const
+    {
+        return jumpsize;
+    }
+};
+
+template<uint_fast32_t jumpsize>
+struct Backward
+{
+    static_assert(jumpsize != 0, "Jumpsize need to be greater than 0");
+    
+    constexpr
+    uint_fast32_t 
+    getJumpsize()
+    const
+    {
+        return jumpsize;
+    }
+};
+
+    
+}
 
 /**
  * @brief The NoChild is used to define the last layer in a nested Iterator

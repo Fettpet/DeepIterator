@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
 
     // over each element                          
 
-    hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::None> con(&test1);
+    hzdr::View<Particle, hzdr::Direction::Forward<1>> con(&test1);
     auto it = con.begin();
     auto itTest = it+1;
     auto wrap = *it;
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrameNotCollectiv)
  *@brief 2. test: Backward 
    */   
 
-    hzdr::View<Particle, hzdr::Direction::Backward,  hzdr::Collectivity::None> con2(&test1);
+    hzdr::View<Particle, hzdr::Direction::Backward<1> > con2(&test1);
     auto it2 = con2.begin();
     BOOST_TEST(*(*it2) == 4);
 
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     ********************/
 
     // the 2 is the number of elements in Last Frame
-    hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None> con(*cell.firstFrame);
+    hzdr::View<Frame, hzdr::Direction::Forward<1> > con(*cell.firstFrame);
 
     int_fast32_t counter(0);
     for(auto it = con.begin(); it != con.end(); ++it)
@@ -99,13 +99,9 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
      @brief 2. Test Forward with Jumpsize 3 nonCollectiv
     We implement a own collectivity class
     ********************/
-    struct CollWithJumpsize{
-        void sync(){}
-        uint_fast32_t nbThreads()const{return 3;} // We would have jumpsize 3
-        uint_fast32_t offset()const{return 0;}
-    };
     
-    hzdr::View<Frame, hzdr::Direction::Forward, CollWithJumpsize> con2(*cell.firstFrame);
+    
+    hzdr::View<Frame, hzdr::Direction::Forward<3> > con2(*cell.firstFrame);
 
     counter = 0;
     for(auto it = con2.begin(); it != con2.end(); ++it)
@@ -125,7 +121,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     // @brief 3. Test backward with Jumpsize 3 nonCollectiv
     ********************/
 
-    hzdr::View<Frame, hzdr::Direction::Backward, CollWithJumpsize> con3(*cell.firstFrame);
+    hzdr::View<Frame, hzdr::Direction::Backward<3> > con3(*cell.firstFrame);
     counter = 0;
     auto it = con3.begin();
 

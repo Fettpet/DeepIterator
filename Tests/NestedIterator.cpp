@@ -25,11 +25,10 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 
     
 
-    typedef hzdr::View<Particle, hzdr::Direction::Forward, hzdr::Collectivity::None> PositionInParticleContainer;
+    typedef hzdr::View<Particle, hzdr::Direction::Forward<1> > PositionInParticleContainer;
     
     hzdr::View< Frame, 
-                    hzdr::Direction::Forward, 
-                    hzdr::Collectivity::None, 
+                    hzdr::Direction::Forward<1>, 
                     PositionInParticleContainer > test(cell.firstFrame); 
                      
     uint counter=0;
@@ -56,7 +55,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
     /** //////////////////////////////////////////////////////////////////
      * First Test with two loops and unnested Iterator
      *///////////////////////////////////////////////////////////////////
-    hzdr::View<Supercell, hzdr::Direction::Forward, hzdr::Collectivity::None> con(&cell);
+    hzdr::View<Supercell, hzdr::Direction::Forward<1> > con(&cell);
      
     auto it=con.begin();
 
@@ -72,7 +71,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
         {
 
             auto t = (*wrap);
-            hzdr::View<Frame, hzdr::Direction::Forward, hzdr::Collectivity::None> innerCon(&t);
+            hzdr::View<Frame, hzdr::Direction::Forward<1> > innerCon(&t);
             for(auto it2=innerCon.begin(); it2 != innerCon.end(); ++it2)
             {
                 auto wrapInner = *it2;
@@ -91,9 +90,9 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
      * Second test with a nested Iterator
      * ************************/
     // All Particle within a Supercell
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None> ParticleInFrame;
+    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
     
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, ParticleInFrame> test(cell); 
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> test(cell); 
     
     counter = 0;
     for(auto it=test.begin(); it!=test.end(); ++it)
@@ -118,15 +117,15 @@ BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
     const int nbFramesInSupercell = 2;
     SupercellContainer supercellContainer(nbSuperCells, nbFramesInSupercell);
     
-    typedef hzdr::View<Frame, hzdr::Direction::Forward,  hzdr::Collectivity::None> ParticleInFrame;
+    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
     
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None,ParticleInFrame> iterSuperCell1(supercellContainer[0]); 
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell1(supercellContainer[0]); 
 // create the second iteartor
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None,ParticleInFrame> iterSuperCell2(supercellContainer[1]);
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell2(supercellContainer[1]);
 // first add all 
     for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
     {

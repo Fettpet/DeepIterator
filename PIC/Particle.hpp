@@ -1,5 +1,6 @@
 /**
  * @author Sebastian Hahn ( t.hahn@hzdr.de )
+ * 
  * @brief A PIConGPU like datastructure. It has a position_type and a dimension.
  */
 #pragma once

@@ -59,11 +59,11 @@
 namespace hzdr 
 {
     
+
    
 template<
     typename TContainer,
-    hzdr::Direction TDirection,
-    typename TCollective,
+    typename TDirection,
     typename TChild = NoChild>
 struct View
 {
@@ -76,7 +76,7 @@ public:
     typedef Navigator<ContainerType, TDirection>                                                                    NavigatorType;
     typedef Accessor<ContainerType>                                                                                 AccessorType;
     typedef Wrapper< ComponentType>                                                                                 WrapperType;
-    typedef DeepIterator<ContainerType, AccessorType, NavigatorType, TCollective, 
+    typedef DeepIterator<ContainerType, AccessorType, NavigatorType,
                                                 WrapperType, ChildType>                                             iterator; 
     typedef iterator                                                                                                Iterator; 
 
@@ -89,6 +89,7 @@ public:
  **************/
     HDINLINE
     View():
+        offset(0),
         ptr(nullptr)
         {}
         /**
@@ -97,14 +98,32 @@ public:
         
     HDINLINE
     View(ContainerType& container):
+        offset(0),
         ptr(&container)
     {}
     HDINLINE
     View(ContainerPtr con):
+        offset(0),
         ptr(con)
     {}
+    
     HDINLINE
     View(const View& other) = default;
+    
+    
+    HDINLINE
+    View(const View& other, ContainerPtr con):
+        offset(other.offset),
+        ptr(con)
+        {}
+    
+    HDINLINE
+    View(const View& other, ContainerPtr con, ChildType& child ):
+        offset(other.offset),
+        ptr(con),
+        childView(child)
+        {}
+    
     HDINLINE
     View(View&& other) = default;
     
@@ -113,12 +132,14 @@ public:
      */
     HDINLINE
     View(ContainerType& container, ChildType& child):
+        offset(0),
         ptr(&container), 
         childView(child)
     {}
     
     HDINLINE
     View(ContainerPtr con,ChildType& child):
+        offset(0),
         ptr(con),
         childView(child)
         {}
@@ -126,10 +147,43 @@ public:
     
     HDINLINE
     View(ContainerPtr con, ChildType&& child):
+        offset(0),
         ptr(con),
         childView(child)
     {}
     
+    
+        HDINLINE
+    View(ContainerType& container, const uint_fast32_t& offset, ChildType& child):
+        offset(offset),
+        ptr(&container), 
+        childView(child)
+    {}
+    
+    HDINLINE
+    View(ContainerPtr con, const uint_fast32_t& offset, ChildType& child):
+        offset(offset),
+        ptr(con),
+        childView(child)
+        {}
+    
+    HDINLINE
+    View( const uint_fast32_t& offset):
+        offset(offset)
+        {}
+        
+    HDINLINE
+    View( const uint_fast32_t& offset, ChildType& child):
+        offset(offset),
+        childView(child)
+        {}
+    
+    HDINLINE
+    View(ContainerPtr con, const uint_fast32_t& offset, ChildType&& child):
+        offset(offset),
+        ptr(con),
+        childView(child)
+    {}
     
     HDINLINE    
     View& operator=(View&& other) = default;
@@ -147,7 +201,8 @@ public:
     typename std::enable_if<test, Iterator>::type 
     begin() 
     {
-       return Iterator(ptr);
+       
+       return Iterator( ptr, offset);
     }
     
     
@@ -156,7 +211,7 @@ public:
     typename std::enable_if<test, Iterator>::type                                       
     begin() 
     {
-       return Iterator(ptr);
+       return Iterator(ptr,childView, offset);
     }
     
 
@@ -182,11 +237,28 @@ public:
         ptr = other.ptr;
     }
     
- protected:
-
+ //protected:
+    uint_fast32_t offset;
     ContainerPtr ptr;
     ChildType childView;
 }; // struct View
+
+
+// // template<
+// //     typename TContainer,
+// //     hzdr::Direction TDirection,
+// //     typename TCollective,
+// //     typename TChild = NoChild>
+// // struct View
+// 
+// template<typename TContainer,
+//          typename TDirection,
+//          typename TChild>
+// auto make_view(TContainer& container, TDirection, uint_fast32_t offset, TChild child) 
+// -> hzdr::View<TContainer, TDirection, TChild>
+// {
+//     return hzdr::View<TContainer, TDirection, TChild>(container, offset, child);
+// }
 
 
 } // namespace hzdr

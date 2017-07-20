@@ -47,7 +47,7 @@ namespace hzdr
     class Indexable;
 
 template<typename TContainer,
-         hzdr::Direction TDirection,
+         typename TDirection,
          typename SFIANE = void>
 struct Navigator;
     
@@ -55,9 +55,9 @@ struct Navigator;
  * @brief This one is used for indexable
  * datatypes. It started at the last element and go to the first one.
  *****************/
-template<typename TContainer>
+template<typename TContainer, uint_fast32_t jumpSize>
 struct Navigator<TContainer,
-                 hzdr::Direction::Backward,
+                 hzdr::Direction::Backward<jumpSize>,
                  typename std::enable_if<traits::IsIndexable<TContainer>::value>::type >
 {
 public:
@@ -69,19 +69,16 @@ public:
      * 
      */
     template<typename TIndex, 
-             typename TComponent,
-             typename TJumpsize>
+             typename TComponent>
     HDINLINE
     
     void 
     next(TContainer* ptr, 
          TComponent* elem,
-         TIndex& index, 
-         const TJumpsize& jump)
+         TIndex& index)
     const
     {
-
-        index -= jump;
+        index -= jumper.getJumpsize();
     }
     
     template<typename TOffset,
@@ -102,23 +99,21 @@ public:
         index = nbElem.size(*conPtrOut) - 1 - offset;
     }
     
-    template<typename TJumpsize,
-            typename TComponent,
-            typename TIndex>
+    template<typename TComponent,
+             typename TIndex>
     
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
-          const TIndex& index, 
-          const TJumpsize& jumpsize)
+          const TIndex& index)
     const
     {
         typedef traits::NumberElements< TContainer> NbElem;
         NbElem nbElem;       
-        return static_cast<int_fast32_t>(index) < -1  * ((static_cast<int_fast32_t>(jumpsize -  (nbElem.size(*containerPtr) % jumpsize) %jumpsize)));
+        return static_cast<int_fast32_t>(index) < -1  * ((static_cast<int_fast32_t>(jumper.getJumpsize() -  (nbElem.size(*containerPtr) % jumper.getJumpsize()) %jumper.getJumpsize())));
     }
-    
+    hzdr::Direction::Backward<jumpSize> jumper;
 }; // Navigator<Forward, Frame, jumpSize>
     
     
@@ -127,9 +122,9 @@ public:
  * datatypes. The direction is forwars i.e. is starts at the first element and
  * go to the last one.
  *****************/////    
-template<typename TContainer>
+template<typename TContainer, uint_fast32_t jumpSize>
 struct Navigator<TContainer,
-                 hzdr::Direction::Forward,
+                 hzdr::Direction::Forward<jumpSize>,
                  typename std::enable_if<traits::IsIndexable<TContainer>::value>::type > 
 {
 public:
@@ -142,18 +137,16 @@ public:
      * 
      */
     template<typename TIndex, 
-             typename TComponent,
-             typename TJumpsize>
+             typename TComponent>
     HDINLINE
     
     void 
     next(TContainer* ptr, 
          TComponent* elem,
-         TIndex& index, 
-         const TJumpsize& jumpsize)
+         TIndex& index)
     const
     {
-        index += jumpsize;
+        index += jumper.getJumpsize();
         
     }
     
@@ -175,23 +168,21 @@ public:
         index = offset;
     }
     
-    template<typename TJumpsize,
-            typename TComponent,
+    template<typename TComponent,
             typename TIndex>
     
     bool 
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
-          const TIndex& index, 
-          const TJumpsize& jumpsize)
+          const TIndex& index)
     const
     {
         typedef traits::NumberElements< TContainer> NbElem;
         NbElem nbElem;        
-        return static_cast<int_fast32_t>(index) >= static_cast<int_fast32_t>(nbElem.size(*containerPtr) + (jumpsize -  (nbElem.size(*containerPtr) % jumpsize)) % jumpsize) ;
+        return static_cast<int_fast32_t>(index) >= static_cast<int_fast32_t>(nbElem.size(*containerPtr) + (jumper.getJumpsize() -  (nbElem.size(*containerPtr) % jumper.getJumpsize())) % jumper.getJumpsize()) ;
     }
-    
+    hzdr::Direction::Forward<jumpSize> jumper;
 }; // Navigator<Backward, Frame, jumpSize>
 
 
@@ -200,10 +191,10 @@ public:
  * forward.
  *****************/
 
-template<typename TFrame>
+template<typename TFrame, uint_fast32_t jumpSize>
 struct Navigator< 
     hzdr::SuperCell<TFrame>, 
-    hzdr::Direction::Forward, 
+    hzdr::Direction::Forward<jumpSize>, 
     void> 
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
@@ -219,19 +210,17 @@ public:
     */
     template<typename TIndex, 
              typename TContainer,  
-             typename TComponent,
-             typename TJumpsize>
+             typename TComponent>
     HDINLINE
     
     void 
     next(TContainer*& ptr, 
          TComponent*& elem,
-         TIndex& index, 
-         const TJumpsize& jumpsize)
+         TIndex& index)
     const
     {
 
-        for(uint_fast32_t i=0; i<jumpsize; ++i)
+        for(uint_fast32_t i=0; i<jumper.getJumpsize(); ++i)
         {
                              
             if(elem == nullptr) 
@@ -280,8 +269,7 @@ public:
             
     }
     
-    template<typename TRuntimeVariables,
-            typename TComponent,
+    template<typename TComponent,
             typename TIndex,
             typename TContainer>
     
@@ -289,13 +277,12 @@ public:
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const compontPtr,
-          const TIndex&, 
-          const TRuntimeVariables&)
+          const TIndex&)
     const
     {
         return (compontPtr == nullptr) and (containerPtr == nullptr);
     }
-    
+    hzdr::Direction::Forward<jumpSize> jumper;
 }; // Navigator<Forward, Frame, jumpSize>
     
     
@@ -303,14 +290,14 @@ public:
 /**
  * @brief this implementation use supercells. The direction is backward. 
  */    
-template<typename TFrame>
-struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward, void>
+template<typename TFrame, uint_fast32_t jumpSize>
+struct Navigator< hzdr::SuperCell<TFrame>, hzdr::Direction::Backward<jumpSize>, void>
 {
     typedef hzdr::SuperCell<TFrame>   SuperCellType;
     typedef TFrame                    FrameType;
     typedef FrameType*                FramePointer;
 public:
-    
+    hzdr::Direction::Backward<jumpSize> jumper;
 
     /**
  * @brief compiletime implementation of next element implementation. This function
@@ -375,8 +362,7 @@ public:
     
 
     
-    template<typename TRuntimeVariables,
-            typename TComponent,
+    template<typename TComponent,
             typename TIndex,
             typename TContainer>
     
@@ -384,8 +370,7 @@ public:
     HDINLINE 
     isEnd(TContainer const * const containerPtr,
           TComponent const * const componentPtr,
-          const TIndex& index, 
-          const TRuntimeVariables& run)
+          const TIndex& index)
     const
     {
         return (componentPtr == nullptr) and (containerPtr == nullptr);

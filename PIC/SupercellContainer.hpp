@@ -24,7 +24,7 @@ public:
         supercells(new SuperCellPtr[nbSupercells])
     {
 
-        for(uint_fast32_t i=0;i<nbSupercells; ++i)
+        for(int_fast32_t i=0;i<nbSupercells; ++i)
         {
             supercells[i] = &(supercell[i]);
         }
