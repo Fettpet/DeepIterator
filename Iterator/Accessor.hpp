@@ -34,90 +34,61 @@ namespace hzdr
 namespace details
 {
 struct UndefinedType;
-}
-    
-class Indexable;
+} // namespace details
      
-template<typename TContainer,
-        typename SFIANE = void>
-struct Accessor;
-
-template<>
-struct Accessor<details::UndefinedType, void>
+template<
+    typename TContainer,
+    typename TComponent,
+    typename TIndex,
+    typename TAccess>
+struct Accessor
 {
-    typedef int ContainerType;
+    typedef TContainer                  ContainerType;
+    typedef ContainerType*              ContainerPtr;
+    typedef TComponent                  ComponentType;
+    typedef ComponentType*              ComponentenPtr;
+    typedef ComponentType&              ComponentRef;
+    typedef TIndex                      IndexType;
+    typedef TAccess                     Access;
+    
+    HDINLINE 
+    ComponentRef
+    get(ContainerPtr ptr,
+        TIndex && index)
+    {
+        Access access;
+        return access(
+                ptr, 
+                std::forward<IndexType>(index));
+    }
+}
+
+template<
+    typename TComponent,
+    typename TIndex,
+    typename TAccess>
+struct Accessor<details::UndefinedType, TComponent, TIndex, TAccess>
+{
+    typedef details::UndefinedType ContainerType;
 };
 
-/**
- * @brief This specialication implements the case, that the Container is indexable.
- * @tparam The container over which you like to iterate. 
- */
-template<typename TContainer >
-struct Accessor<TContainer, typename std::enable_if<traits::IsIndexable<TContainer>::value>::type> 
-{
-    
-    typedef TContainer ContainerType;
-
-    
-    template<typename TComponent,
-             typename TIndex>
-    HDINLINE
-    auto 
-    get(TContainer* containerPtr, 
-        TComponent* componentenPtr, 
-        const TIndex& pos)
-    const
-    -> TComponent&
-    
-    {
-        return ((*containerPtr)[pos]); 
-    }
-}; // Accessor< Indexable >
 
 
-
-/**
- * @brief Frames in supercells are not indexable. This specialication implements
- * the access to a frame within a supercell
- */
-template<typename TFrame>
-struct Accessor<SuperCell<TFrame>, void >
-{
-    typedef TFrame                          FrameType;
-    typedef FrameType*                      FramePointer;
-    typedef FrameType                       ReturnType;
-    typedef ReturnType&                     ReturnReference;
-    typedef ReturnType*                     ReturnPtr;
-    typedef SuperCell<TFrame>               ContainerType;
-    template<typename TContainer, 
-             typename TComponent,
-             typename TIndex>
-    HDINLINE
-    auto 
-    get(TContainer* con, TComponent* com, const TIndex& pos)
-    const
-    -> TComponent&
-    {
-        return *com;
-    }
-    
-}; // Accessor < SuperCell >
 
 
 namespace details
 {
-struct UndefinedType;
 
+// template<
+//     typename TContainer>
+// auto 
+// HDINLINE
+// makeAccessor()
+// -> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+// {
+//     return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+// }   
 
-template<
-    typename TContainer>
-auto 
-HDINLINE
-makeAccessor()
--> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
-{
-    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
-}   
 } // details
 
 template<
@@ -125,27 +96,42 @@ template<
 auto 
 HDINLINE
 makeAccessor(TContainer&&)
--> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+-> hzdr::Accessor<
+    typename std::decay<TContainer>::type,
+    typename traits::ComponentType<typename std::decay<TContainer>::type>::type>::type,
+    typename traits::Accessing<typename traits::ContainerKind<std::decay<TContainer>::type>::type>::type,
+    typename traits::IndexType<std::decay<TContainer>::type>::type     IndexType;
+    >
 {
-    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+    typedef typename std::decay<TContainer>::type               ContainerType;
+    typedef typename traits::ComponentType<ContainerType>::type ComponentType; 
+    typedef typename traits::ContainerKind<ContainerType>::type ContainerKind;
+    typedef typename traits::Accessing<ContainerKind>::type     AccessingType;
+    typedef typename traits::IndexType<ContainerType>::type     IndexType;
+    typedef hzdr::Accessor<
+        ContainerType, 
+        ComponentType, 
+        AccessingType, 
+        IndexType>                                              ResultType;
+        
+    return ResultType();
 }
 
-template<
-    typename TContainer>
+
 auto 
 HDINLINE
 makeAccessor()
--> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+-> hzdr::Accessor<
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType>
 {
-    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+    typedef hzdr::Accessor<
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType>                           ResultType;
+    return ResultType();
 }
-
-auto 
-HDINLINE
-makeAccessor() 
--> hzdr::Accessor<details::UndefinedType, void>
-{
-    return hzdr::Accessor<details::UndefinedType, void>();
-}
-
 }// namespace hzdr
