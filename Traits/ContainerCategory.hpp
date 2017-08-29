@@ -22,32 +22,32 @@ struct ListBased;
 }
 
 template<typename T>
-struct ContainerKind;
+struct ContainerCategory;
 
 
 
   
 template<typename TParticle, int_fast32_t nb>
-struct ContainerKind<hzdr::Frame<TParticle, nb> >
+struct ContainerCategory<hzdr::Frame<TParticle, nb> >
 {
     typedef traits::details::ArrayBased type;
 };
 
 template<typename TPos, int_fast32_t dim>
-struct ContainerKind<hzdr::Particle<TPos, dim> >
+struct ContainerCategory<hzdr::Particle<TPos, dim> >
 {
     typedef traits::details::ArrayBased type;
 };
     
 template<typename TFrame>
-struct ContainerKind<hzdr::SuperCell<TFrame> >
+struct ContainerCategory<hzdr::SuperCell<TFrame> >
 {
     typedef traits::details::ListBased type;
 
 };
     
 template<typename TSuperCell>
-struct ContainerKind<hzdr::SupercellContainer<TSuperCell> >
+struct ContainerCategory<hzdr::SupercellContainer<TSuperCell> >
 {
     typedef traits::details::ArrayBased type;
 };

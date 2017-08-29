@@ -53,12 +53,14 @@ struct Accessor
     
     HDINLINE 
     ComponentRef
-    get(ContainerPtr ptr,
+    get(ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         TIndex && index)
     {
         Access access;
         return access(
-                ptr, 
+                containerPtr, 
+                componentPtr,
                 std::forward<IndexType>(index));
     }
 }
@@ -99,14 +101,14 @@ makeAccessor(TContainer&&)
 -> hzdr::Accessor<
     typename std::decay<TContainer>::type,
     typename traits::ComponentType<typename std::decay<TContainer>::type>::type>::type,
-    typename traits::Accessing<typename traits::ContainerKind<std::decay<TContainer>::type>::type>::type,
+    typename traits::Accessing<typename traits::ContainerCategory<std::decay<TContainer>::type>::type>::type,
     typename traits::IndexType<std::decay<TContainer>::type>::type     IndexType;
     >
 {
     typedef typename std::decay<TContainer>::type               ContainerType;
     typedef typename traits::ComponentType<ContainerType>::type ComponentType; 
-    typedef typename traits::ContainerKind<ContainerType>::type ContainerKind;
-    typedef typename traits::Accessing<ContainerKind>::type     AccessingType;
+    typedef typename traits::ContainerCategory<ContainerType>::type ContainerCategory;
+    typedef typename traits::Accessing<ContainerCategory>::type     AccessingType;
     typedef typename traits::IndexType<ContainerType>::type     IndexType;
     typedef hzdr::Accessor<
         ContainerType, 

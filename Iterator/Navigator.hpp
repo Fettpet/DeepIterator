@@ -40,536 +40,127 @@
 #include <type_traits>
 #include "Definitions/hdinline.hpp"
 #include "Traits/Componenttype.hpp"
-#include "Traits/IsIndexable.hpp"
+#include "Traits/ContainerCategory.hpp"
+#include "Traits/RandomAccessable.hpp"
+
 namespace hzdr 
 {
-namespace details
-{
-struct UndefinedType;
-}
-class Indexable;
+
 
 template<typename TContainer,
-         typename TDirection,
-         typename TOffset,
-         typename TJumpsize,
-         typename SFIANE = void>
-struct Navigator;
-    
-
-template<
-        typename TDirection,
-        typename TOffset,
-        typename TJumpsize>
-struct Navigator<details::UndefinedType, TDirection, TOffset, TJumpsize, void>
+         typename TFirstElement,
+         typename TNextElement,
+         typename TEndValue,
+         typename TIndex>
+struct Navigator
 {
-    typedef int                                 ContainerType;
-    typedef TDirection                          DirectionType;
-    typedef TOffset                             OffsetType;
-    typedef TJumpsize                           JumpsizeType;
+// some type definitions
+public:
+    typedef TContainer                                              ContainerType;
+    typedef ContainerType*                                          ContainerPtr;
+    typedef ContainerType&                                          ContainerRef;
+    typedef traits::Componenttype<ContainerType>::type              ComponentType;
+    typedef ComponentType                                           ComponentPtr;
+    typedef TIndex                                                  IndexType;
     
-    Navigator(OffsetType&& offset, JumpsizeType&& jumpsize):
-        offset(std::forward<OffsetType>(offset)),
-        jumpsize(std::forward<JumpsizeType>(jumpsize))
-    {    }
+    typedef TFirstElement                                           FirstElement;
+    typedef TNextElement                                            NextElement;
+    typedef TEndValue                                               EndValue;
     
-    int 
-    getJumpsize() 
-    {
-        return jumpsize();
-    }
     
-    OffsetType offset;
-    JumpsizeType jumpsize;
-};
-
-
-/** ****************
- * @brief This one is used for indexable
- * datatypes. It started at the last element and go to the first one.
- *****************/
-template<typename TContainer, typename TOffset, typename TJumpsize>
-struct Navigator<TContainer,
-                 hzdr::Direction::Backward,
-                 TOffset,
-                 TJumpsize,
-                 typename std::enable_if<traits::IsIndexable<TContainer>::value>::type>
-{
-    typedef TContainer                          ContainerType;
-    typedef hzdr::Direction::Backward           DirectionType;
-    typedef TOffset                             OffsetType;
-    typedef TJumpsize                           JumpsizeType;
     
+// the core functions
 public:
     
-    
-    HDINLINE
-    Navigator() = default;
-    
-    
-    HDINLINE
-    Navigator(TOffset const & offset, 
-              TJumpsize const & jumpsize):
-        offset(offset),
-        jumpsize(jumpsize)
-    {}
-            
-    
-    /**
-     * @brief runtime implementation of next element implementation. This function
-     * is called if the template parameter jumpsize == 0.
-     * 
-     */
-    template<typename TIndex, 
-             typename TComponent>
-    HDINLINE
-    void 
-    next(TContainer* ptr, 
-         TComponent* elem,
-         TIndex& index)
-    const
-    {
-        index -= jumpsize();
-    }
-    
-    template<typename TComponent,
-             typename TIndex>
-    void 
-    HDINLINE 
-    first(TContainer* conPtrIn,
-          TContainer*& conPtrOut, 
-          TComponent*& compontPtr,
-          TIndex& index)
-    const
-    {
-        typedef traits::NumberElements< TContainer> NbElem;
-        NbElem nbElem;   
-        conPtrOut = conPtrIn;
-        index = nbElem.size(*conPtrOut) - 1 - offset();
-    }
-    
-    template<typename TComponent,
-             typename TIndex>
-    
-    bool 
-    HDINLINE 
-    isEnd(TContainer const * const containerPtr,
-          TComponent const * const compontPtr,
-          const TIndex& index)
-    const
-    {
-        typedef traits::NumberElements< TContainer> NbElem;
-        NbElem nbElem;       
-        return static_cast<int_fast32_t>(index) < 0;
-    }
-    
-//protected:
-    TOffset offset;
-    TJumpsize jumpsize;
-}; // Navigator<Forward, Frame, jumpSize>
-    
-    
-/** *******************
- * @brief This one is used for indexable
- * datatypes. The direction is forwars i.e. is starts at the first element and
- * go to the last one.
- *****************/////    
-template<typename TContainer, 
-         typename TOffset, 
-         typename TJumpsize>
-struct Navigator<TContainer,
-                 hzdr::Direction::Forward,
-                 TOffset,
-                 TJumpsize,
-                 typename std::enable_if<traits::IsIndexable<TContainer>::value>::type > 
-{
-    typedef void                                ContainerType;
-    typedef hzdr::Direction::Forward            DirectionType;
-    typedef TOffset                             OffsetType;
-    typedef TJumpsize                           JumpsizeType;
-public:
-    
-    HDINLINE 
-    Navigator() = default;
-    
-    HDINLINE
-    Navigator(TOffset const & offset, 
-              TJumpsize const & jumpsize):
-        offset(offset),
-        jumpsize(jumpsize)
-    {
-    }
-    
-    HDINLINE 
-    Navigator(Navigator const & other):
-        offset(other.offset),
-        jumpsize(other.jumpsize)
-    {
-    }
-    
-    HDINLINE 
-    Navigator(Navigator&& navi):
-        offset(std::forward<TOffset>(navi.offset)),
-        jumpsize(std::forward<TJumpsize>(navi.jumpsize))
-    {
-    };
-    
-    HDINLINE
-    Navigator(TOffset && offset, 
-              TJumpsize && jumpsize):
-        offset(std::forward<TOffset>(offset)),
-        jumpsize(jumpsize)
-    {
-    }
-    
-    /**
-     * @brief runtime implementation of next element implementation. This function
-     * is called if the template parameter jumpsize == 0.
-     * 
-     */
-    template<typename TIndex, 
-             typename TComponent>
-    HDINLINE
-    void 
-    next(TContainer* ptr, 
-         TComponent* elem,
-         TIndex& index)
-    const
-    {
-        index += jumpsize();
-    }
-    
-    int 
-    getJumpsize() 
-    {
-        return jumpsize();
-    }
-    
-    template<typename TIndex,
-            typename TComponent>
-    void 
-    HDINLINE 
-    first(TContainer* conPtrIn,
-          TContainer*& conPtrOut, 
-          TComponent*& compontPtr,
-          TIndex& index)
-    const
-    {
+// some default constructors
+    HDINLINE Navigator() = default;
+    HDINLINE Navigator(Navigator const &) = default;
+    HDINLINE Navigator(Navigator &&) = default;
 
-        conPtrOut = conPtrIn;
-        index = offset();
-    }
-    
-    template<typename TComponent,
-            typename TIndex>
-    bool 
-    HDINLINE 
-    isEnd(TContainer const * const containerPtr,
-          TComponent const * const compontPtr,
-          const TIndex& index)
-    const
-    {
-        typedef traits::NumberElements< TContainer> NbElem;
-        NbElem nbElem;        
-        return static_cast<int_fast32_t>(index) >= static_cast<int_fast32_t>(nbElem.size(*containerPtr));
-    }
-    
-//protected:
-    TOffset offset;
-    TJumpsize jumpsize;
-}; // Navigator<Backward, Frame, jumpSize>
-
-
-/** ****************
- * @brief This Navigator can acess all Frames in a Supercell. The direction is
- * forward.
- *****************/
-
-template<typename TFrame,
-         typename TOffset,
-         typename TJumpsize>
-struct Navigator< 
-    hzdr::SuperCell<TFrame>, 
-    hzdr::Direction::Forward,
-    TOffset,
-    TJumpsize,
-    void> 
-{
-    
-    typedef hzdr::Direction::Forward            DirectionType;
-    typedef TOffset                             OffsetType;
-    typedef TJumpsize                           JumpsizeType;
-    typedef hzdr::SuperCell<TFrame>             ContainerType;
-    typedef hzdr::SuperCell<TFrame>             SuperCellType;
-    typedef TFrame                              FrameType;
-    typedef FrameType*                          FramePointer;
-    
-public:
-    
-    
-    HDINLINE 
-    Navigator() = default;
-    
     HDINLINE
-    Navigator(TOffset const & offset, 
-              TJumpsize const & jumpsize):
-        offset(offset),
-        jumpsize(jumpsize)
+    Navigator(
+            FirstElement && firstElement, 
+            NextElement && nextElement,
+            EndValue && endValue):
+        firstElem(std::forward<FirstElement>(firstElement)),
+        nextElem(std::forward<NextElement>(nextElement)),
+        endValue(std::forward<EndValue>(endValue))
     {}
     
-    /**
-     * @brief runtime implementation of next element implementation. This function
-     * is called if the template parameter jumpsize == 0.
-    */
-    template<typename TIndex, 
-             typename TContainer,  
-             typename TComponent>
+
     HDINLINE
     void 
-    next(TContainer*& ptr, 
-         TComponent*& elem,
-         TIndex& index)
+    next(ContainerPtr containerPtr,  
+         ComponentPtr componentPtr,
+         IndexType & index)
     const
     {
-
-        for(uint_fast32_t i=0; i<jumpsize(); ++i)
-        {
-                             
-            if(elem == nullptr) 
-            {
-                ptr = nullptr;
-                break;
-            }
-            elem = elem->nextFrame;
-        }
+        nextElem(containerPtr, componentPtr, index);
     }
 
-    
-    template<typename TComponent,
-             typename TIndex,
-             typename TContainer>
-    
+    HDINLINE
     void 
-    HDINLINE 
-    first(TContainer* conPtrIn,
-          TContainer*& conPtrOut, 
-          TComponent*& compontPtr,
-          TIndex& index)
+    first(ContainerPtr containerPtr,
+          ComponentPtr componentPtr,
+          IndexType & index)
     const
     {
-         
-        if(conPtrIn != nullptr)
-        {
-            compontPtr = conPtrIn->firstFrame;
-            for(uint i=0; i < offset(); ++i)
-            {
-                if(compontPtr == nullptr) 
-                {
-                    conPtrOut = nullptr;
-                    break;
-                }
-                compontPtr = compontPtr->nextFrame;
-            }
-        } 
-        else 
-        {
-
-            compontPtr = nullptr;
-        }
-            
+        firstElem(containerPtr, componentPtr, index);
     }
     
-    template<typename TComponent,
-            typename TIndex,
-            typename TContainer>
-    
+    HDINLINE 
     bool 
-    HDINLINE 
-    isEnd(TContainer const * const containerPtr,
-          TComponent const * const compontPtr,
-          const TIndex&)
-    const
+    isEnd(ContainerPtr containerPtr,
+          ComponentPtr componentPtr,
+          IndexType & index)
+    const 
     {
-        return (compontPtr == nullptr) and (containerPtr == nullptr);
+        return endValue(containerPtr, componentPtr, index);
     }
     
-//protected:
-    TOffset offset;
-    TJumpsize jumpsize;
-}; // Navigator<Forward, Frame, jumpSize>
     
     
-    
-/**
- * @brief this implementation use supercells. The direction is backward. 
- */    
-template<typename TFrame,
-         typename TOffset,
-         typename TJumpsize>
-struct Navigator< hzdr::SuperCell<TFrame>, 
-                  hzdr::Direction::Backward,
-                  TOffset,
-                  TJumpsize,
-                void>
-{
-    typedef hzdr::Direction::Backward           DirectionType;
-    typedef TOffset                             OffsetType;
-    typedef TJumpsize                           JumpsizeType;
-    typedef hzdr::SuperCell<TFrame>             ContainerType;
-    typedef hzdr::SuperCell<TFrame>             SuperCellType;
-    typedef TFrame                              FrameType;
-    typedef FrameType*                          FramePointer;
-public:
-
-    
-    HDINLINE 
-    Navigator() = default;
-    
-    HDINLINE
-    Navigator(TOffset const & offset, 
-              TJumpsize const & jumpsize):
-        offset(offset),
-        jumpsize(jumpsize)
-    {}
-    
-    /**
- * @brief compiletime implementation of next element implementation. This function
- * is called if the template parameter jumpsize != 0.
- */
-    template<typename TIndex, 
-             typename TContainer>
-    HDINLINE
-    
-    void 
-    next(TContainer*& ptr, 
-         typename traits::ComponentType<TContainer>::type*& elem,
-         TIndex& index)
-    const
-    {
-
-        for(size_t i=0; i<jumpsize(); ++i)
-        {
-            
-            if(elem == nullptr) 
-            {
-                ptr = nullptr;
-                break;
-            }
-            elem = elem->previousFrame;
-        }
-
-    }
-    
-    template<typename TIndex,
-             typename TComponent,
-             typename TContainer>
-    
-    void 
-    HDINLINE 
-    first(TContainer* conPtrIn,
-          TContainer*& conPtrOut, 
-          TComponent*& compontPtr,
-          TIndex& index)
-    const
-    {
-       
-        if(conPtrIn != nullptr)
-        {
-
-            compontPtr = conPtrIn->lastFrame;
-            for(auto i=0; i < offset(); ++i)
-            {
-                if(compontPtr != nullptr)
-                    compontPtr = compontPtr ->previousFrame;
-            }
-        }
-        else
-        {
-            compontPtr = nullptr;
-        }
-    }
-    
-
-    
-    template<typename TComponent,
-            typename TIndex,
-            typename TContainer>
-    
-    bool 
-    HDINLINE 
-    isEnd(TContainer const * const containerPtr,
-          TComponent const * const componentPtr,
-          const TIndex& index)
-    const
-    {
-        return (componentPtr == nullptr) and (containerPtr == nullptr);
-    }
     
 protected:
-    TOffset offset;
-    TJumpsize jumpsize;
-}; // Navigator<Forward, Frame, jumpSize>
-
-
-
-namespace details
-{
-struct UndefinedType;
+    FirstElement    firstElem;
+    NextElement     nextElem;
+    EndValue        endValue;
+    
+};
     
 template<
     typename TContainer,
-    typename TDirection,
-    typename TOffset,
-    typename TJumpsize
->
+    typename TFirstElement,
+    typename TNextElement,
+    typename TEndValue>
 HDINLINE 
 auto 
-makeNavigator(hzdr::Navigator<details::UndefinedType, TDirection, TOffset, TJumpsize>&& other)
--> hzdr::Navigator<TContainer, TDirection, TOffset, TJumpsize>
+makeNavigator(
+    TContainer &&,
+    TFirstElement && firstElem,
+    TNextElement && nextElem,
+    TEndValue && endValue)
+->
 {
-    typedef hzdr::Navigator<TContainer, TDirection, TOffset, TJumpsize> Navi;
-    return Navi(std::forward<TOffset>(other.offset), 
-                std::forward<TJumpsize>(other.jumpsize));
+    typedef typename std::decay<TContainer>::type                   ContainerType;
+    typedef typename std::decay<TFirstElement>::type                FirstType;
+    typedef typename std::decay<TNextElement>::type                 NextType;
+    typedef typename std::decay<TEndValue>::type                    EndValue;
+    typedef typename traits::ContainerCategory<ContainerType>::type ContainerCat;
+    typedef typename traits::IndexType<ContainerCat>::type          IndexType;
+    
+    typedef Navigator<
+        ContainerType,
+        FirstType,
+        NextType,
+        EndValue,
+        IndexType>                                                  NavigatorType;
+        
+    return NavigatorType(
+        std::forward<TFirstElement>(firstElem),
+        std::forward<NextType>(nextElem),
+        std::forward<EndValue>(endValue));
+        
 }
-
-}
-
-template<
-    typename TContainer,
-    typename TDirection,
-    typename TOffset,
-    typename TJumpsize
->
-HDINLINE 
-auto 
-makeNavigator(TContainer&&,
-               TDirection&&, 
-               TOffset&& offset, 
-               TJumpsize&& jumpsize)
--> hzdr::Navigator<typename std::remove_reference<TContainer>::type, TDirection, TOffset, TJumpsize>
-{
-    typedef typename std::remove_reference<TContainer>::type ContainerType;
-    typedef hzdr::Navigator<ContainerType, TDirection, TOffset, TJumpsize> Navi;
-    return Navi(std::forward<TOffset>(offset), 
-                std::forward<TJumpsize>(jumpsize));
-}
-
-template<
-    typename TDirection,
-    typename TOffset,
-    typename TJumpsize
->
-HDINLINE 
-auto 
-makeNavigator(TDirection&&, 
-               TOffset&& offset, 
-               TJumpsize&& jumpsize)
--> hzdr::Navigator<details::UndefinedType, TDirection, TOffset, TJumpsize>
-{
-    typedef hzdr::Navigator<details::UndefinedType, TDirection, TOffset, TJumpsize> Navi;
-    return Navi(std::forward<TOffset>(offset), 
-                std::forward<TJumpsize>(jumpsize));
-}
-
 
 }// namespace hzdr

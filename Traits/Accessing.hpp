@@ -22,10 +22,12 @@ struct Accessing<hzdr::traits::details::ArrayBased>
     
     template<
         typename TContainer,
+        typename TComponent,
         typename TIndex>
     auto 
     operator() (
-        TContainer* container, 
+        TContainer* container,
+        TComponent*,
         TIndex && index) 
     const
     ->
@@ -44,19 +46,18 @@ struct Accessing<hzdr::details::ListBased>
     
     template<
         typename TContainer,
+        typename TComponent,
         typename TIndex>
     auto 
     operator() (
-        TContainer* container, 
-        TIndex && index) 
+        TContainer*, 
+        TComponent* component,
+        TIndex &&) 
     const
     ->
     typename traits::ComponentType<std::decay<TContainer>::type>::type &    
     {
-        if(std::is_pointer<TIndex>::value)
-            return *index;
-        else 
-            return index;
+        return *component;
     }
 };
     
