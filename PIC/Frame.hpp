@@ -28,6 +28,11 @@ struct Frame
     constexpr static int_fast32_t Dim = TParticle::Dim;
     constexpr static int_fast32_t maxParticlesInFrame = maxParticles;
     
+    HDINLINE 
+    Frame(Frame const &) = default;
+    
+    HDINLINE Frame(Frame &&) = default;
+    
     HDINLINE
     Frame():
         
@@ -46,8 +51,8 @@ struct Frame
     
     HDINLINE
     Frame(const uint_fast32_t& nbParticles):
-        nbParticlesInFrame(nbParticles),
-        nextFrame(nullptr), previousFrame(nullptr)
+        nextFrame(nullptr), previousFrame(nullptr),
+        nbParticlesInFrame(nbParticles)
     {
         static int_fast32_t value{0};
         for(auto &par: particles)
@@ -55,6 +60,13 @@ struct Frame
            for(int_fast32_t i=0; i<Dim; ++i)
            {
                par.data[i] = value++;
+           }
+        }
+        for(int i=nbParticles; i<maxParticles; ++i)
+        {
+           for(int_fast32_t j=0; j<Dim; ++j)
+           {
+               particles[i].data[j] = -1;
            }
         }
     }
@@ -92,7 +104,9 @@ struct Frame
     operator=(const FrameType& other)
     {
         particles = other.particles;
+        return *this;
     }
+
     
     TParticle particles[maxParticles];
 

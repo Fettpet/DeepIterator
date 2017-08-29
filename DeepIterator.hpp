@@ -133,13 +133,15 @@
 #include "Iterator/Collective.hpp"
 #include <boost/iterator/iterator_concepts.hpp>
 #include "Iterator/Wrapper.hpp"
+#include "Iterator/Accessor.hpp"
+#include "Iterator/Navigator.hpp"
 #include <limits>
 #include <cassert>
 #include <type_traits>
 #include "Traits/NumberElements.hpp"
 #include "Traits/Componenttype.hpp"
 #include "Definitions/hdinline.hpp"
-
+#include <typeinfo>
 
 namespace hzdr 
 {
@@ -151,7 +153,6 @@ namespace hzdr
 template<typename TContainer, 
          typename TAccessor, 
          typename TNavigator, 
-         typename TWrapper,
          typename TChild,
          typename TEnable = void>
 struct DeepIterator;
@@ -165,25 +166,25 @@ struct DeepIterator;
  * ************************************/
 template<typename TContainer,
         typename TAccessor, 
-        typename TNavigator,
-        typename TWrapper>
+        typename TNavigator>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator,
-                    TWrapper,
                     hzdr::NoChild,
                     void>
 {
 // datatypes
 public:
     typedef TContainer                                                  ContainerType;
+    typedef ContainerType*                                              ContainerPtr;
+    typedef ContainerType&                                              ContainerReference;
     typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
-    typedef ComponentType*                                              ComponentPointer;
+    typedef ComponentType*                                              ComponentPtr;
     typedef ComponentType&                                              ComponentReference;
     typedef ComponentType                                               ReturnType;
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
-    typedef TWrapper                                                    WrapperType;
+
 // functions 
 //    static_assert(std::is_same<typename Taccessor.ReturnType, ComponentType>::value, "Returntype of accessor must be the same as Valuetype of TContainer");
 public:
@@ -200,11 +201,33 @@ public:
     DeepIterator()
     {}
 
-    HDINLINE
-    DeepIterator(ContainerType* _ptr, const uint_fast32_t& offset)
-    {
 
-        navigator.first(_ptr, containerPtr, componentPtr, index,  offset);
+    HDINLINE
+    DeepIterator(ContainerPtr container, 
+                 const Accessor& accessor, 
+                 const Navigator& navigator):
+        navigator(navigator),
+        accessor(accessor)
+    {
+        reset(&container);
+    }
+    
+    
+    HDINLINE
+    DeepIterator(const Accessor& accessor, 
+                 const Navigator& navigator):
+        navigator(navigator),
+        accessor(accessor)
+    { }
+    
+    HDINLINE
+    DeepIterator(ContainerType& container, 
+                 const Accessor& accessor, 
+                 const Navigator& navigator):
+        navigator(navigator),
+        accessor(accessor)
+    {
+        reset(container);
     }
     
     HDINLINE DeepIterator(const DeepIterator&) = default;
@@ -217,8 +240,6 @@ public:
     DeepIterator&
     operator++()
     {
-
-
         navigator.next(containerPtr, componentPtr, index);
 
 
@@ -226,13 +247,10 @@ public:
     }
     
     HDINLINE
-    WrapperType
+    ComponentReference
     operator*()
     {
-
-
-        return WrapperType(accessor.get(containerPtr, componentPtr, index),
-                        containerPtr, componentPtr, index);
+        return (accessor.get(containerPtr, componentPtr, index));
     }
     
     template<typename TIndex>
@@ -245,6 +263,12 @@ public:
         for(TIndex i=static_cast<TIndex>(0); i< jumpsize; ++i)
             ++result;
         return result;
+    }
+    
+    int 
+    getJumpsize()
+    {
+        return navigator.getJumpsize();
     }
     
     HDINLINE
@@ -281,12 +305,29 @@ public:
          return navigator.isEnd(containerPtr, componentPtr, index);
     }
     
-// protected:
+    HDINLINE 
+    bool 
+    isAtEnd()
+    const
+    {
+        return navigator.isEnd(containerPtr, componentPtr, index);
+    }
+    
+    HDINLINE 
+    void 
+    reset(ContainerReference ptr)
+    {
+        navigator.first(&ptr, containerPtr, componentPtr, index);
+    }
+    
+
+    
     ComponentType* componentPtr = nullptr; 
     ContainerType* containerPtr = nullptr;
     int_fast32_t index = std::numeric_limits<int_fast32_t>::min();
     Navigator navigator;
     Accessor accessor;
+    hzdr::NoChild childIterator;
 private:
 }; // struct DeepIterator
 
@@ -302,12 +343,10 @@ private:
 template<typename TContainer,
         typename TAccessor, 
         typename TNavigator,
-        typename TChild,
-        typename TWrapper>
+        typename TChild>
 struct DeepIterator<TContainer, 
                     TAccessor, 
                     TNavigator, 
-                    TWrapper,
                     TChild,
                     typename std::enable_if<not std::is_same<TChild, hzdr::NoChild>::value>::type >
 {
@@ -323,9 +362,10 @@ public:
     typedef TNavigator                                                  Navigator;
 
 // child things
-    typedef TChild                                                      ChildView;
-    typedef typename ChildView::Iterator                                ChildIterator;
-    typedef typename ChildView::WrapperType                             WrapperType;
+    typedef TChild                                                      ChildIterator;
+    typedef typename ChildIterator::ReturnType                          ReturnType;
+    typedef ReturnType&                                                 ReturnReference;
+
 
     
 public:
@@ -335,39 +375,59 @@ public:
  * @param nbElems number of elements within the datastructure
  */
 
-    
-    template<typename TIndex>
-    HDINLINE 
-    DeepIterator
-    operator+(const TIndex& jumpsize)
-    const 
+    HDINLINE
+    DeepIterator(ContainerType& container, 
+                 const Accessor& accessor, 
+                 const Navigator& navigator,
+                 const ChildIterator& child
+                ):
+        childIterator(child),
+        navigator(navigator),
+        accessor(accessor)
+        
     {
-        DeepIterator result(*this);
-        for(TIndex i=static_cast<TIndex>(0); i< jumpsize; ++i)
-            ++result;
-        return result;
+            
+        navigator.first(&container, containerPtr, componentPtr, index);
+        childIterator.reset(accessor.get(containerPtr, componentPtr, index)); 
+      
     }
     
     HDINLINE
-    DeepIterator(ContainerType* ptr2, const uint_fast32_t& offset)
+    DeepIterator(const Accessor& accessor, 
+                 const Navigator& navigator,
+                 const ChildIterator& child
+                ):
+        childIterator(child),
+        navigator(navigator),
+        accessor(accessor)
+        
     {
-
-        navigator.first(ptr2, containerPtr, componentPtr, index, offset);
-        childView = ChildView(accessor.get(containerPtr, componentPtr, index));
-
-        childIter = childView.begin();
+      
     }
     
-        HDINLINE
-    DeepIterator(ContainerType* ptr2, const ChildView& child,const uint_fast32_t& offset)
+    HDINLINE
+    DeepIterator(ContainerType& container, 
+                 Accessor&& accessor, 
+                 Navigator&& navigator,
+                 ChildIterator&& child
+                ):
+        childIterator(child),
+        navigator(navigator),
+        accessor(accessor)
+        
     {
-
-        navigator.first(ptr2, containerPtr, componentPtr, index, offset);
-        childView = ChildView(child, accessor.get(containerPtr, componentPtr, index));
-
-        childIter = childView.begin();
+            
+        navigator.first(&container, containerPtr, componentPtr, index);
+        childIterator.reset(accessor.get(containerPtr, componentPtr, index)); 
+      
     }
     
+    int 
+    getJumpsize()
+    {
+        return navigator.getJumpsize();
+    }
+
     /**
      * @brief goto the next element
      */
@@ -376,24 +436,29 @@ public:
     operator++()
     {
 
-
-        ++childIter;
-        if(not (childIter != childView.end()))
+        
+        ++childIterator;
+        while(not navigator.isEnd(containerPtr, componentPtr, index) and childIterator.isAtEnd() )
         {
             navigator.next(containerPtr, componentPtr, index);
-            childView = ChildView(childView, accessor.get(containerPtr, componentPtr, index));
-            childIter = childView.begin();
+            childIterator.reset(accessor.get(containerPtr, componentPtr, index)) ;
         }
-
         return *this;
     }
     
     HDINLINE
-    WrapperType
+    ReturnReference
     operator*()
     {
-
-        return *childIter;
+        return *childIterator;
+    }
+    
+    HDINLINE 
+    bool 
+    isAtEnd()
+    const
+    {
+        return navigator.isEnd(containerPtr, componentPtr, index);
     }
     
     HDINLINE
@@ -405,7 +470,7 @@ public:
         return componentPtr != other.componentPtr
             or containerPtr != other.containerPtr
             or index != other.index 
-            or other.childIter != childIter;
+            or other.childIterator != childIterator;
     }
 
     HDINLINE    
@@ -414,21 +479,237 @@ public:
     const
     {
         
-        return not navigator.isEnd(containerPtr, componentPtr, index);
+        return not isAtEnd();
     }
     
+    
+    HDINLINE
+    void
+    reset(TContainer& ptr)
+    {
+        navigator.first(&ptr, containerPtr, componentPtr, index);
+        childIterator.reset((accessor.get(containerPtr, componentPtr, index)));
+    }
 
+    
 
-// protected:
     TContainer* containerPtr = nullptr;
-    int_fast32_t index;
+    int_fast32_t index = std::numeric_limits<int_fast32_t>::min();
     ComponentType* componentPtr= nullptr;
-    ChildView childView;
-    ChildIterator childIter;
+    ChildIterator childIterator;
     Navigator navigator;
     Accessor accessor;
 private:
 
 }; // struct DeepIterator
 
+
+
+namespace details 
+{
+struct UndefinedType{};
+
+template<
+    typename TContainer,
+    typename TNavigator,
+    typename TAccessor
+    >
+HDINLINE
+auto 
+makeIterator(TAccessor&& accessor, 
+              TNavigator&& navigator, 
+              hzdr::NoChild&&)
+-> hzdr::DeepIterator<TContainer,  
+                      decltype(details::makeAccessor<TContainer>()), 
+                      decltype(details::makeNavigator<TContainer>(std::forward<TNavigator>(navigator))), 
+                      hzdr::NoChild>
+{
+    typedef decltype(details::makeNavigator<TContainer>(std::forward<TNavigator>(navigator))) IteratorNavigator;
+    typedef decltype(details::makeAccessor<TContainer>()) IteratorAccessor;
+    typedef hzdr::DeepIterator<TContainer,  
+                            IteratorAccessor, 
+                            IteratorNavigator, 
+                            hzdr::NoChild> Iterator;
+    return Iterator(details::makeAccessor<TContainer>(),
+                    details::makeNavigator<TContainer>(std::forward<TNavigator>(navigator)));
+}
+
+
+template<
+    typename TContainer,
+    typename TNavigator,
+    typename TAccessor,
+    typename TChild
+>
+HDINLINE
+auto 
+makeIterator(TAccessor&& accessor, 
+              TNavigator&& navigator, 
+              TChild&& child)
+-> hzdr::DeepIterator<TContainer,  
+                      decltype(details::makeAccessor<TContainer>()), 
+                      decltype(details::makeNavigator<TContainer>(std::forward<TNavigator>(navigator))), 
+                      decltype(details::makeIterator< typename hzdr::traits::ComponentType<TContainer>::type>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator)))>
+{
+    
+    
+    typedef decltype(details::makeNavigator<TContainer>(std::forward<TNavigator>(navigator))) IteratorNavigator;
+    typedef decltype(details::makeAccessor<TContainer>()) IteratorAccessor;
+    typedef typename hzdr::traits::ComponentType<TContainer>::type ChildContainerType;
+
+    typedef decltype(details::makeIterator<ChildContainerType>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator))) Child;
+    
+
+    
+    auto && childIterator = details::makeIterator<ChildContainerType>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator));
+    
+    
+    typedef hzdr::DeepIterator<TContainer,  
+                            IteratorAccessor, 
+                            IteratorNavigator, 
+                            Child> Iterator;    
+        
+    typedef decltype(details::makeAccessor<TContainer>()) AccessorType;
+    typedef decltype(details::makeNavigator<TContainer>(std::move(navigator))) NavigatorType;
+                    
+    return Iterator(std::forward<AccessorType>(details::makeAccessor<TContainer>()),
+                    std::forward<NavigatorType>(details::makeNavigator<TContainer>(std::move(navigator))),
+                    childIterator
+                   );
+}
+
+
+} // namespace details
+
+
+template<
+    typename TContainer,
+    typename TNavigator,
+    typename TAccessor,
+    typename TChildNavigator,
+    typename TChildAccessor,
+    typename TChildChild
+    >
+HDINLINE
+auto 
+makeIterator(TContainer& container, 
+            TAccessor&& accessor, 
+            TNavigator&& navigator, 
+            hzdr::DeepIterator<details::UndefinedType, TChildAccessor, TChildNavigator, TChildChild>&& child)
+-> hzdr::DeepIterator<typename std::remove_pointer<typename std::decay<TContainer>::type>::type,  
+                      TAccessor, 
+                      TNavigator, 
+                      decltype(details::makeIterator<typename hzdr::traits::ComponentType<typename std::remove_pointer<typename std::decay<TContainer>::type>::type >::type>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator)))
+                     >
+
+{
+    typedef typename std::remove_pointer<typename std::decay<TContainer>::type>::type ContainerType;
+    typedef typename hzdr::traits::ComponentType<ContainerType>::type ChildContainerType;
+
+    typedef decltype(details::makeIterator<ChildContainerType>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator))) Child;
+    
+    Child && childIterator = details::makeIterator<ChildContainerType>(std::move(child.accessor),
+                                                   std::move(child.navigator),
+                                                   std::move(child.childIterator));
+    
+    typedef hzdr::DeepIterator<ContainerType,  
+                            TAccessor, 
+                            TNavigator, 
+                            Child> Iterator;    
+                    
+    return Iterator(container,
+                    std::forward<TAccessor>(accessor),
+                    std::forward<TNavigator>(navigator),
+                    childIterator
+                   );
+    
+}
+
+
+
+
+template<
+    typename TContainer,
+    typename TNavigator,
+    typename TAccessor
+    >
+HDINLINE
+auto 
+makeIterator(TContainer& container, 
+             TAccessor&& accessor, 
+             TNavigator&& navigator)
+-> hzdr::DeepIterator<typename std::decay<TContainer>::type,  TAccessor, TNavigator, hzdr::NoChild>
+{
+    typedef typename std::decay<TContainer>::type ContainerType;
+    typedef hzdr::DeepIterator<ContainerType,  TAccessor, TNavigator, hzdr::NoChild> Iterator;
+    return Iterator(container, 
+                    std::forward<TAccessor>(accessor), 
+                    std::forward<TNavigator>(navigator));
+}
+
+
+
+template<typename TAccessor,
+        typename TNavigator>
+HDINLINE
+auto
+make_child(TAccessor&& accessor,
+           TNavigator&& navigator)
+-> hzdr::DeepIterator<details::UndefinedType, TAccessor, TNavigator, hzdr::NoChild>
+{
+    
+    typedef hzdr::DeepIterator<details::UndefinedType, TAccessor, TNavigator, hzdr::NoChild> Iterator;
+    
+    return Iterator(accessor, navigator);
+    
+}
+
+template<typename TAccessor,
+        typename TNavigator,
+        typename TChild>
+HDINLINE
+auto
+make_child(TAccessor&& accessor,
+           TNavigator&& navigator,
+           TChild&& child
+          )
+-> hzdr::DeepIterator<details::UndefinedType, TAccessor, TNavigator, TChild>
+{
+    typedef hzdr::DeepIterator<details::UndefinedType, TAccessor, TNavigator, TChild> Iterator;
+    return Iterator(accessor, navigator, child);
+}
+
 }// namespace hzdr
+
+template< 
+    typename TContainer,
+    typename TAccessor,
+    typename TNavigator,
+    typename TChild>
+std::ostream& operator<<(std::ostream& out, const hzdr::DeepIterator<TContainer, TAccessor, TNavigator, TChild>& iter)
+{
+    out << "[" << iter.containerPtr << ", " << iter.componentPtr << ", " << iter.index << "," << iter.childIterator << "]";
+    return out;
+    
+}
+
+template< 
+    typename TContainer,
+    typename TAccessor,
+    typename TNavigator>
+std::ostream& operator<<(std::ostream& out, const hzdr::DeepIterator<TContainer, TAccessor, TNavigator, hzdr::NoChild>& iter)
+{
+    out << "[" << iter.containerPtr << ", " << iter.componentPtr << ", " << iter.index << "]";
+    return out;
+    
+}

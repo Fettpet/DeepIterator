@@ -17,6 +17,8 @@
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
 #include "DeepIterator.hpp"
+#include "Iterator/Accessor.hpp"
+#include "Iterator/Navigator.hpp"
 #include "View.hpp"
 #include "Definitions/hdinline.hpp"
 
@@ -34,22 +36,26 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     auto nbParticleInLastFrame = 100;
     auto nbFrames = 5;
     callSupercellAddOne(&super, nbFrames, nbParticleInLastFrame);
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    
-    
-    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
-    
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> view(super); 
-    std::cout << *super << std::endl;
+    auto && it = hzdr::makeIterator(*super, 
+                             hzdr::makeAccessor(*super),
+                             hzdr::makeNavigator(*super,
+                                            hzdr::Direction::Forward(),
+                                            Offset(0),
+                                            Jumpsize(1)),
+                             hzdr::make_child(hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                       Offset(0),
+                                                       Jumpsize(1))));
+                               
+
     auto counter=0;
-    auto it=view.begin();
-    for(; it!=view.end(); ++it)
+    for(; not it.isAtEnd(); ++it)
     {
-        if(*it)
-        {
-            counter++;
-            BOOST_TEST((**it).data[0] == (**it).data[1]);
-        }
+        counter++;
+        BOOST_TEST((*it).data[0] == (*it).data[1]);
     }
     // 4 full Frames, 1 with 100 elements
     BOOST_TEST(counter == 256 * 4 +100);
@@ -59,14 +65,11 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 
 BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
 {
-    typedef hzdr::View<Frame, 
-                       hzdr::Direction::Forward<1> > ParticleInFrame;
-    typedef  hzdr::View<Supercell,
-                        hzdr::Direction::Forward<1>,  
-                        ParticleInFrame> FrameInSupercellView;
+
     typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
-    typedef hzdr::View<SupercellContainer, 
-                       hzdr::Direction::Forward<1> > ViewSupercellContainer;
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    
     const int nbSupercells = 3;
     Supercell** super;
     std::vector<int> nbFrames, nbParticles;
@@ -81,38 +84,39 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
     // all first elements need to have the same number of elements
     SupercellContainer supercellContainer(*super, nbSupercells);  
     
+
     
+    auto it = hzdr::makeIterator(
+                supercellContainer, 
+                hzdr::makeAccessor(supercellContainer),
+                hzdr::makeNavigator(
+                    supercellContainer,
+                    hzdr::Direction::Forward(),
+                    Offset(0),
+                    Jumpsize(1)));
     
-    ViewSupercellContainer viewSupercellContainer(supercellContainer);
-    std::cout << supercellContainer[0] << std::endl;
-    for(auto it=viewSupercellContainer.begin();
-        it != viewSupercellContainer.end();
-        ++it)
+    for(; not it.isAtEnd(); ++it)
     {
-    
-        
-        FrameInSupercellView view(**it);
-        const auto value = (**(view.begin())).data[1];
-        
-        for(auto itElem=view.begin(); itElem != view.end(); ++itElem)
+        auto itPart = hzdr::makeIterator(
+            *it,
+            hzdr::makeAccessor(*it),
+            hzdr::makeNavigator(
+                *it,
+                hzdr::Direction::Forward(),
+                Offset(0),
+                Jumpsize(1)),
+            hzdr::make_child(
+                hzdr::makeAccessor(),
+                hzdr::makeNavigator(
+                    hzdr::Direction::Forward(),
+                    Offset(0),
+                    Jumpsize(1))));
+        auto value = (*itPart).data[1];
+        BOOST_TEST(value > 0);
+        for(; not itPart.isAtEnd(); ++itPart)
         {
-            if(*itElem)
-            {
-            //    BOOST_TEST( (**itElem).data[1] == value);
-            }
+            BOOST_TEST((*itPart).data[1] == value);
         }
     }
-//     
-// 
-//     
-//     
-//     // I have supercells, and I need 
-// //     std::cout <<"Superzelle 1" << std::endl;
-// //     std::cout << *(super[0]);
-// //     
-// //     std::cout <<"Superzelle 2" << std::endl;
-// //     std::cout << *(super[1]);
-// //     
-// //     std::cout <<"Superzelle 3" << std::endl;
-// //      std::cout << *(super[2]);
+    
 }

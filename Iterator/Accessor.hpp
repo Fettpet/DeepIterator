@@ -27,13 +27,26 @@
 #include <iostream>
 #include <boost/core/ignore_unused.hpp>
 #include "Definitions/hdinline.hpp"
+#include "Traits/NumberElements.hpp"
+#include "Traits/IsIndexable.hpp"
 namespace hzdr
 {
+namespace details
+{
+struct UndefinedType;
+}
+    
 class Indexable;
      
 template<typename TContainer,
         typename SFIANE = void>
 struct Accessor;
+
+template<>
+struct Accessor<details::UndefinedType, void>
+{
+    typedef int ContainerType;
+};
 
 /**
  * @brief This specialication implements the case, that the Container is indexable.
@@ -42,6 +55,8 @@ struct Accessor;
 template<typename TContainer >
 struct Accessor<TContainer, typename std::enable_if<traits::IsIndexable<TContainer>::value>::type> 
 {
+    
+    typedef TContainer ContainerType;
 
     
     template<typename TComponent,
@@ -52,21 +67,10 @@ struct Accessor<TContainer, typename std::enable_if<traits::IsIndexable<TContain
         TComponent* componentenPtr, 
         const TIndex& pos)
     const
-    -> TComponent*
+    -> TComponent&
     
     {
-        typedef traits::NumberElements< TContainer> NbElem;
-        NbElem nbElem;        
-
-        if(pos < nbElem.size(*containerPtr) && pos >= 0)
-        {
-            return &((*containerPtr)[pos]); 
-        }
-        else 
-        {
-            return nullptr;
-        }
-        
+        return ((*containerPtr)[pos]); 
     }
 }; // Accessor< Indexable >
 
@@ -84,7 +88,7 @@ struct Accessor<SuperCell<TFrame>, void >
     typedef FrameType                       ReturnType;
     typedef ReturnType&                     ReturnReference;
     typedef ReturnType*                     ReturnPtr;
-
+    typedef SuperCell<TFrame>               ContainerType;
     template<typename TContainer, 
              typename TComponent,
              typename TIndex>
@@ -92,11 +96,56 @@ struct Accessor<SuperCell<TFrame>, void >
     auto 
     get(TContainer* con, TComponent* com, const TIndex& pos)
     const
-    -> TComponent*
+    -> TComponent&
     {
-        return com;
+        return *com;
     }
     
 }; // Accessor < SuperCell >
+
+
+namespace details
+{
+struct UndefinedType;
+
+
+template<
+    typename TContainer>
+auto 
+HDINLINE
+makeAccessor()
+-> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+{
+    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+}   
+} // details
+
+template<
+    typename TContainer>
+auto 
+HDINLINE
+makeAccessor(TContainer&&)
+-> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+{
+    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+}
+
+template<
+    typename TContainer>
+auto 
+HDINLINE
+makeAccessor()
+-> hzdr::Accessor<typename std::remove_reference<TContainer>::type >
+{
+    return hzdr::Accessor<typename std::remove_reference<TContainer>::type>();
+}
+
+auto 
+HDINLINE
+makeAccessor() 
+-> hzdr::Accessor<details::UndefinedType, void>
+{
+    return hzdr::Accessor<details::UndefinedType, void>();
+}
 
 }// namespace hzdr

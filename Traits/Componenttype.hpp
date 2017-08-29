@@ -15,6 +15,10 @@
 
 namespace hzdr 
 {
+namespace details
+{
+struct UndefinedType;
+}
 namespace traits 
 {
 template<typename T>
@@ -24,6 +28,12 @@ template<typename Particle, int_fast32_t size>
 struct ComponentType< hzdr::Frame<Particle, size> >
 {
     typedef Particle type;
+};
+
+template<>
+struct ComponentType<hzdr::details::UndefinedType>
+{
+    typedef hzdr::details::UndefinedType type;
 };
 
 template<typename Frame>

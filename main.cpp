@@ -58,9 +58,15 @@
 #include "Iterator/Collective.hpp"
 
 #include "Tests/Cuda/cuda.hpp"
-
-
-
+#include "DeepIterator.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
+#include "Iterator/Accessor.hpp"
+#include "Iterator/Navigator.hpp"
+#include "Iterator/Policies.hpp"
+#include "Iterator/Collective.hpp"
+#include "Traits/NumberElements.hpp"
+#include "Definitions/hdinline.hpp"
 
 
 
@@ -73,6 +79,56 @@ int main(int argc, char **argv) {
         typedef hzdr::Frame<Particle, 256> Frame;
         typedef hzdr::SuperCell<Frame> Supercell;
 
+        typedef hzdr::SelfValue<uint_fast32_t> Offset;
+        typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+        
+    
+        typedef hzdr::Accessor<Particle> Accessor;
+        Particle particle(1,2);
+        Offset offset(0);
+        auto counter = 0;
+        // first test the iterator
+//         for(auto && iterator = hzdr::makeIterator(
+//                                     particle, 
+//                                     hzdr::makeAccessor(particle),
+//                                     hzdr::makeNavigator(particle, 
+//                                                      hzdr::Direction::Forward(),
+//                                                      offset, 
+//                                                      Jumpsize(1)) ); 
+//             not iterator.isAtEnd(); 
+//             ++iterator)
+//         {
+//             ++counter;
+//         }
+//         std::cout << "We count " << counter << ", should be 2" << std::endl;
+        counter = 0;
+        Frame frame(100);
+        std::vector<std::string> test;
+        
+
+        auto && iter = hzdr::makeIterator(frame,
+                            hzdr::makeAccessor(frame), 
+                            hzdr::makeNavigator(frame,
+                                                hzdr::Direction::Forward(),
+                                                Offset(0),
+                                                Jumpsize(1)),
+                            hzdr::make_child(hzdr::makeAccessor(),
+                                             hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                                 Offset(0),
+                                                                 Jumpsize(1))));
+                                                
+        for(; not iter.isAtEnd(); ++iter)
+        {
+  //           std::cout << "size Frame" <<frame.nbParticlesInFrame << std::endl;
+             std::cout << *iter << std::endl;
+            counter ++;
+            if(counter > 205) break;
+        }
+        std::cout << "Counter" << counter << std::endl;
+// //         
+        
+        
+        
 
 /** 1. erstellen eines 2d Arrays auf der GPU. Die zweite Dimension ist dabei 256
  * Elemente groß.

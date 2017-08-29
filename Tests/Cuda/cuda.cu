@@ -2,6 +2,9 @@
 #include "PIC/SupercellManager.hpp"
 #include "PIC/SupercellContainer.hpp"
 #include "PIC/SupercellContainerManager.hpp"
+#include "Iterator/Policies.hpp"
+#include "DeepIterator.hpp"
+#include "Iterator/Accessor.hpp"
 #undef _OPENMP
 #include "View.hpp"
 /***************************************************************
@@ -14,22 +17,28 @@ FrameInSuperCell(Supercell *supercell, const int nbParticleInLastFrame)
 {  
    
     typedef typename Supercell::FrameType Frame;
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef hzdr::SelfValue<uint_fast32_t, 256> Jumpsize_256;
+    auto it=hzdr::makeIterator(
+        *supercell, 
+        hzdr::makeAccessor(*supercell),
+        hzdr::makeNavigator(
+            *supercell,
+            hzdr::Direction::Forward(),
+            Offset(0),
+            Jumpsize(1)),
+        hzdr::make_child(
+            hzdr::makeAccessor(),
+            hzdr::makeNavigator(
+                hzdr::Direction::Forward(),
+                Offset(threadIdx.x),
+                Jumpsize_256())));
+                                            
 
-    
-    
-    
-
-    const auto offset = threadIdx.x;
-    typedef hzdr::View<Frame, hzdr::Direction::Forward<256>> ParticleInFrame;
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> view(supercell, ParticleInFrame(offset)); 
-    auto it=view.begin();
-    printf("Offset %i\n", it.childIter.index);
-     for(; it!=view.end(); ++it)
+     for(; not it.isAtEnd(); ++it)
      {
-         if(*it)
-         {
-             (**it).data[0] += 1;
-         }
+        (*it).data[0] += 1;
      }
 }
 
@@ -55,7 +64,55 @@ callSupercellAddOne(Supercell** supercell, int Frames, int nbParticleInFrame)
 
 /***************************************************************
  * second Test case: Add all Particles of the Supercell together
+ * @brief Within this test we do some particle-particle stuff. We use the current 
+ * supercell and the next supercell. We read from the data[1] and write in data[0].
+ * Our operation is an add. Some wie add all values in the current, and the next 
+ * supercell
+ * 
+ * The particles are stored in frames, which belong to a supercell. We store the 
+ * supercells in a supercellcontainer.
  * *************************************************************/
+
+template<typename T=void>
+__device__ 
+void 
+addParticle(Supercell & cur, int *value)
+{
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    auto itFrame = makeIterator(
+            cur, 
+            makeAccessor(cur),
+            makeNavigator(
+                cur,
+                hzdr::Direction::Forward(),
+                Offset(0),
+                Jumpsize(1)));
+        // over all frames in a supercell
+
+    for(;not itFrame.isAtEnd(); ++itFrame)
+    {
+    //    printf("Inner loop");
+            Frame frame =  *itFrame;
+            
+            __syncthreads();
+            auto itParticle = makeIterator(
+                *itFrame,
+                makeAccessor(*itFrame),
+                makeNavigator(
+                    *itFrame,
+                    hzdr::Direction::Forward(),
+                    Offset(threadIdx.x),
+                    Jumpsize(256)));
+            for(; not itParticle.isAtEnd(); ++itParticle)
+            {
+                
+                value[threadIdx.x] += (*itParticle).data[0];
+            }
+    }
+}
+
+
 template<typename T=void>
 __global__
 void 
@@ -64,79 +121,63 @@ addAllParticlesInSupercell(Supercell *supercell, const int nbSupercells)
     // define all needed types 
     typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
     typedef typename Supercell::FrameType Frame;
-    typedef hzdr::View<SupercellContainer, 
-                       hzdr::Direction::Forward<1> > ViewSupercellContainer;
-    typedef hzdr::View<Frame, 
-                       hzdr::Direction::Forward<1> > ParticleInFrame;
-    typedef  hzdr::View<Supercell,
-                        hzdr::Direction::Forward<256>,  
-                        ParticleInFrame> ParticleInSupercellView;
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     // define shared variables
-    __shared__ int32_t mem[256];
-    __shared__ int32_t result;
     
-    // create the iteratable container.
     SupercellContainer supercellContainer(supercell, nbSupercells);  
-// 
-    // create the first second: over all supercells
-    ViewSupercellContainer viewSupercellContainer(supercellContainer);
- 
-    for(auto itSupercell=viewSupercellContainer.begin();
-        itSupercell != viewSupercellContainer.end();
-        ++itSupercell)
+    
+    auto itSupercell = makeIterator(
+                supercellContainer, 
+                makeAccessor(supercellContainer),
+                makeNavigator(
+                    supercellContainer,
+                    hzdr::Direction::Forward(),
+                    Offset(0),
+                    Jumpsize(1)));
+  //  over all supercells
+    while(not itSupercell.isAtEnd())
     {
-        // Add all particles within the first supercell
+        Supercell & cur = *itSupercell;
+        __shared__ int value[256];
+        value[threadIdx.x] = 0;
+        __syncthreads();
+        addParticle(cur, value);
+        // go to the next supercell
+        ++itSupercell;
+        if(not itSupercell.isAtEnd())
+        {
+            addParticle(cur, value);
+        }
+        
+        // write back
+        __shared__ int result;
         result = 0;
-        mem[threadIdx.x] = 0;
-        if(*itSupercell)
-        {
-            ParticleInSupercellView viewSupercell(**itSupercell);
-            
-            for(auto itParticle = viewSupercell.begin();
-                    itParticle != viewSupercell.end();
-                    ++itParticle)
-            {
-                if(*itParticle)
-                    mem[threadIdx.x] += (**itParticle).data[0];
-            }
-            
-        }
-        // add all particles within the second supercell
-        auto nextSupercell = itSupercell;
-        ++nextSupercell;
-        if(*(nextSupercell))
-        {
-            ParticleInSupercellView viewSupercell(**(nextSupercell));
-            
-            for(auto itParticle = viewSupercell.begin();
-                    itParticle != viewSupercell.end();
-                    ++itParticle)
-            {
-                if(*itParticle)
-                    mem[threadIdx.x] += (**itParticle).data[0];
-            }
-            
-        }
-        // write the results back
-        atomicAdd(&result, mem[threadIdx.x]);
         __syncthreads();
         
-                if(*itSupercell)
+        atomicAdd(&result, value[threadIdx.x]);
+        __syncthreads();
+        auto itParticle = hzdr::makeIterator(
+            cur, 
+            hzdr::makeAccessor(cur),
+            hzdr::makeNavigator(
+                cur,
+                hzdr::Direction::Forward(),
+                Offset(0),
+                Jumpsize(1)),
+            hzdr::make_child(
+                hzdr::makeAccessor(),
+                hzdr::makeNavigator(
+                    hzdr::Direction::Forward(),
+                    Offset(threadIdx.x),
+                    Jumpsize(256))));
+        for(; not itParticle.isAtEnd(); ++itParticle)
         {
-            ParticleInSupercellView viewSupercell(**itSupercell);
-            
-            for(auto itParticle = viewSupercell.begin();
-                    itParticle != viewSupercell.end();
-                    ++itParticle)
-            {
-                if(*itParticle)
-                    (**itParticle).data[1] = result;
-            }
-            
+            (*itParticle).data[1] = result;
         }
         
     }
-    
+        
 
 }
 

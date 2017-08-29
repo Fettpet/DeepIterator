@@ -24,36 +24,84 @@ namespace hzdr
 
 namespace Direction
 {
-template<uint_fast32_t jumpsize>
+
 struct Forward 
-{
-    static_assert(jumpsize != 0, "Jumpsize need to be greater than 0");
-    
-    constexpr
-    uint_fast32_t 
-    getJumpsize()
-    const
-    {
-        return jumpsize;
-    }
-};
+{};
 
-template<uint_fast32_t jumpsize>
+
 struct Backward
+{};
+
+
+}
+
+
+
+/**
+ * @brief This class gets a value with the constructor. The value is returned 
+ * with the operator ().
+ */
+template<typename T, unsigned value = 0>
+struct SelfValue;
+
+
+template<typename T, unsigned value>
+struct SelfValue
 {
-    static_assert(jumpsize != 0, "Jumpsize need to be greater than 0");
+    HDINLINE
+    SelfValue() = default;
     
-    constexpr
-    uint_fast32_t 
-    getJumpsize()
-    const
+    HDINLINE
+    SelfValue(SelfValue const &) = default;
+    
+    HDINLINE
+    SelfValue(SelfValue&&) = default;
+    
+    
+    HDINLINE
+    SelfValue& operator=( SelfValue const &) = default;
+    
+    HDINLINE
+    T 
+    operator() ()
+    const 
     {
-        return jumpsize;
+        return value;
     }
 };
 
+
+template<typename T>
+struct SelfValue<T, 0>
+{
     
-}
+    HDINLINE
+    SelfValue(T const & value):
+        value(value)
+        {}
+    
+    HDINLINE
+    SelfValue(SelfValue const &) = default;
+    
+    HDINLINE
+    SelfValue(SelfValue&&) = default;
+    
+    HDINLINE
+    SelfValue() = delete;
+    
+    HDINLINE
+    SelfValue& operator=( SelfValue const &) = default;
+    
+    HDINLINE
+    T 
+    operator() ()
+    const 
+    {
+        return value;
+    }
+protected:
+    T value;
+};
 
 /**
  * @brief The NoChild is used to define the last layer in a nested Iterator
@@ -61,3 +109,4 @@ struct Backward
 struct NoChild {};
     
 }
+

@@ -59,6 +59,14 @@ struct NumberElements<hzdr::Frame<TParticle, nb> >
     {
         return f.nbParticlesInFrame;    
     }
+    
+    HDINLINE
+    int_fast32_t 
+    size( Frame&& f)
+    const
+    {
+        return f.nbParticlesInFrame;    
+    }
 }; // struct NumberElements
 
 template<typename TPos, int_fast32_t nb>

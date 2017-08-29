@@ -1,4 +1,5 @@
 
+
 #define BOOST_TEST_MODULE NestedIterator
 #include <boost/test/included/unit_test.hpp>
 
@@ -22,28 +23,28 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
  
     Supercell cell(5, 2);
     
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    auto && it = hzdr::makeIterator(*(cell.firstFrame), 
+                               hzdr::makeAccessor(*(cell.firstFrame)),
+                               hzdr::makeNavigator(*(cell.firstFrame), 
+                                              hzdr::Direction::Forward(),
+                                              Offset(0),
+                                              Jumpsize(1)),
+                               hzdr::make_child(hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                Offset(0),
+                                                Jumpsize(1))));
 
-    
-
-    typedef hzdr::View<Particle, hzdr::Direction::Forward<1> > PositionInParticleContainer;
-    
-    hzdr::View< Frame, 
-                    hzdr::Direction::Forward<1>, 
-                    PositionInParticleContainer > test(cell.firstFrame); 
-                     
     uint counter=0;
-    for(auto it=test.begin(); it!=test.end(); ++it)
+    for(; not it.isAtEnd(); ++it)
     {
-        if(*it)
-        {
-            counter += (**it);
-            
-        }
+        counter += (*it);
     }
 //     
 //     // sum([0, 19]) = 190
     BOOST_TEST((counter == 190)); 
-//  
+// //  
 }
 
 
@@ -55,163 +56,209 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
     /** //////////////////////////////////////////////////////////////////
      * First Test with two loops and unnested Iterator
      *///////////////////////////////////////////////////////////////////
-    hzdr::View<Supercell, hzdr::Direction::Forward<1> > con(&cell);
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    auto && it = hzdr::makeIterator(cell, 
+                               hzdr::makeAccessor(cell),
+                               hzdr::makeNavigator(cell,
+                                              hzdr::Direction::Forward(),
+                                              Offset(0),
+                                              Jumpsize(1)),
+                               hzdr::make_child(hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                Offset(0),
+                                                Jumpsize(1))));
      
-    auto it=con.begin();
+    
 
-    BOOST_TEST((**it).particles[0] == Particle(100, 101));
+    BOOST_TEST((*it) == Particle(100, 101));
     uint counter(0);
-    for(; it!=con.end(); ++it)
+    for(; not it.isAtEnd(); ++it)
     {
-        
-     //   std::cout << "Hello world" << std::endl;
-        
-        auto wrap = *it;
-        if(wrap)
-        {
-
-            auto t = (*wrap);
-            hzdr::View<Frame, hzdr::Direction::Forward<1> > innerCon(&t);
-            for(auto it2=innerCon.begin(); it2 != innerCon.end(); ++it2)
-            {
-                auto wrapInner = *it2;
-                if(wrapInner)
-                {
-                    counter++;
-                    
-                }
-            }
-        }
+        counter++;            
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 42);
 
-    /***************************
-     * Second test with a nested Iterator
-     * ************************/
-    // All Particle within a Supercell
-    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
+}
+
+
+BOOST_AUTO_TEST_CASE(PositionsInSupercell)
+{
+
+
+    Supercell cell(5, 2);
+    /** //////////////////////////////////////////////////////////////////
+     * First Test with two loops and unnested Iterator
+     *///////////////////////////////////////////////////////////////////
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    auto && it = hzdr::makeIterator(cell, 
+                               hzdr::makeAccessor(cell),
+                               hzdr::makeNavigator(cell,
+                                              hzdr::Direction::Forward(),
+                                              Offset(0),
+                                              Jumpsize(1)),
+                                    hzdr::make_child(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                    Offset(0),
+                                                    Jumpsize(1)),
+                                                hzdr::make_child(
+                                                    hzdr::makeAccessor(),
+                                                    hzdr::makeNavigator(hzdr::Direction::Forward(),
+                                                        Offset(0),
+                                                        Jumpsize(1)))));
+     
     
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> test(cell); 
-    
-    counter = 0;
-    for(auto it=test.begin(); it!=test.end(); ++it)
+
+    uint counter(0);
+    for(; not it.isAtEnd(); ++it)
     {
-        if(*it)
-        {
-            counter += (**it).data[0] + (**it).data[1];
-            
-        }
+        counter++;            
     }
-    // the first position starts at 100
-    // sum ( [100, 184] )
-     BOOST_TEST(counter == 11886);
-    // Second test: 
+    // There are 4 full frames with 10 Elements an one frame with 2 elements
+    BOOST_TEST(counter == 84);
 
 }
 
 
 BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
 {
-    const int nbSuperCells = 5;
-    const int nbFramesInSupercell = 2;
-    SupercellContainer supercellContainer(nbSuperCells, nbFramesInSupercell);
-    
-    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
-    
-
-    
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell1(supercellContainer[0]); 
-// create the second iteartor
-
-    
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell2(supercellContainer[1]);
-// first add all 
-    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
-    {
-        if(*it)
-        {
-            (**it).data[0] = 0;
-        }
-
-        for(auto it2 = iterSuperCell2.begin(); it2 != iterSuperCell2.end(); ++it2)
-        {
-            // check wheter both are valid
-            if(*it and *it2)
-            {
-                (**it).data[0] += (**it2).data[1];
-            }
-        }
-    }
-    
-// second all particles within the first supercell must have the same value
-    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
-    {
-        for(auto it2 = iterSuperCell1.begin(); it2 != iterSuperCell1.end(); ++it2)
-        {
-            // check wheter both are valid
-            if(*it and *it2)
-            {
-                BOOST_TEST((**it).data[0] == (**it2).data[0]);
-            }
-        }
-    }
+//     const int nbSuperCells = 5;
+//     const int nbFramesInSupercell = 2;
+//     SupercellContainer supercellContainer(nbSuperCells, nbFramesInSupercell);
+//     
+//     typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
+//     
+// 
+//     
+//     hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell1(supercellContainer[0]); 
+// // create the second iteartor
+// 
+//     
+//     hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell2(supercellContainer[1]);
+// // first add all 
+//     for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+//     {
+//         if(*it)
+//         {
+//             (**it).data[0] = 0;
+//         }
+// 
+//         for(auto it2 = iterSuperCell2.begin(); it2 != iterSuperCell2.end(); ++it2)
+//         {
+//             // check wheter both are valid
+//             if(*it and *it2)
+//             {
+//                 (**it).data[0] += (**it2).data[1];
+//             }
+//         }
+//     }
+//     
+// // second all particles within the first supercell must have the same value
+//     for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+//     {
+//         for(auto it2 = iterSuperCell1.begin(); it2 != iterSuperCell1.end(); ++it2)
+//         {
+//             // check wheter both are valid
+//             if(*it and *it2)
+//             {
+//                 BOOST_TEST((**it).data[0] == (**it2).data[0]);
+//             }
+//         }
+//     }
     
 }
 
-// #if 0
-// BOOST_AUTO_TEST_CASE(ParticlesWithSimulatedThreads)
-// {
-//     /**
-//      * First Test, check whether the right number of invalid objects are detected
-//      * 
-//      */
-//     Supercell cell(5, 2);
-// 
-//     for(int nbThreads = 2; nbThreads <=5; ++nbThreads)
-//     {
-// 
-//         int count = 0;
-//         for(int i=0; i<nbThreads; ++i)
-//         {   
-//             const int jumpsizeFrame2 = 1;
-//             const int offsetFrame2 = 0;
-//             const int nbElementsFrame2 = 0;
-//             
-//             const RuntimeTuple runtimeSupercell2(offsetFrame2, nbElementsFrame2, jumpsizeFrame2);
-//             
-//             const int jumpsizeParticle2 = nbThreads;
-//             const int offsetParticle2 = i;
-//             const int nbElementsParticle2 = cell.nbParticlesInLastFrame;
-//             
-//             const RuntimeTuple runtimeVarParticle2(offsetParticle2, nbElementsParticle2, jumpsizeParticle2);
-//             
-//             hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell(cell, 
-//                                                                                                                                     runtimeSupercell2,
-//                                                                                                                                     ParticleInFrame(nullptr, runtimeVarParticle2)); 
-//             for(auto it=iterSuperCell.begin(); it != iterSuperCell.end(); ++it)
-//             {
-//                 if(not *it)
-//                 {
-//                     ++count;
-//                 }
-//             }   
-//         }
-//         if(nbThreads == 2)
-//             BOOST_TEST(count == 4);
-//         
-//         if(nbThreads == 3)
-//             BOOST_TEST(count == 5);
-//         if(nbThreads == 4)
-//             BOOST_TEST(count == 12);
-//         if(nbThreads == 5)
-//             BOOST_TEST(count == 3);
-//     }
-// 
-// /**
-//  * Second test: 
-//  */
-// }
-// #endif
-// 
-// 
+
+BOOST_AUTO_TEST_CASE(ParticlesWithSimulatedThreads)
+{
+    /**
+     * First Test, check whether the right number of invalid objects are detected
+     * We have a supercell with 5 frames. The first four frames have 10 particles.
+     * The last frame has two particles. I.e there are 42 particles. We iterate 
+     * over all particles.
+     */
+    Supercell cell(5, 2);
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    for(int nbThreads = 2; nbThreads <=5; ++nbThreads)
+    {
+
+        int count = 0;
+        auto myId = 1;
+
+        auto && it = hzdr::makeIterator(
+                        cell,
+                        hzdr::makeAccessor(cell),
+                        hzdr::makeNavigator(
+                            cell, 
+                            hzdr::Direction::Forward(),
+                            Offset(0),
+                            Jumpsize(1)),
+                        hzdr::make_child(
+                            hzdr::makeAccessor(),
+                            hzdr::makeNavigator(
+                                hzdr::Direction::Forward(),
+                                Offset(myId),
+                                Jumpsize(nbThreads))));
+            
+       
+        for(; not it.isAtEnd(); ++it)
+        {
+            ++count;
+        }   
+        if(nbThreads == 2)
+        {
+            // 1,3,5,7,9
+            BOOST_TEST(count == 5 * 4 + 1);
+        }
+        if(nbThreads == 3)
+            // 1,4,7
+            BOOST_TEST(count == 3*4 + 1);
+        if(nbThreads == 4)
+            // 1, 5, 9
+            BOOST_TEST(count == 3 *4 + 1);
+        if(nbThreads == 5)
+            // 1, 6
+            BOOST_TEST(count == 2 * 4 + 1);
+        
+        /**
+         * second test, write and check the result
+         * 
+         */
+        for(auto myId=0; myId<nbThreads;++myId)
+        {
+            auto it2 = hzdr::makeIterator(
+                                cell,
+                                hzdr::makeAccessor(cell),
+                                hzdr::makeNavigator(
+                                    cell, 
+                                    hzdr::Direction::Forward(),
+                                    Offset(0),
+                                    Jumpsize(1)),
+                                hzdr::make_child(
+                                    hzdr::makeAccessor(),
+                                    hzdr::makeNavigator(
+                                        hzdr::Direction::Forward(),
+                                        Offset(myId),
+                                        Jumpsize(nbThreads))));
+            for(; not it2.isAtEnd(); ++it2)
+            {
+                //syncThreads() // geht nicht wegen deadlock
+                auto value = (*it2).data[1] == -1;
+                if((*it2).data[1] == -1)
+                {
+                    it2.childIterator.isAtEnd();
+                }
+                (*it2).data[0] = myId;
+                BOOST_TEST((*it2).data[0] == myId);
+                
+            }       
+        }
+    }
+
+}
+
+

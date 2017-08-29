@@ -5,7 +5,6 @@
  * previousFrame. Only the last frame is not full with particles. The supercell
  * stores the number of particles in the last frame. Each supercell has two 
  * pointers to frame: firstFrame and lastFrame.
- * 
  */
 #pragma once
 #include <iostream>
@@ -46,13 +45,13 @@ struct SuperCell
     HDINLINE
     ~SuperCell() 
     {
-//         TFrame* cur = firstFrame;
-//         while(cur != nullptr)
-//         {
-//             TFrame* buffer = cur->nextFrame;
-//             delete cur;
-//             cur = buffer;
-//         }
+        TFrame* cur = firstFrame;
+        while(cur != nullptr)
+        {
+            TFrame* buffer = cur->nextFrame;
+            delete cur;
+            cur = buffer;
+        }
     }
     
     HDINLINE
@@ -104,7 +103,8 @@ struct SuperCell
         
     }
     
-    TFrame *firstFrame, *lastFrame;
+    TFrame *firstFrame = nullptr;
+    TFrame *lastFrame = nullptr;
  //   uint32_t nbParticlesInLastFrame;
 }; // struct SuperCell
 
