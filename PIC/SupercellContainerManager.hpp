@@ -18,22 +18,22 @@ __global__
 void
 appendFrame(Supercell* supercell, Frame* frame, int i)
 {
-    frame->previousFrame = nullptr;
-    frame->nextFrame = nullptr;
-    if(supercell[i].firstFrame == nullptr)
+    frame->previous = nullptr;
+    frame->next = nullptr;
+    if(supercell[i].first == nullptr)
     {
-        supercell[i].firstFrame = frame;
-        supercell[i].lastFrame = frame;
+        supercell[i].first = frame;
+        supercell[i].last = frame;
         return;
     }
-    Frame* buffer = supercell[i].firstFrame;
-    while(buffer->nextFrame != nullptr)
+    Frame* buffer = supercell[i].first;
+    while(buffer->next != nullptr)
     {
-        buffer = buffer->nextFrame;
+        buffer = buffer->next;
     }
-    buffer->nextFrame = frame;
-    frame->previousFrame = buffer;
-    supercell[i].lastFrame = frame;
+    buffer->next = frame;
+    frame->previous = buffer;
+    supercell[i].last = frame;
 }
 
 template<typename Supercell>
@@ -41,8 +41,8 @@ __global__
 void 
 resetSupercell(Supercell* supercell, int id)
 {
-    supercell[id].firstFrame =nullptr;
-    supercell[id].lastFrame = nullptr;
+    supercell[id].first =nullptr;
+    supercell[id].last = nullptr;
 }
 
 
@@ -73,11 +73,11 @@ struct SupercellContainerManager
                 framePointerCPU[i][j] = new Frame();
                 gpuErrchk(cudaMalloc(&framePointerGPU[i][j], sizeof(Frame)));
             }
-            framePointerCPU[i][0] = supercellCPU[i].firstFrame;
+            framePointerCPU[i][0] = supercellCPU[i].first;
             
             for(auto j=1; j<nbFramesSupercell[i]; ++j)
             {
-                framePointerCPU[i][j] = framePointerCPU[i][j-1]->nextFrame;
+                framePointerCPU[i][j] = framePointerCPU[i][j-1]->next;
             }
         }
         gpuErrchk(cudaMalloc(&supercellGPU, nbSupercells * sizeof(Supercell)));
@@ -122,7 +122,7 @@ struct SupercellContainerManager
                 // 1. Alle Frames Kopieren
         for(uint i=0; i<nbFramesSupercell.size(); ++i)
         {
-            supercellCPU[i].firstFrame = framePointerCPU[i][0];
+            supercellCPU[i].first = framePointerCPU[i][0];
             for(auto j=0; j<nbFramesSupercell[i]; ++j)
             {
                 gpuErrchk(cudaMemcpy(framePointerCPU[i][j], framePointerGPU[i][j], sizeof(Frame), cudaMemcpyDeviceToHost));
@@ -130,10 +130,10 @@ struct SupercellContainerManager
             
                     // 2. Linked list wieder erstellen
             for(auto j=0; j<nbFramesSupercell[i]-1; ++j)
-                framePointerCPU[i][j]->nextFrame = framePointerCPU[i][j+1];
+                framePointerCPU[i][j]->next = framePointerCPU[i][j+1];
             
             for(auto j=1; j<nbFramesSupercell[i]; ++j)
-                framePointerCPU[i][j]->previousFrame = framePointerCPU[i][j-1];
+                framePointerCPU[i][j]->previous = framePointerCPU[i][j-1];
         }
     }
     

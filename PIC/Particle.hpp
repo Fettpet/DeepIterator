@@ -6,7 +6,7 @@
 #pragma once
 #include <array>
 #include <iostream>
-
+#include "Iterator/Categorie/ArrayLike.hpp"
 #include "Definitions/hdinline.hpp"
 namespace hzdr 
 {
@@ -138,6 +138,67 @@ struct Particle<TPosition, 2>
 
 }; // struct Particle<TPosition, 2>
 
+// traits
+namespace traits 
+{
+template<typename>
+struct IsBidirectional;
+    
+template<
+    typename TProperty,
+    int_fast32_t maxParticles>
+struct IsBidirectional<Particle<TProperty, maxParticles> >
+{
+    static const bool value = true;
+};
+
+
+template<typename>
+struct IsRandomAccessable;
+
+template<
+    typename TProperty,
+    int_fast32_t maxParticles>
+struct IsRandomAccessable<Particle<TProperty, maxParticles> >
+{
+    static const bool value = true;
+};
+    
+template<typename>
+struct HasConstantSize;
+
+template<
+    typename TProperty,
+    int_fast32_t maxParticles>
+struct HasConstantSize<Particle<TProperty, maxParticles> >
+{
+    static const bool value = true;
+};
+
+template<typename>
+struct ComponentType;
+
+template<
+    typename TProperty,
+    int_fast32_t maxParticles>
+struct ComponentType<Particle<TProperty, maxParticles> >
+{
+    typedef TProperty type;
+};
+
+template<typename>
+struct ContainerCategory;
+
+template<typename TProperty, int_fast32_t nb>
+struct ContainerCategory<Particle<TProperty, nb> >
+{
+    typedef hzdr::container::categorie::ArrayLike type;
+};
+
+} // namespace traits
+
+
+
 template<typename TPos>
 HDINLINE
 std::ostream& operator<<(std::ostream& out, Particle<TPos, 1> const & par)
@@ -158,4 +219,4 @@ int_fast32_t Particle<TPos, 2>::currentValue = 0;
 
 template<typename TPos>
 int_fast32_t Particle<TPos, 1>::currentValue = 0;
-} // namespace PIC
+} // namespace hzdr

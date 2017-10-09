@@ -7,18 +7,18 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set (USE_OPEMMP ON)
 set (USE_CUDA ON)
 set (CMAKE_CXX_STANDARD 11)
-set (MAKE_TEST ON)
+set (MAKE_TEST OFF)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -O3")
 
 
 SET(CUDA_SEPARABLE_COMPILATION ON)
 
 include_directories("./")
-
-#set(BOOST_ROOT "/home/s6303743/boost/")
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+#set(BOOST_ROOT "/home/s6303743/boost/")
+
 if(Boost_FOUND)
     message(STATUS "Boost Include Dirs ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost LIBARAY Dirs  ${Boost_LIBRARIES}")

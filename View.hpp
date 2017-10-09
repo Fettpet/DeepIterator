@@ -1,3 +1,5 @@
+#pragma once
+
 // /**
 //  * \struct View
 //  * @author Sebastian Hahn (t.hahn@hzdr.de )
@@ -45,261 +47,150 @@
 //     component is given to the child.
 //  */
 // 
-// #pragma once
-// #include "DeepIterator.hpp"
-// #include "PIC/Frame.hpp"
-// #include "PIC/Particle.hpp"
-// #include "Iterator/Accessor.hpp"
-// #include "Iterator/Navigator.hpp"
-// #include "Iterator/Policies.hpp"
-// #include "Iterator/Collective.hpp"
-// #include "Traits/NumberElements.hpp"
-// #include "Definitions/hdinline.hpp"
-// #include <type_traits>
-// namespace hzdr 
-// {
-//     
-// 
-//    
-// template<
-//     typename TContainer,
-//     typename TDirection,
-//     typename TOffset,
-//     typename TJumpsize,
-//     typename TChild = NoChild>
-// struct View
-// {
-// public:
-// // Datatypes    
-//     typedef TContainer                                                                                              ContainerType;
-//     typedef ContainerType*                                                                                          ContainerPtr;
-//     typedef typename traits::ComponentType<ContainerType>::type                                                     ComponentType;
-//     typedef TChild                                                                                                  ChildType; 
-//     typedef Navigator<ContainerType, TDirection, TOffset, TJumpsize>                                                NavigatorType;
-//     typedef Accessor<ContainerType>                                                                                 AccessorType;
-//     typedef Wrapper< ComponentType>                                                                                 WrapperType;
-//     typedef DeepIterator<ContainerType, AccessorType, NavigatorType,
-//                                                 WrapperType, ChildType>                                             iterator; 
-//     typedef iterator                                                                                                Iterator; 
-// 
-//     
-// public:
-//     
-//     
-// /***************
-//  * constructors without childs
-//  **************/
-//     HDINLINE
-//     View():
-//         ptr(nullptr)
-//         {}
-//         /**
-//      * @param container The element 
-//      */
-//         
-//     HDINLINE
-//     View(ContainerType& container):
-//         ptr(&container)
-//     {}
-//     HDINLINE
-//     View(ContainerPtr con):
-//         ptr(con)
-//     {}
-//     
-//     HDINLINE
-//     View(const View& other) = default;
-//     
-//     HDINLINE
-//     View(View&& other) = default;
-//     
-//     
-//     HDINLINE
-//     View(const View& other, ContainerPtr con):
-//         offset(other.offset),
-//         ptr(con)
-//         {}
-//     
-//     HDINLINE
-//     View(const View& other, ContainerPtr con, ChildType& child ):
-//         offset(other.offset),
-//         ptr(con),
-//         childView(child)
-//         {}
-//     
-//     
-//     /**
-//      * @param container The element 
-//      */
-//     HDINLINE
-//     View(ContainerType& container, ChildType& child):
-//         ptr(&container), 
-//         childView(child)
-//     {}
-//     
-//     HDINLINE
-//     View(ContainerPtr con,ChildType& child):
-//         offset(0),
-//         ptr(con),
-//         childView(child)
-//         {}
-//         
-//     
-//     HDINLINE
-//     View(ContainerPtr con, ChildType&& child):
-//         offset(0),
-//         ptr(con),
-//         childView(std::move(child))
-//     {}
-//     
-//     
-//     HDINLINE
-//     View(ContainerType& container, 
-//          const TOffset& offset, 
-//          const TJumpsize& jumpsize, 
-//          ChildType& child):
-//         offset(offset),
-//         jumpsize(jumpsize),
-//         ptr(&container), 
-//         childView(child)
-//     {}
-//     
-//         HDINLINE
-//     View(ContainerType& container, 
-//          const TOffset& offset, 
-//          const TJumpsize& jumpsize, 
-//          ChildType&& child):
-//         offset(offset),
-//         jumpsize(jumpsize),
-//         ptr(&container), 
-//         childView(child)
-//     {}
-//     
-//     HDINLINE
-//     View(ContainerPtr con,
-//          const TOffset& offset, 
-//          const TJumpsize& jumpsize,
-//          ChildType& child):
-//         offset(offset),
-//         jumpsize(jumpsize),
-//         ptr(con),
-//         childView(child)
-//         {}
-//         
-//     HDINLINE
-//     View(ContainerPtr con,
-//          const TOffset& offset, 
-//          const TJumpsize& jumpsize,
-//          ChildType&& child):
-//         offset(offset),
-//         jumpsize(jumpsize),
-//         ptr(con),
-//         childView(child)
-//         {}
-//         
-//         
-//     HDINLINE    
-//     View& operator=(View&& other) = default;
-// 
-//     
-//     HDINLINE
-//     View& operator=(const View& other) = default;
-//     
-//     /**
-//      * 1. Iterator with runtime and offset
-//      */
-//     
-//     template< bool test =  std::is_same<ChildType, NoChild>::value>
-//     HDINLINE
-//     typename std::enable_if<test, Iterator>::type 
-//     begin() 
-//     const
-//     {
-//        
-//        return Iterator( ptr, AccessorType(), NavigatorType(offset, jumpsize));
-//     }
-//     
-//     
-//     template< bool test = not std::is_same<ChildType, NoChild>::value, typename TUnused =void>
-//     HDINLINE
-//     typename std::enable_if<test, Iterator>::type                                       
-//     begin() 
-//     const
-//     {
-//        return Iterator(ptr,childView, offset);
-//     }
-//     
-// 
-//     
-//     
-//     HDINLINE
-//     nullptr_t
-//     end() 
-//     const 
-//     {
-//             return nullptr;
-//     }
-// 
-//     HDINLINE
-//     void
-//     setPtr(ContainerPtr _ptr)
-//     {
-//         ptr = _ptr;
-//     }
-//     
-//     HDINLINE
-//     void
-//     setPtr(const View& other)
-//     {
-//         ptr = other.ptr;
-//     }
-//     
-// protected:
-//     ContainerPtr ptr;
-//     ChildType childView;
-//     TOffset offset;
-//     TJumpsize jumpsize;
-// }; // struct View
-// 
-// 
-// 
-// template<typename TContainer,
-//          typename TDirection,
-//          typename TChild>
-// auto make_view(TContainer& container, 
-//                TDirection, 
-//                const uint_fast32_t& offset, 
-//                const uint_fast32_t& jumpsize, 
-//                const TChild& child) 
-// -> hzdr::View<TContainer, 
-//               TDirection,
-//               SelfValue<uint_fast32_t>,
-//               SelfValue<uint_fast32_t>,
-//               TChild>
-// {
-//     
-//     typedef SelfValue<uint_fast32_t> Offset;
-//     typedef SelfValue<uint_fast32_t> Jumpsize;
-//     return hzdr::View<TContainer, TDirection, Offset, Jumpsize, TChild>(container, Offset(offset), Jumpsize(jumpsize), child);
-// }
-// 
-// 
-// template<typename TContainer,
-//          typename TDirection>
-// auto make_view(TContainer& container, 
-//                TDirection, 
-//                const uint_fast32_t& offset, 
-//                const uint_fast32_t& jumpsize) 
-// -> hzdr::View<TContainer,
-//               TDirection, 
-//               SelfValue<uint_fast32_t>,
-//               SelfValue<uint_fast32_t>,
-//               hzdr::NoChild>
-// {
-//     typedef SelfValue<uint_fast32_t> Offset;
-//     typedef SelfValue<uint_fast32_t> Jumpsize;
-// 
-//     return hzdr::View<TContainer, TDirection, Offset, Jumpsize, hzdr::NoChild>(container, Offset(offset), Jumpsize(jumpsize), hzdr::NoChild());
-// }
-// 
-// 
-// } // namespace hzdr
+#pragma once
+#include "DeepIterator.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
+#include "Iterator/Accessor.hpp"
+#include "Iterator/Navigator.hpp"
+#include "Iterator/Policies.hpp"
+#include "Iterator/Collective.hpp"
+#include "Traits/NumberElements.hpp"
+#include "Definitions/hdinline.hpp"
+#include <type_traits>
+namespace hzdr 
+{
+
+/**
+ * Anforderungen an den Deep Iterator:
+ * Ich will über mehrere Ebenen iterieren können. In jeder Ebene soll unabhängig 
+ * ein start element einstellbar sein. Hierfür wird ein Offset benötigt. 
+ * Jede Ebene soll unterschiedlich viele Elemente überspringen dürfen. Hierfür 
+ * ist eine Jumpsize nötig
+ * Ich muss die art der Bewegung irgendwie spezifizieren
+ */
+
+//makeView<WalkPolicy>(Offset, Jumpsize, Child);
+
+
+template<
+    typename TContainer,
+    typename TAccessor,
+    typename TNavigator,
+    typename TChild>
+struct View
+{
+public:
+    typedef TContainer ContainerType;
+    typedef ContainerType* ContainerPtr;
+    typedef ContainerType& ContainerRef;
+    
+    typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
+    typedef ComponentType*                                              ComponentPtr;
+    typedef ComponentType&                                              ComponentRef;
+    
+    typedef TAccessor AccessorType;
+    typedef TNavigator NavigatorType;
+    typedef TChild ChildType;
+    
+    typedef DeepIterator<
+        ContainerType,
+        AccessorType,
+        NavigatorType,
+        ChildType> IteratorType;
+        
+    View() = default;
+    View(View const &) = default;
+    View(View &&) = default;
+    
+    template<
+        typename TAccessor_,
+        typename TNavigator_,
+        typename TChild_>
+    View(
+         ContainerType& container,
+         TAccessor_ && accessor,
+         TNavigator_ && navigator,
+         TChild_ && child
+        ):
+        containerPtr(&container),
+        accessor(std::forward<TAccessor_>(accessor)),
+        navigator(std::forward<TNavigator_>(navigator)),
+        child(std::forward<TChild_>(child))
+    {}
+        
+    HDINLINE
+    IteratorType
+    end()
+    {
+        return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::end());
+    }
+    
+    HDINLINE
+    IteratorType 
+    rbegin()
+    {
+        return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::rbegin());
+    }
+    
+    HDINLINE
+    IteratorType 
+    rend()
+    {
+        return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::rend());
+    }
+        
+    HDINLINE
+    IteratorType
+    begin()
+    {
+        return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::begin());
+    }
+
+
+
+protected:
+    ContainerPtr containerPtr;
+    AccessorType accessor;
+    NavigatorType navigator;
+    ChildType child;
+};
+
+template<
+    typename TContainer,
+    typename TConcept,
+    typename ContainerNoRef = typename std::decay<TContainer>::type,
+    typename ComponentType = typename traits::ComponentType<ContainerNoRef>::type>
+auto 
+makeView(
+    TContainer && con, 
+    TConcept && concept)
+->
+    View<
+        ContainerNoRef,
+        decltype(details::makeAccessor<ContainerNoRef>(std::forward<TConcept>(concept).accessor)),
+        decltype(details::makeNavigator<ContainerNoRef>(std::forward<TConcept>(concept).navigator)),
+        decltype(details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child))>
+{
+
+        
+        typedef ContainerNoRef                          ContainerType;
+
+        typedef decltype(details::makeAccessor<ContainerNoRef>( std::forward<TConcept>(concept).accessor)) AccessorType;
+        typedef decltype(details::makeNavigator<ContainerNoRef>( std::forward<TConcept>(concept).navigator)) NavigatorType;
+        typedef decltype(details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child)) ChildType;
+        typedef View<
+            ContainerType,
+            AccessorType,
+            NavigatorType,
+            ChildType> ResultType;
+     //   std::forward<TConcept>(concept).navigator.T();
+        
+        return ResultType(
+            std::forward<TContainer>(con), 
+            details::makeAccessor<ContainerNoRef>(std::forward<TConcept>(concept).accessor), 
+            details::makeNavigator<ContainerNoRef>(std::forward<TConcept>(concept).navigator), 
+            details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child));
+}
+
+} // namespace hzdr

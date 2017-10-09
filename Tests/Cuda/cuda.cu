@@ -1,3 +1,4 @@
+#if 0
 #include "Tests/Cuda/cuda.hpp"
 #include "PIC/SupercellManager.hpp"
 #include "PIC/SupercellContainer.hpp"
@@ -196,3 +197,4 @@ void callSupercellSquareAdd(Supercell*** superCellContainer, int nbSupercells, s
     }
     
 }
+#endif

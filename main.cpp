@@ -70,23 +70,106 @@
 
 
 
-int main(int argc, char **argv) {
 
-        std::vector<int> nbFrames{2,3,4};
-        std::vector<int> nbParticles{100,200,150};
+
+int main(int , char **) {
+
+    std::vector<int> nbFrames{2,3,4};
+    std::vector<int> nbParticles{100,200,150};
     
-        typedef hzdr::Particle<int32_t, 2> Particle;
-        typedef hzdr::Frame<Particle, 256> Frame;
-        typedef hzdr::SuperCell<Frame> Supercell;
+    typedef hzdr::Particle<int32_t, 2> Particle;
+    typedef hzdr::Frame<Particle, 10> Frame;
+    typedef hzdr::SuperCell<Frame> Supercell;
 
-        typedef hzdr::SelfValue<uint_fast32_t> Offset;
-        typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
         
     
-        typedef hzdr::Accessor<Particle> Accessor;
-        Particle particle(1,2);
-        Offset offset(0);
-        auto counter = 0;
+    Supercell test(5, 5);
+    
+    
+    auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                                hzdr::makeAccessor(),
+                                hzdr::makeNavigator(
+                                    Offset(0),
+                                    Jumpsize(1)),
+                                hzdr::makeIteratorConcept(
+                                    hzdr::makeAccessor(),
+                                    hzdr::makeNavigator(
+                                        Offset(0),
+                                        Jumpsize(1))));
+                            
+    
+
+    auto view = makeView(test,
+                         childConceptJump1);
+    
+    std::cout << test << std::endl;
+    auto it = view.begin();
+    std::cout << std::boolalpha << "Constant Size: " << it.hasConstantSize << std::endl;
+    std::cout << "RandomAccessable: " << it.isRandomAccessable << std::endl;
+    std::cout << "hasConstantSizeChild " << it.hasConstantSizeChild << std::endl;
+    std::cout << "selfCompileTimeSize " << it.selfCompileTimeSize << std::endl;
+    int counter = 0;
+    
+//     for(auto && it=view.begin(); it!= view.end(); it += 3)
+//     {
+//         if(++counter > 60) 
+//             break;
+//         std::cout << *it << std::endl;
+//     }
+//     
+//     for(auto && it=view.begin(); it!= view.end(); it += 3)
+//     {
+//         if(++counter > 50) 
+//             break;
+//         std::cout << *it << std::endl;
+//     }
+    
+    auto  childConceptOffset2 = hzdr::makeIteratorConcept(
+                                hzdr::makeAccessor(),
+                                hzdr::makeNavigator(
+                                    Offset(0),
+                                    Jumpsize(1)),
+                                hzdr::makeIteratorConcept(
+                                    hzdr::makeAccessor(),
+                                    hzdr::makeNavigator(
+                                        Offset(1),
+                                        Jumpsize(1)),
+                                    hzdr::makeIteratorConcept(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(0),
+                                            Jumpsize(2)))));
+    
+    auto view2 = makeView(test,
+                         childConceptOffset2);
+    for(auto && it=view2.begin(); it!= view2.end(); it += 3)
+    {
+        if(++counter > 50) 
+            break;
+        std::cout << (*it)<< std::endl;
+    }
+    counter = 0;
+    /*
+    for(auto && it=view2.rbegin(); it!= view2.rend(); it-=2)
+    {
+   //     std::cout << "index: " << it.index << std::endl;
+        if(++counter > 20) 
+            break;
+        std::cout << *it << std::endl;
+    }
+    
+    
+    
+  //  auto navigator = makeNavigator(test, FirstElem(), NextElem(),  LastElem());
+                    
+    
+    
+//         for(auto it=nbFrames.begin(); it!=nbFrames.end()-1; ++it)
+//         {
+//             std::cout << *it << std::endl;
+//         }
         // first test the iterator
 //         for(auto && iterator = hzdr::makeIterator(
 //                                     particle, 
@@ -101,30 +184,30 @@ int main(int argc, char **argv) {
 //             ++counter;
 //         }
 //         std::cout << "We count " << counter << ", should be 2" << std::endl;
-        counter = 0;
-        Frame frame(100);
-        std::vector<std::string> test;
-        
-
-        auto && iter = hzdr::makeIterator(frame,
-                            hzdr::makeAccessor(frame), 
-                            hzdr::makeNavigator(frame,
-                                                hzdr::Direction::Forward(),
-                                                Offset(0),
-                                                Jumpsize(1)),
-                            hzdr::make_child(hzdr::makeAccessor(),
-                                             hzdr::makeNavigator(hzdr::Direction::Forward(),
-                                                                 Offset(0),
-                                                                 Jumpsize(1))));
-                                                
-        for(; not iter.isAtEnd(); ++iter)
-        {
-  //           std::cout << "size Frame" <<frame.nbParticlesInFrame << std::endl;
-             std::cout << *iter << std::endl;
-            counter ++;
-            if(counter > 205) break;
-        }
-        std::cout << "Counter" << counter << std::endl;
+//         counter = 0;
+//         Frame frame(100);
+//         std::vector<std::string> test;
+//         
+// 
+//         auto && iter = hzdr::makeIterator(frame,
+//                             hzdr::makeAccessor(frame), 
+//                             hzdr::makeNavigator(frame,
+//                                                 hzdr::Direction::Forward(),
+//                                                 Offset(0),
+//                                                 Jumpsize(1)),
+//                             hzdr::make_child(hzdr::makeAccessor(),
+//                                              hzdr::makeNavigator(hzdr::Direction::Forward(),
+//                                                                  Offset(0),
+//                                                                  Jumpsize(1))));
+//                                                 
+//         for(; not iter.isAtEnd(); ++iter)
+//         {
+//   //           std::cout << "size Frame" <<frame.nbParticlesInFrame << std::endl;
+//              std::cout << *iter << std::endl;
+//             counter ++;
+//             if(counter > 205) break;
+//         }
+//         std::cout << "Counter" << counter << std::endl;
 // //         
         
         
@@ -179,7 +262,7 @@ int main(int argc, char **argv) {
 // 
 //     std::cout << "First Supercell " <<std::endl << cell << std::endl;
 //     
-//     ParticleInFrame view(cell.firstFrame, runtimeVarParticle1);
+//     ParticleInFrame view(cell.first, runtimeVarParticle1);
 //     
 //    // view.begin();
 //    // view.end();

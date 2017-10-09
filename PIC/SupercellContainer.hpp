@@ -2,6 +2,7 @@
 #include "PIC/Supercell.hpp"
 #include <vector>
 #include "Definitions/hdinline.hpp"
+#include "Iterator/Categorie/ArrayLike.hpp"
 namespace hzdr
 {
 template<typename TSupercell>
@@ -81,4 +82,61 @@ protected:
     uint_fast32_t nbSupercells;
     SuperCellPtr* supercells;
 }; // struct SupercellContainer
+
+// traits
+namespace traits 
+{
+template<typename>
+struct IsBidirectional;
+    
+template<
+    typename TSupercell>
+struct IsBidirectional<SupercellContainer<TSupercell> >
+{
+    static const bool value = true;
+};
+
+
+template<typename>
+struct IsRandomAccess;
+
+template<
+    typename TSupercell>
+struct IsRandomAccess<SupercellContainer<TSupercell> >
+{
+    static const bool value = true;
+};
+    
+template<typename>
+struct HasConstantSize;
+
+template<
+    typename TSupercell>
+struct HasConstantSize<SupercellContainer<TSupercell> >
+{
+    static const bool value = true;
+};
+
+template<typename>
+struct ComponentType;
+
+template<
+    typename TSupercell>
+struct ComponentType<SupercellContainer<TSupercell> >
+{
+    typedef TSupercell type;
+};
+
+template<typename>
+struct ContainerCategory;
+
+template<typename TSupercell>
+struct ContainerCategory<SupercellContainer<TSupercell> >
+{
+    typedef hzdr::container::categorie::ArrayLike type;
+};
+
+} // namespace traits
+
+
 }// namespace hzdr

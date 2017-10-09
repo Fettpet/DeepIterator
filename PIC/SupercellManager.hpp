@@ -7,22 +7,22 @@ __global__
 void
 appendFrame(Supercell* supercell, Frame* frame)
 {
-    frame->previousFrame = nullptr;
-    frame->nextFrame = nullptr;
-    if(supercell->firstFrame == nullptr)
+    frame->previous = nullptr;
+    frame->next = nullptr;
+    if(supercell->first == nullptr)
     {
-        supercell->firstFrame = frame;
-        supercell->lastFrame = frame;
+        supercell->first = frame;
+        supercell->last = frame;
         return;
     }
-    Frame* buffer = supercell->firstFrame;
-    while(buffer->nextFrame != nullptr)
+    Frame* buffer = supercell->first;
+    while(buffer->next != nullptr)
     {
-        buffer = buffer->nextFrame;
+        buffer = buffer->next;
     }
-    buffer->nextFrame = frame;
-    frame->previousFrame = buffer;
-    supercell->lastFrame = frame;
+    buffer->next = frame;
+    frame->previous = buffer;
+    supercell->last = frame;
 }
 
 template<typename Supercell>
@@ -30,8 +30,8 @@ __global__
 void 
 resetSupercell(Supercell* supercell)
 {
-    supercell->firstFrame =nullptr;
-    supercell->lastFrame = nullptr;
+    supercell->first =nullptr;
+    supercell->last = nullptr;
     
 }
 
@@ -63,11 +63,11 @@ struct SupercellHandle
         gpuErrchk(cudaMalloc(&supercellGPU, sizeof(Supercell)));
         gpuErrchk(cudaMemcpy(supercellGPU, supercellCPU, sizeof(Supercell), cudaMemcpyHostToDevice));
         
-        framePointerCPU[0] = supercellCPU->firstFrame;
+        framePointerCPU[0] = supercellCPU->first;
 
         for(auto i=1; i<nbFrames; ++i)
         {
-            framePointerCPU[i] = framePointerCPU[i-1]->nextFrame;
+            framePointerCPU[i] = framePointerCPU[i-1]->next;
         }
         
         copyHostToDevice();
@@ -110,10 +110,10 @@ struct SupercellHandle
         
                 // 2. Linked list wieder erstellen
         for(auto i=0; i<nbFrames-1; ++i)
-            framePointerCPU[i]->nextFrame = framePointerCPU[i+1];
+            framePointerCPU[i]->next = framePointerCPU[i+1];
         
         for(auto i=1; i<nbFrames; ++i)
-            framePointerCPU[i]->previousFrame = framePointerCPU[i-1];
+            framePointerCPU[i]->previous = framePointerCPU[i-1];
     }
     
     int nbFrames;

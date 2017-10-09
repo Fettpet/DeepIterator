@@ -22,19 +22,6 @@ namespace hzdr
  * \see Navigator
  */
 
-namespace Direction
-{
-
-struct Forward 
-{};
-
-
-struct Backward
-{};
-
-
-}
-
 
 
 /**

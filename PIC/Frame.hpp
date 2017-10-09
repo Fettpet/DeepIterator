@@ -4,7 +4,7 @@
  * @brief A PIConGPU like datastructure. It represent the frame in PIC. We use
  * a std::array to store some Particles. Both, the particle type and the number
  * of particles within the frame, are compiletime variables. 
- * Each frame has a pointer to the next and the previous frame.
+ * Each frame has a pointer to the next Frame and the previousFrame frame.
  */ 
  
 
@@ -12,6 +12,7 @@
 #include "Definitions/hdinline.hpp"
 #include <iostream>
 #include <iomanip>
+#include "Iterator/Categorie/ArrayLike.hpp"
 namespace hzdr
 {
 template<
@@ -129,4 +130,63 @@ std::ostream& operator<<(std::ostream& out, const Frame<TParticle, maxParticles>
     return out;
 }
 
-}// namespace PIC
+// traits
+namespace traits 
+{
+template<typename>
+struct IsBidirectional;
+    
+template<
+    typename TParticle,
+    int_fast32_t maxParticles>
+struct IsBidirectional<Frame<TParticle, maxParticles> >
+{
+    static const bool value = true;
+};
+
+
+template<typename>
+struct IsRandomAccessable;
+
+template<
+    typename TParticle,
+    int_fast32_t maxParticles>
+struct IsRandomAccessable<Frame<TParticle, maxParticles> >
+{
+    static const bool value = true;
+};
+    
+template<typename>
+struct HasConstantSize;
+
+template<
+    typename TParticle,
+    int_fast32_t maxParticles>
+struct HasConstantSize<Frame<TParticle, maxParticles> >
+{
+    static const bool value = true;
+};
+
+template<typename>
+struct ComponentType;
+
+template<
+    typename TParticle,
+    int_fast32_t maxParticles>
+struct ComponentType<Frame<TParticle, maxParticles> >
+{
+    typedef TParticle type;
+};
+
+template<typename>
+struct ContainerCategory;
+
+template<typename TParticle, int_fast32_t nb>
+struct ContainerCategory<hzdr::Frame<TParticle, nb> >
+{
+    typedef hzdr::container::categorie::ArrayLike type;
+};
+
+} // namespace traits
+
+}// namespace hzdr

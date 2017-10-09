@@ -39,10 +39,10 @@ struct NumberElements<hzdr::SupercellContainer<Supercell> >
     
     HDINLINE
     int_fast32_t
-    size(const SupercellContainer& element)
+    operator()( SupercellContainer* element)
     const
     {
-        return element.getNbSupercells();
+        return element->getNbSupercells();
     }
 };
 
@@ -52,20 +52,13 @@ struct NumberElements<hzdr::Frame<TParticle, nb> >
 {
     typedef hzdr::Frame<TParticle, nb> Frame;
     
-    HDINLINE
-    int_fast32_t 
-    size(const Frame& f)
-    const
-    {
-        return f.nbParticlesInFrame;    
-    }
+
     
     HDINLINE
     int_fast32_t 
-    size( Frame&& f)
-    const
+    operator()( Frame const * const f)
     {
-        return f.nbParticlesInFrame;    
+        return f->nbParticlesInFrame;    
     }
 }; // struct NumberElements
 
@@ -77,7 +70,7 @@ struct NumberElements<hzdr::Particle<TPos, nb> >
     HDINLINE
     int_fast32_t 
     constexpr
-    size(const Particle& )
+    operator()(Particle* )
     const
     {
         return nb;    

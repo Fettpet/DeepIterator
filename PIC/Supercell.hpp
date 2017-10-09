@@ -2,12 +2,11 @@
  * @author Sebastian Hahn
  * @brief A PIConGPU like datastructure. The supercell contains some frames.
  * The frames are in a linked list. Each frame has the pointer nextFrame and 
- * previousFrame. Only the last frame is not full with particles. The supercell
- * stores the number of particles in the last frame. Each supercell has two 
+ * previousFrame. Only the lastFrame frame is not full with particles. The supercell
+ * stores the number of particles in the lastFrame frame. Each supercell has two 
  * pointers to frame: firstFrame and lastFrame.
  */
 #pragma once
-#include <iostream>
 #include "Definitions/hdinline.hpp"
 
 namespace hzdr
@@ -78,7 +77,7 @@ struct SuperCell
     
     /**
      * @param nbFrames: number of frames within the supercell,
-     * @param nbParticle number of particles in the last frame
+     * @param nbParticle number of particles in the lastFrame frame
      */
     HDINLINE
     SuperCell(uint32_t nbFrames, uint32_t nbParticles):
@@ -107,6 +106,53 @@ struct SuperCell
     TFrame *lastFrame = nullptr;
  //   uint32_t nbParticlesInLastFrame;
 }; // struct SuperCell
+
+// traits
+namespace traits 
+{
+template<typename>
+struct IsBidirectional;
+    
+template<
+    typename TFrame>
+struct IsBidirectional<SuperCell<TFrame> >
+{
+    static const bool value = true;
+};
+
+
+template<typename>
+struct IsRandomAccessable;
+
+template<
+    typename TFrame>
+struct IsRandomAccessable<SuperCell<TFrame> >
+{
+    static const bool value = true;
+};
+    
+template<typename>
+struct HasConstantSize;
+
+template<
+    typename TFrame>
+struct HasConstantSize<SuperCell<TFrame> >
+{
+    static const bool value = true;
+};
+
+template<typename>
+struct ComponentType;
+
+template<
+    typename TFrame>
+struct ComponentType<SuperCell<TFrame> >
+{
+    typedef TFrame type;
+};
+
+} // namespace traits
+
 
 template<typename TFrame>
 HDINLINE

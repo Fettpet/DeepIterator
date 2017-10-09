@@ -23,7 +23,7 @@ namespace traits
 {
 template<typename T>
 struct ComponentType;
-
+/*
 template<typename Particle, int_fast32_t size>
 struct ComponentType< hzdr::Frame<Particle, size> >
 {
@@ -53,7 +53,7 @@ struct ComponentType< hzdr::SupercellContainer<Supercell> >
 {
     typedef Supercell type;
 };
-
+*/
 
 }//traits
 }//hzdr

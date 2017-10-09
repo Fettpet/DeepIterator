@@ -1,44 +1,42 @@
 #pragma once
-
+#include "Traits/ContainerCategory.hpp"
+#include "Iterator/Categorie/ArrayLike.hpp"
+#include "Iterator/Categorie/DoublyLinkListLike.hpp"
 
 namespace hzdr
 {
+namespace details
+{
+struct UndefinedType;
+} // namespace details
 namespace traits
 {
 
 template<typename TContainer>
-struct IndexType;
-    
-
-template<typename Particle, int_fast32_t size>
-struct IndexType< hzdr::Frame<Particle, size> >
+struct IndexType
 {
-    typedef int_fast32_t type;
+    typedef int_fast32_t type; 
 };
+
+template<>
+struct IndexType<hzdr::container::categorie::ArrayLike>
+{
+    typedef int_fast32_t type; 
+};
+
+template<>
+struct IndexType<hzdr::container::categorie::DoublyLinkListLike>
+{
+    typedef int_fast32_t type; 
+};
+
 
 template<>
 struct IndexType<hzdr::details::UndefinedType>
 {
-    typedef hzdr::details::UndefinedType type;
+    typedef int type; 
 };
 
-template<typename Frame>
-struct IndexType< hzdr::SuperCell<Frame> >
-{
-    typedef hzdr::details::UndefinedType type;
-};
+} // namespace traits
 
-template<typename TElem, int_fast32_t size>
-struct IndexType< hzdr::Particle< TElem, size> >
-{
-    typedef int_fast32_t type;
-};
-
-template<typename Supercell>
-struct IndexType< hzdr::SupercellContainer<Supercell> >
-{
-    typedef int_fast32_t type;
-};
-}
-
-}
+} // namespace hzdr
