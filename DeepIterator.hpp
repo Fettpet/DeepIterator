@@ -70,7 +70,7 @@
  begin with the constructor. The constructor has five parameter: The first is 
  the result of the accessor.get. The other four are the variables of the deep -
  iterator:
- Wrapper(accessor.get(containerPtr, componentPtr, index, runtimeVariables),
+ Wrapper(accessor.get(containerPtr, index, runtimeVariables),
          containerPtr, 
          componentPtr, 
          index, 
@@ -319,13 +319,11 @@ public:
     HDINLINE 
     DeepIterator(
         ContainerPtr containerPtr,
-        ComponentPointer componentPtr,
         IndexType && index,
         Accessor&& accessor, 
         Navigator&& navigator,
         ChildIterator&& child):
             containerPtr(containerPtr),
-            componentPtr(componentPtr),
             index(std::forward<IndexType>(index)),
             childIterator(std::forward<ChildIterator>(child)),
             navigator(std::forward<Navigator>(navigator)),
@@ -366,12 +364,11 @@ public:
     const
     {
 //        std::cout << std::boolalpha << other.isBeforeFirst() << " && " << isBeforeFirst() << " index " << index << " " << other.index << std::endl;
-        return (componentPtr == other.componentPtr
-            and containerPtr == other.containerPtr
-            and index == other.index 
-            and other.childIterator == childIterator)
-            or (isAfterLast() && other.isAfterLast())
-            or (isBeforeFirst() && other.isBeforeFirst());
+        return (isAfterLast() && other.isAfterLast())
+            || (isBeforeFirst() && other.isBeforeFirst())
+            ||(containerPtr == other.containerPtr
+            && index == other.index 
+            && other.childIterator == childIterator);
     }
     
     /**
@@ -387,11 +384,11 @@ public:
             return *this;  
         }
         ++childIterator;
-        while(not navigator.isAfterLast(containerPtr, componentPtr, index) and childIterator.isAfterLast() )
+        while(not navigator.isAfterLast(containerPtr, index) and childIterator.isAfterLast() )
         {
-            navigator.next(containerPtr, componentPtr, index,1);
-            if(not navigator.isAfterLast(containerPtr, componentPtr, index))
-                childIterator.setToBegin(accessor.get(containerPtr, componentPtr, index)) ;
+            navigator.next(containerPtr, index, 1);
+            if(not navigator.isAfterLast(containerPtr, index))
+                childIterator.setToBegin(accessor.get(containerPtr, index)) ;
         }
         return *this;
     }
@@ -407,11 +404,11 @@ public:
             return tmp;  
         }
         childIterator++;
-        while(not navigator.isAfterLast(containerPtr, componentPtr, index) and childIterator.isAfterLast() )
+        while(not navigator.isAfterLast(containerPtr, index) and childIterator.isAfterLast() )
         {
-            navigator.next(containerPtr, componentPtr, index,1);
-            if(not navigator.isAfterLast(containerPtr, componentPtr, index))
-                childIterator.setToBegin(accessor.get(containerPtr, componentPtr, index)) ;
+            navigator.next(containerPtr, index, 1u);
+            if(not navigator.isAfterLast(containerPtr, index))
+                childIterator.setToBegin(accessor.get(containerPtr, index)) ;
         }
         return *this;
         return tmp;
@@ -429,12 +426,12 @@ public:
             return *this;  
         }
         --childIterator;
-        while(not navigator.isBeforeFirst(containerPtr, componentPtr, index) and childIterator.isBeforeFirst() )
+        while(not navigator.isBeforeFirst(containerPtr, index) and childIterator.isBeforeFirst() )
         {
 
-            navigator.previous(containerPtr, componentPtr, index, 1);
-            if(not navigator.isBeforeFirst(containerPtr, componentPtr, index))
-                childIterator.setToRbegin(accessor.get(containerPtr, componentPtr, index)) ;
+            navigator.previous(containerPtr, index, 1u);
+            if(not navigator.isBeforeFirst(containerPtr, index))
+                childIterator.setToRbegin(accessor.get(containerPtr, index)) ;
         }
         return *this;
     }
@@ -452,11 +449,11 @@ public:
             return tmp;  
         }
         childIterator--;
-        while(not navigator.isBeforeFirst(containerPtr, componentPtr, index) and childIterator.isBeforeFirst() )
+        while(not navigator.isBeforeFirst(containerPtr, index) and childIterator.isBeforeFirst() )
         {
-            navigator.previous(containerPtr, componentPtr, index,1);
-            if(not navigator.isBeforeFirst(containerPtr, componentPtr, index))
-                childIterator.setToRbegin(accessor.get(containerPtr, componentPtr, index)) ;
+            navigator.previous(containerPtr, index, 1u);
+            if(not navigator.isBeforeFirst(containerPtr, index))
+                childIterator.setToRbegin(accessor.get(containerPtr, index)) ;
         }
         return tmp;
     }
@@ -476,7 +473,7 @@ public:
         bool T = isRandomAccessable && hasConstantSizeChild>    
     HDINLINE 
     typename std::enable_if<T, DeepIterator&>::type
-    operator+=(int jumpsize)
+    operator+=(uint const & jumpsize)
     {
         // We abuse the the fact, that all childs know, where they are and how 
         // much elements to the end of the container are needed.
@@ -485,35 +482,26 @@ public:
         // elements (remaining)
         // 2. The number of elements, the iterator can overjump (overjump)
         // 3. The distance of new element to there child element (childJumps)
-#define MIN(X, Y) (((X)>(Y))*(Y) + ((X)<=(Y))*(X))
-#define MAX(X, Y) (((X)<(Y))*(Y) + ((X)>=(Y))*(X))
-        auto && remaining = childIterator.getRangeToEnd();
-        childIterator += MIN(remaining, jumpsize);
-//         std::cout << "jumpsize, nbElements: " << jumpsize << ", " << childIterator.nbElements() << std::endl;
-        jumpsize = MAX(static_cast<int>(jumpsize) - static_cast<int>(remaining), static_cast<int>(0));
-        if(childIterator.isAfterLast())
-        {
-            ++(*this);
 
-            auto && overjump = (jumpsize) / childIterator.nbElements();
-                    
-            int childJumps = jumpsize % childIterator.nbElements();
+
+        auto && remaining = childIterator.gotoNext(jumpsize);
+//         std::cout << "jumpsize, nbElements: " << jumpsize << ", " << childIterator.nbElements() << std::endl;
+        
+
+        auto && childNbElements = childIterator.nbElements();
+        auto && overjump = (remaining + childNbElements - 1) / childNbElements;
+        int childJumps = (remaining - 1) % childNbElements;
                 
-             std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
-            navigator.next(containerPtr, componentPtr, index, overjump);
-            if(not isAfterLast())
-            {
-                childIterator.setToBegin(accessor.get(containerPtr, componentPtr, index));
-                childIterator += childJumps;
-                if(childIterator.isAfterLast())
-                {
-                    ++(*this);
-                }
-            }
+        navigator.next(containerPtr, index, overjump);
+        if((overjump > 0) && not isAfterLast())
+        {
+            childIterator.setToBegin(accessor.get(containerPtr, index));
+            childIterator += childJumps;
         }
+        std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
+
         return *this;
-#undef MAX
-#undef MIN
+
     }
     
     template<
@@ -534,9 +522,8 @@ public:
                 
             int childJumps = jumpsize % childIterator.nbElements();
             
-            std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
-            navigator.next(containerPtr, componentPtr, index, overjump);
-            childIterator.setToBegin(accessor.get(containerPtr, componentPtr, index));
+            navigator.next(containerPtr, index, overjump);
+            childIterator.setToBegin(accessor.get(containerPtr, index));
             childIterator += childJumps;
             if(childIterator.isAfterLast())
             {
@@ -573,8 +560,8 @@ public:
             int childJumps = jumpsize % childIterator.nbElements();
             
      //       std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
-            navigator.previous(containerPtr, componentPtr, index, overjump);
-            childIterator.setToRbegin(accessor.get(containerPtr, componentPtr, index));
+            navigator.previous(containerPtr, index, overjump);
+            childIterator.setToRbegin(accessor.get(containerPtr, index));
             childIterator -= childJumps;
             if(childIterator.isBeforeFirst())
             {
@@ -599,10 +586,10 @@ public:
     void
     setToBegin()
     {
-        navigator.begin(containerPtr, componentPtr, index);
+        navigator.begin(containerPtr, index);
         if(not isBeforeFirst() and not isAfterLast())
         {
-            childIterator.setToBegin((accessor.get(containerPtr, componentPtr, index)));
+            childIterator.setToBegin((accessor.get(containerPtr, index)));
         }
     }
 
@@ -628,8 +615,8 @@ public:
     void
     setToEnd()
     {
-        navigator.end(containerPtr, componentPtr, index);
-        //childIterator.setToEnd((accessor.get(containerPtr, componentPtr, index)));
+        navigator.end(containerPtr, index);
+        //childIterator.setToEnd((accessor.get(containerPtr, index)));
     }
 
     HDINLINE
@@ -644,7 +631,7 @@ public:
     void
     setToRend()
     {
-        navigator.rend(containerPtr, componentPtr, index);
+        navigator.rend(containerPtr, index);
         //childIterator.setToRend();
     }
 
@@ -660,11 +647,11 @@ public:
     void 
     setToRbegin()
     {
-        navigator.rbegin(containerPtr, componentPtr, index);
+        navigator.rbegin(containerPtr, index);
         if(not isBeforeFirst() and not isAfterLast())
         {
             
-            childIterator.setToRbegin((accessor.get(containerPtr, componentPtr, index)));
+            childIterator.setToRbegin((accessor.get(containerPtr, index)));
         }
     }
     
@@ -689,7 +676,7 @@ public:
     isAfterLast()
     const
     {
-        return navigator.isAfterLast(containerPtr, componentPtr, index);
+        return navigator.isAfterLast(containerPtr, index);
     }
     
     HDINLINE 
@@ -697,7 +684,7 @@ public:
     isBeforeFirst()
     const
     {
-        return navigator.isBeforeFirst(containerPtr, componentPtr, index);
+        return navigator.isBeforeFirst(containerPtr, index);
     }
     
     template<
@@ -733,7 +720,6 @@ public:
     
     ContainerPtr containerPtr = nullptr;
     IndexType index;
-    ComponentType* componentPtr= nullptr;
     ChildIterator childIterator;
     Navigator navigator;
     Accessor accessor;
@@ -907,7 +893,7 @@ public:
     DeepIterator&
     operator++()
     {
-        navigator.next(containerPtr, componentPtr, index,1);
+        navigator.next(containerPtr, index,1);
         return *this;
     }
     
@@ -916,7 +902,7 @@ public:
     typename std::enable_if<T, DeepIterator&>::type
     operator+=(TJump const & jump)
     {
-        navigator.next(containerPtr, componentPtr, index, jump);
+        navigator.next(containerPtr, index, jump);
         return *this;
     }
     
@@ -925,7 +911,7 @@ public:
     typename std::enable_if<T, DeepIterator&>::type
     operator-=(TJump const & jump)
     {
-        navigator.previous(containerPtr, componentPtr, index, jump);
+        navigator.previous(containerPtr, index, jump);
         return *this;
     }
     
@@ -956,7 +942,7 @@ public:
     -> 
     typename std::enable_if<T, int_fast32_t>::type
     {
-        return navigator.previous(containerPtr, componentPtr, index, jump);
+        return navigator.previous(containerPtr, index, jump);
     }
 
     template<typename TJump, bool TRandom = isRandomAccessable>
@@ -966,7 +952,7 @@ public:
     ->
     typename std::enable_if<TRandom, int_fast32_t>::type
     {
-        return navigator.next(containerPtr, componentPtr, index, jump);
+        return navigator.next(containerPtr, index, jump);
     }
     
     
@@ -978,10 +964,8 @@ public:
 
         return accessor.lesser(
             containerPtr, 
-            componentPtr, 
             index,
             other.containerPtr,
-            other.componentPtr,
             other.index);
     }
     
@@ -991,11 +975,9 @@ public:
     operator>(DeepIterator const & other)
     {
         return accessor.greater(
-            containerPtr, 
-            componentPtr, 
+            containerPtr,  
             index,
             other.containerPtr,
-            other.componentPtr,
             other.index);
     }
     
@@ -1021,7 +1003,7 @@ public:
     typename std::enable_if<T, ComponentReference>::type
     operator[](IndexType const & index)
     {
-        return accessor.get(containerPtr, componentPtr, index);
+        return accessor.get(containerPtr, index);
     }
     
     HDINLINE
@@ -1029,7 +1011,7 @@ public:
     operator++(int)
     {
         DeepIterator tmp(*this);
-        navigator.next(containerPtr, componentPtr, index,1);
+        navigator.next(containerPtr, index,1);
         return tmp;
     }
     
@@ -1038,7 +1020,7 @@ public:
     typename std::enable_if<T, DeepIterator& >::type
     operator--()
     {
-        navigator.previous(containerPtr, componentPtr, index,1);
+        navigator.previous(containerPtr, index,1);
         return *this;
     }
     
@@ -1048,7 +1030,7 @@ public:
     operator--(int)
     {
         DeepIterator tmp(*this);
-        navigator.previous(containerPtr, componentPtr, index,1);
+        navigator.previous(containerPtr, index,1);
         return tmp;
     }
     
@@ -1058,7 +1040,7 @@ public:
     -> 
     ComponentReference
     {
-        return (accessor.get(containerPtr, componentPtr, index));
+        return (accessor.get(containerPtr, index));
     }
     
     
@@ -1068,11 +1050,10 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
-        return (componentPtr != other.componentPtr
-            or containerPtr != other.containerPtr
-            or index != other.index)
-            and (not isAfterLast() or not other.isAfterLast())
-            and (not isBeforeFirst() or not other.isBeforeFirst());
+        return (containerPtr != other.containerPtr
+            || index != other.index)
+            && (not isAfterLast() || not other.isAfterLast())
+            && (not isBeforeFirst() || not other.isBeforeFirst());
     }
     
     HDINLINE 
@@ -1080,7 +1061,7 @@ public:
     isAfterLast()
     const
     {
-        return navigator.isAfterLast(containerPtr, componentPtr, index);
+        return navigator.isAfterLast(containerPtr, index);
     }
     
     HDINLINE 
@@ -1088,7 +1069,7 @@ public:
     isBeforeFirst()
     const
     {
-        return navigator.isBeforeFirst(containerPtr, componentPtr, index);
+        return navigator.isBeforeFirst(containerPtr, index);
     }
     
     HDINLINE
@@ -1104,7 +1085,7 @@ public:
     void 
     setToBegin()
     {
-        navigator.begin(containerPtr, componentPtr, index);
+        navigator.begin(containerPtr, index);
     }
     
     HDINLINE 
@@ -1112,7 +1093,7 @@ public:
     setToBegin(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.begin(containerPtr, componentPtr, index);
+        navigator.begin(containerPtr, index);
     }
     
     HDINLINE 
@@ -1120,7 +1101,7 @@ public:
     setToBegin(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.begin(containerPtr, componentPtr, index);
+        navigator.begin(containerPtr, index);
     }
 
     HDINLINE
@@ -1128,7 +1109,7 @@ public:
     setToEnd(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.end(containerPtr, componentPtr, index);
+        navigator.end(containerPtr, index);
     }
     
     HDINLINE
@@ -1136,14 +1117,14 @@ public:
     setToEnd(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.end(containerPtr, componentPtr, index);
+        navigator.end(containerPtr, index);
     }
     
     HDINLINE
     void 
     setToEnd()
     {
-        navigator.end(containerPtr, componentPtr, index);
+        navigator.end(containerPtr, index);
     }
     
     HDINLINE
@@ -1151,7 +1132,7 @@ public:
     setToRend(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.rend(containerPtr, componentPtr, index);
+        navigator.rend(containerPtr, index);
     }
     
     HDINLINE
@@ -1159,14 +1140,14 @@ public:
     setToRend(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.rend(containerPtr, componentPtr, index);
+        navigator.rend(containerPtr, index);
     }
     
     HDINLINE
     void 
     setToRend()
     {
-        navigator.rend(containerPtr, componentPtr, index);
+        navigator.rend(containerPtr, index);
     }
     
     HDINLINE
@@ -1174,7 +1155,7 @@ public:
     setToRbegin(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.rbegin(containerPtr, componentPtr, index);
+        navigator.rbegin(containerPtr, index);
     }
     
     HDINLINE
@@ -1182,34 +1163,52 @@ public:
     setToRbegin(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.rbegin(containerPtr, componentPtr, index);
+        navigator.rbegin(containerPtr, index);
     }
     
     HDINLINE
     void 
     setToRbegin()
     {
-        navigator.rbegin(containerPtr, componentPtr, index);
+        navigator.rbegin(containerPtr, index);
     }
     
-    
-    template<
-        bool T = hasConstantSize>
-    typename std::enable_if<T, int>::type
-    getRangeToEnd()
-    const
+    HDINLINE 
+    auto 
+    gotoNext(uint const & steps)
+    ->
+    uint
     {
-        return navigator.distanceToEnd(containerPtr, index);
+        return navigator.next(containerPtr, index, steps);
     }
     
-    template<
-        bool T = hasConstantSize>
-    typename std::enable_if<T, int>::type
-    getRangeToBegin()
-    const
+    HDINLINE
+    auto 
+    gotoPrevious(uint const & steps)
+    ->
+    uint
     {
-        return navigator.distanceToBegin(containerPtr, index);
+        return navigator.previous(containerPtr, index, steps);
     }
+    
+    
+//     template<
+//         bool T = hasConstantSize>
+//     typename std::enable_if<T, int>::type
+//     getRangeToEnd()
+//     const
+//     {
+//         return navigator.distanceToEnd(containerPtr, index);
+//     }
+    
+//     template<
+//         bool T = hasConstantSize>
+//     typename std::enable_if<T, int>::type
+//     getRangeToBegin()
+//     const
+//     {
+//         return navigator.distanceToBegin(containerPtr, index);
+//     }
     
     template<
         bool T = hasConstantSize>
@@ -1225,7 +1224,6 @@ public:
     hzdr::NoChild childIterator;
     
 protected:
-    ComponentType* componentPtr = nullptr; 
     ContainerType* containerPtr = nullptr;
     IndexType index;
 

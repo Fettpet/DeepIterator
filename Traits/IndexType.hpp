@@ -1,7 +1,6 @@
 #pragma once
 #include "Traits/ContainerCategory.hpp"
-#include "Iterator/Categorie/ArrayLike.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
+#include "PIC/Supercell.hpp"
 
 namespace hzdr
 {
@@ -18,16 +17,10 @@ struct IndexType
     typedef int_fast32_t type; 
 };
 
-template<>
-struct IndexType<hzdr::container::categorie::ArrayLike>
+template<typename TFrame>
+struct IndexType<hzdr::Supercell<TFrame> >
 {
-    typedef int_fast32_t type; 
-};
-
-template<>
-struct IndexType<hzdr::container::categorie::DoublyLinkListLike>
-{
-    typedef int_fast32_t type; 
+    typedef TFrame* type; 
 };
 
 

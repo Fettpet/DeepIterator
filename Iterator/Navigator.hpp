@@ -3,7 +3,9 @@
  * \struct Navigator
  * @author Sebastian Hahn (t.hahn< at >hzdr.de )
  * ove
- * @brief The navigator is used to move through a container. 
+ * @brief The navigator is used to move through a container. This includes a lot 
+ * of functions:
+ * 1. 
  * 
  * @tparam TContainer The datatype of the datastructure. If the datastructure is
  * indexable you doesnt need to write your own navigator. 
@@ -22,56 +24,132 @@
 #include "Traits/Componenttype.hpp"
 #include "Traits/ContainerCategory.hpp"
 #include "Traits/RangeType.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
+#include "Traits/Navigator/AfterLastElement.hpp"
+#include "Traits/Navigator/BeforeFirstElement.hpp"
+#include "Traits/Navigator/LastElement.hpp"
+#include "Traits/Navigator/NextElement.hpp"
+#include "Traits/Navigator/PreviousElement.hpp"
+#include "Traits/Navigator/FirstElement.hpp"
+#include "Iterator/Categorie.hpp"
+
 
 namespace hzdr 
 {
+namespace details
+{
+template <typename T>
+class UndefinedLastElement
+{
+    typedef char one;
+    typedef long two;
 
+    template <typename C> static one test( typeof(&C::UNDEFINED) ) ;
+    template <typename C> static two test(...);    
+
+public:
+    enum { value = sizeof(test<T>(0)) == sizeof(char) };
+}; // class UndefinedAhead
+
+template<typename T>    
+struct OffsetRangeType
+{
+    T v;
+    typedef decltype(v()) type;
+};
+
+} // namespace details
 
 /**
- * @brief This is the default implementation of the navigator. This navigator has
- * only functionality for forward iteration. To use this one you need to specify 
- * the following traits:
- * 1. ComponentType
- * 2. IndexType
- * 3. NumberElements
- * 4. container::categorie::NextElement
- * 5. container::categorie::EndElementReached
- * 6. container::categorie::FirstElement
- * 
- * @tparam TContainer Type of the container,
- * @tparam TOffset policy to get the offset. You need to specify the () operator.
-
+ @brief This is the default implementation of the navigator. This navigator has
+ only functionality for forward iteration. Your implementation has two special 
+ parameters: The offset and the jumpsize. This parameters are used to implement 
+ a parallel iterator. The offset is the distance from the beginning of the 
+ container to the first element of the iterator, i.e. the process id. 
+ The jumpsize is the distance between two iterator positions, i.e. the number of
+ processes. All traits are instantiated as class members. 
+ @tparam TContainer Type of the container,
+ @tparam TComponent Type of the component of the container.
+ @tparam TOffset Policy to get the offset. You need to specify the () operator.
+ @tparam TJumpsize Policy to specify the Jumpsize. It need the operator ().
+ @tparam TIndex Type of the index. The index is used to specify the iterator 
+ position.
+ @tparam TContainerSize Trait to specify the size of a container. It need the 
+ function operator()(TContainer*). TContainer is a pointer to the container 
+ instance over which the iterator walks.
+ @tparam TFirstElement Trait to set the index to the first element. It need the 
+ function operator()(TContainer*, TIndex&, const TRange). TRange is the result 
+ type of TOffset's (). TContainer is a pointer to the container 
+ instance over which the iterator walks. TIndex is used to describe the position.
+ TRange is the offset.
+ @tparam TNextElement Trait to set the index to the next element. The trait need 
+ the function TRange operator()(TContainer*, TIndex&, TRange). The TRange 
+ parameter is used to handle the jumpsize. The result of this function is the 
+ remaining jumpsize. A little example. Your container has 10 elements and your
+ iterator is the the 8 element. Your jumpsize is 5. This means the new position
+ would be 13. So the result of the function is 3, the remaining jumpsize.
+ @tparam TAfterLastElement This Trait is used to check whether the iteration is 
+ after the last element. The function header is 
+ bool operator()(TContainer*, TIndex&). It returns true, if the end is reached, 
+ and false otherwise.
+ @tparam TLastElement This trait gives the last element which the iterator would
+ access, befor the end is reached, in a forward iteration case. The function 
+ head is operator()(TContainer*, TIndex&, const TRange). This trait is only needed
+ if the navigator is bidirectional. 
+ @tparam TPreviousElement Trait to set the index to the previous element. The 
+ trait need the function TRange operator()(TContainer*, TIndex&, TRange). This 
+ trait is only needed if the navigator is bidirectional. For fourther 
+ informations see TNextElement.
+ @tparam TBeforeFirstElement Used to check whether the iterator is before the
+ first element. The function header is bool operator()(TContainer*, TIndex&). 
+ It returns true, if the end is reached, and false otherwise.
+ @tparam isBidirectional Set the navigator to bidirectional (true) or to forward
+ only (false)
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TOffset,
     typename TJumpsize,
-    typename TContainerCategorie = void,
-    typename SFINAE = void>
+    typename TIndex,
+    typename TContainerSize,
+    typename TFirstElement,
+    typename TNextElement,
+    typename TAfterLastElement,
+    typename TLastElement = hzdr::details::UndefinedType,
+    typename TPreviousElement = hzdr::details::UndefinedType,
+    typename TBeforeFirstElement = hzdr::details::UndefinedType,
+    bool isBidirectional = not details::UndefinedLastElement<TLastElement>::value
+>
 struct Navigator
 {
 // define the types 
     typedef typename std::decay<TContainer>::type                   ContainerType;
     typedef ContainerType*                                          ContainerPtr;
     typedef ContainerType&                                          ContainerRef;
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type ComponentType;
-    typedef ComponentType*                                           ComponentPtr;
+    typedef TComponent                                              ComponentType;
+    typedef ComponentType*                                          ComponentPtr;
     typedef TJumpsize                                               JumpsizeType;
     typedef TOffset                                                 OffsetType;
-    typedef hzdr::container::categorie::DoublyLinkListLike          ContainerCategoryType;
-    typedef typename traits::IndexType<ContainerCategoryType>::type IndexType;
-    typedef typename traits::RangeType<ContainerCategoryType>::type RangeType;
-    typedef traits::NumberElements<ContainerType>                   ContainerSizeType;
+    typedef TIndex                                                  IndexType;
+    typedef typename details::OffsetRangeType<TOffset>::type        RangeType;
+    typedef TContainerSize                                          NumberElements;
+    typedef TFirstElement                                           FirstElement;
+    typedef TNextElement                                            NextElement;
+    typedef TAfterLastElement                                       AfterLastElement;
+    typedef TLastElement                                            LastElement;
+    typedef TPreviousElement                                        PreviousElement;
+    typedef TBeforeFirstElement                                     BeforeFirstElement;
+
     
+public:
 // the default constructors
     HDINLINE Navigator() = default;
     HDINLINE Navigator(Navigator const &) = default;
     HDINLINE Navigator(Navigator &&) = default;
     HDINLINE ~Navigator() = default;
+    HDINLINE Navigator& operator=(const Navigator&) = default;
+    HDINLINE Navigator& operator=(Navigator&&) = default;
 
-    
-public:
     /**
      * @brief Set the offset and the jumpsize to the given values
        @param offset the distance from the start to the first element
@@ -96,33 +174,29 @@ public:
     HDINLINE
     RangeType
     next(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
+        ContainerPtr containerPtr,  
         IndexType & index,
-        RangeType const & distance)
+        RangeType distance)
     {
-
-        container::categorie::NextElement<ContainerType> nextElement;
-        container::categorie::EndElementReached<ContainerType> endReached;
-
-        RangeType counter = 0;
-        for(; counter<distance; ++counter)
+        // test if the iterator is before the first element
+        if(beforeFirstElement.test(containerPtr, index, containerSize))
         {
-            for(decltype(jumpsize()) i=0; i< jumpsize(); ++i)
-            {
-                componentPtr = nextElement(componentPtr);
-                if(endReached(componentPtr))
-                {
-                    index = 1;
-                    break;
-                    
-                }
-            }
-            if(endReached(componentPtr))
-                    break;
+            firstElement(
+                containerPtr,
+                index, 
+                offset());
+            --distance;
         }
+        // We jump over distance * jumpsize elements
+        auto remainingJumpsize = nextElement(
+            containerPtr, 
+            index,  
+            static_cast<RangeType>(jumpsize() * distance),
+            containerSize);
+        
+        /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
-        return distance - counter;
+        return remainingJumpsize / jumpsize();
     }
     
     
@@ -136,50 +210,30 @@ public:
     HDINLINE
     RangeType
     previous(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
+        ContainerPtr containerPtr,  
         IndexType & index,
         RangeType distance)
     {
-        container::categorie::PreviousElement<ContainerType> previousElement;
-        container::categorie::NextElement<ContainerType> nextElement;
-        container::categorie::BeforeElementReached<ContainerType> beforeReached;
-        
-        RangeType counter = 0;
-        for(; counter<distance; ++counter)
+        // test if the iterator is before the first element
+        if(afterLastElement.test(containerPtr, index))
         {
-            for(decltype(jumpsize()) i=static_cast<decltype(jumpsize())>(0); i< jumpsize(); ++i)
-            {
-                componentPtr = previousElement(componentPtr);
-                if(beforeReached(componentPtr))
-                {
-                    break;
-                    index = -1;
-                }
-            }
-            if(beforeReached(componentPtr))
-                     return distance - counter;
+            lastElement(
+                containerPtr,
+                index, 
+                offset(),
+                jumpsize(),
+                containerSize);
+            --distance;
         }
-        std::cout << "works" << std::endl;
-        // check whether the element is before the offset element
-        for(auto i=0u; i < offset(); ++i)
-        {
-            
-            componentPtr = previousElement(componentPtr);
-            if(beforeReached(componentPtr))
-            {
-                
-                return 0;
-            }
-        }
+        // We jump over distance * jumpsize elements
+        auto remainingJumpsize = previousElement(
+            containerPtr, 
+            index,
+            static_cast<RangeType>(jumpsize() * distance));
         
-        for(auto i=0u; i < offset(); ++i)
-        {
-            componentPtr = nextElement(componentPtr);
-        }
-        
+        /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
-        return distance - counter;
+        return remainingJumpsize / jumpsize();
     }
     
     /**
@@ -191,12 +245,9 @@ public:
     void 
     begin(
         ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
         IndexType & index)
     {
-        index = 0;
-        container::categorie::FirstElement<ContainerType > first;
-        componentPtr = first(containerPtr);
+        firstElement(containerPtr, index, offset());
     }
     
     /**
@@ -208,34 +259,18 @@ public:
     void 
     rbegin(
         ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
         IndexType & index)
     {
-        auto nbelem = size(containerPtr);
-        auto jumps = (nbelem % jumpsize()) - ((nbelem - offset()) % jumpsize()); 
-        container::categorie::BeforeElementReached<ContainerType> beforeReached;
-        container::categorie::PreviousElement<ContainerType> previousElement;
-        container::categorie::LastElement<ContainerType > last;
-        componentPtr = last(containerPtr);
-        index = static_cast<IndexType>(0);
-        for( auto i=0u; i<jumps; ++i)
-        {
-            if(beforeReached(componentPtr))
-                break;
-            componentPtr = previousElement(componentPtr);
-        }
+        lastElement(containerPtr, index, offset(), jumpsize(), containerSize);
     }
     
     HDINLINE 
     void 
     end(
         ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
         IndexType & index)
     {
-        index = static_cast<IndexType>(1);
-        container::categorie::FirstElement<ContainerType > first;
-        componentPtr = first(containerPtr);
+        afterLastElement.set(containerPtr, index, containerSize);
     }
     
     /**
@@ -247,525 +282,518 @@ public:
     void 
     rend(
         ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
         IndexType & index)
     {
-        container::categorie::LastElement<ContainerType > first;
-        componentPtr = first(containerPtr);
-        index = static_cast<IndexType>(-1);
+        beforeFirstElement.set(containerPtr, index, containerSize);
     }
     
     HDINLINE 
     bool
     isAfterLast(
-        ContainerPtr,  
-        ComponentPtr comPtr,
+        ContainerPtr containerPtr,  
         IndexType const & index)
     const
     {
-        
-        container::categorie::EndElementReached<ContainerType> endReached;
-        return index == 1 or endReached(comPtr);
+        return afterLastElement.test(containerPtr, index, containerSize);
     }
     
     HDINLINE 
     bool
     isBeforeFirst(
-        ContainerPtr,  
-        ComponentPtr comPtr,
+        ContainerPtr containerPtr,   
         IndexType const & index)
     const
     {
-        container::categorie::BeforeElementReached<ContainerType> beforeReached;
-        return index == -1 or beforeReached(comPtr);
+        return beforeFirstElement.test(containerPtr, index, containerSize);
     }
     
-    uint_fast32_t size(ContainerPtr containerPtr)
+    
+    HDINLINE
+    RangeType 
+    nbElements(ContainerPtr containerPtr)
+    const
     {
-        uint_fast32_t counter = 0u;
-        container::categorie::FirstElement<ContainerType > first;
-        container::categorie::EndElementReached<ContainerType> endReached;
-        container::categorie::NextElement<ContainerType> nextElement;
-        auto componentPtr = first(containerPtr);
-        while(not endReached(componentPtr))
-        {
-            ++counter;
-            componentPtr = nextElement(componentPtr);
-        };
-        return counter;
+        return containerSize(containerPtr);
     }
     
     HDINLINE
-    int_fast32_t
-    nbElements( ContainerPtr conPtr)
+    RangeType
+    size(ContainerPtr containerPtr)
     const 
     {
-        return (size(conPtr) - offset() + jumpsize() - 1) / jumpsize();
+        return (nbElements(containerPtr) - offset() + jumpsize() - static_cast<RangeType>(1)) / jumpsize();
     }
     
 //variables
 protected:
     OffsetType offset;
     JumpsizeType jumpsize;
+    NumberElements containerSize;
+    FirstElement firstElement;
+    NextElement nextElement;
+    AfterLastElement afterLastElement;
+    LastElement lastElement;
+    PreviousElement previousElement;
+    BeforeFirstElement beforeFirstElement;
 };
 
 
-template<
-    typename TContainer,
-    typename TOffset,
-    typename TJumpsize>
-struct Navigator<
-    TContainer,
-    TOffset,
-    TJumpsize,
-    hzdr::container::categorie::ArrayLike>
-{
-// define the types 
-    typedef typename std::decay<TContainer>::type                   ContainerType;
-    typedef ContainerType*                                          ContainerPtr;
-    typedef ContainerType&                                          ContainerRef;
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type ComponentType;
-    typedef ComponentType*                                           ComponentPtr;
-    typedef TJumpsize                                               JumpsizeType;
-    typedef TOffset                                                 OffsetType;
-    typedef hzdr::container::categorie::ArrayLike           ContainerCategoryType;
-    typedef typename traits::IndexType<ContainerCategoryType>::type IndexType;
-    typedef typename traits::RangeType<ContainerCategoryType>::type RangeType;
-    typedef traits::NumberElements<ContainerType>                   ContainerSizeType;
-    
-// the default constructors
-    HDINLINE Navigator() = default;
-    HDINLINE Navigator(Navigator const &) = default;
-    HDINLINE Navigator(Navigator &&) = default;
-    HDINLINE ~Navigator() = default;
-    
-    /**
-     * @brief Set the offset and the jumpsize to the given values
-       @param offset the distance from the start to the first element
-       @param jumpsize distance between two elements
-    */
-    HDINLINE
-    Navigator(
-            OffsetType && offset, 
-            JumpsizeType && jumpsize):
-        offset(std::forward<OffsetType>(offset)),
-        jumpsize(std::forward<JumpsizeType>(jumpsize))
-    {}
-    
-    
-    /**
-     * @brief The function moves the iterator forward to the next element. 
-     * @param index in: current position of iterator; out: position of the 
-     * iterator after the move.
-     * @result the distance from the end element to the hypothetical position
-     * given by the distance parameter
-     */
-    HDINLINE
-    RangeType
-    next(
-        ContainerPtr containerPtr,  
-        ComponentPtr,
-        IndexType & index,
-        RangeType const & distance)
-    {
-        ContainerSizeType size;
-        index += distance * jumpsize();
-        
-        // we need the distance from the last element to the current index position
-        return (index - size(containerPtr) + jumpsize() - static_cast<IndexType>(1)) / jumpsize();
-    }
-    
-    
-    /**
-     * @brief The function moves the iterator backward to the next element. 
-     * @param index in: current position of iterator; out: position of the 
-     * iterator after the move.
-     * @result the distance from the end element to the hypothetical position
-     * given by the distance parameter
-     */
-     
-    template< typename TRange_>
-    HDINLINE
-    RangeType
-    previous(
-        ContainerPtr,  
-        ComponentPtr,
-        IndexType & index,
-        TRange_ && distance)
-    {
-        index -= distance * jumpsize();
-        // index < 0
-        // we need the distance from the last element to the current index position
-        return (static_cast<IndexType>(-1) * index + jumpsize() - static_cast<IndexType>(1)) / jumpsize();
-    }
-    
-    /**
-     * @brief set the iterator to the first element
-     * 
-     */
-
-    HDINLINE 
-    void 
-    begin(
-        ContainerPtr,  
-        ComponentPtr,
-        IndexType & index)
-    {
-
-        index = offset();
-    }
-    
-    /**
-     * @brief set the iterator to the last element. It is possible that two iterators,
-     * the first start with begin, the second with last, never meet.
-     */
-
-    HDINLINE 
-    void 
-    rbegin(
-        ContainerPtr conPtr,  
-        ComponentPtr,
-        IndexType & index)
-    {
-
-        ContainerSizeType size;
-        auto nbOfJumps = ((size(conPtr) - offset() - 1) / jumpsize() );
-        
-        index = (nbOfJumps) * jumpsize() + offset();
-    }
-    
-    
-        /**
-     * @brief set the iterator to the first element
-     * 
-     */
-
-    HDINLINE 
-    void 
-    end(
-        ContainerPtr conPtr,  
-        ComponentPtr,
-        IndexType & index)
-    {
-        ContainerSizeType size;
-        /**
-         * We need the index of the first Element outside the container
-         */
-        auto nbOfJumps = ((size(conPtr) - offset()-1) / jumpsize() );
-        
-        index = (nbOfJumps +1) * jumpsize() + offset();
-    }
-    
-    /**
-     * @brief set the iterator to the last element. It is possible that two iterators,
-     * the first start with begin, the second with last, never meet.
-     */
-
-    HDINLINE 
-    void 
-    rend(
-        ContainerPtr conPtr,  
-        ComponentPtr,
-        IndexType & index)
-    {
-
-                /**
-         * We need the index of the first Element outside the container
-         */
-        index = -(nbElements(conPtr) - offset()) % jumpsize() - jumpsize() - 1;
-    }
-    
-    HDINLINE 
-    bool
-    isAfterLast(
-        ContainerPtr conPtr,  
-        ComponentPtr,
-        IndexType const & index)
-    const
-    {
-        return index >= nbElements(conPtr);
-    }
-    
-    HDINLINE 
-    bool
-    isBeforeFirst(
-        ContainerPtr,  
-        ComponentPtr,
-        IndexType const & index)
-    const
-    {
-        return index < static_cast<IndexType>(offset());
-    }
-    
-    HDINLINE
-    int_fast32_t
-    nbElements( ContainerPtr conPtr)
-    const 
-    {
-        ContainerSizeType size;
-        return size(conPtr);
-    }
-    
-    HDINLINE
-    int_fast32_t
-    distanceToEnd( 
-        ContainerPtr conPtr, 
-        IndexType const & index)
-    const 
-    {
-        return (nbElements(conPtr) - index + jumpsize() - 1) / jumpsize();
-    }
-    
-    HDINLINE
-    int_fast32_t
-    distanceToBegin( 
-        ContainerPtr, 
-        IndexType const & index)
-    const 
-    {
-        return (index - offset() + jumpsize() - 1) / jumpsize();
-    }
-    
-    
-        HDINLINE
-    int_fast32_t
-    size( 
-        ContainerPtr conPtr)
-    const 
-    {
-        return (nbElements(conPtr) - offset() + jumpsize() - 1) / jumpsize();
-    }
-    
-// variables
-protected:
-    OffsetType offset;
-    JumpsizeType jumpsize;
-};
-
-
-
-/** *************************************************************************
- * @brief The Doubly Link list like
- * ************************************************************************/
-
-
-template<
-    typename TContainer,
-    typename TOffset,
-    typename TJumpsize>
-struct Navigator<
-    TContainer,
-    TOffset,
-    TJumpsize,
-    hzdr::container::categorie::DoublyLinkListLike>
-{
-// define the types 
-    typedef typename std::decay<TContainer>::type                   ContainerType;
-    typedef ContainerType*                                          ContainerPtr;
-    typedef ContainerType&                                          ContainerRef;
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type ComponentType;
-    typedef ComponentType*                                           ComponentPtr;
-    typedef TJumpsize                                               JumpsizeType;
-    typedef TOffset                                                 OffsetType;
-    typedef hzdr::container::categorie::DoublyLinkListLike          ContainerCategoryType;
-    typedef typename traits::IndexType<ContainerCategoryType>::type IndexType;
-    typedef typename traits::RangeType<ContainerCategoryType>::type RangeType;
-    typedef traits::NumberElements<ContainerType>                   ContainerSizeType;
-    
-// the default constructors
-    HDINLINE Navigator() = default;
-    HDINLINE Navigator(Navigator const &) = default;
-    HDINLINE Navigator(Navigator &&) = default;
-    HDINLINE ~Navigator() = default;
-
-    
-public:
-    /**
-     * @brief Set the offset and the jumpsize to the given values
-       @param offset the distance from the start to the first element
-       @param jumpsize distance between two elements
-    */
-    HDINLINE
-    Navigator(
-            OffsetType && offset, 
-            JumpsizeType && jumpsize):
-        offset(std::forward<OffsetType>(offset)),
-        jumpsize(std::forward<JumpsizeType>(jumpsize))
-    {}
-    
-    
-    /**
-     * @brief The function moves the iterator forward to the next element. 
-     * @param index in: current position of iterator; out: position of the 
-     * iterator after the move.
-     * @result the distance from the end element to the hypothetical position
-     * given by the distance parameter
-     */
-    HDINLINE
-    RangeType
-    next(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &,
-        RangeType const & distance)
-    {
-        RangeType counter = 0;
-        for(; counter<distance; ++counter)
-        {
-            for(decltype(jumpsize()) i=0; i< jumpsize(); ++i)
-            {
-                componentPtr = componentPtr->next;
-                if(componentPtr == nullptr)
-                    break;
-            }
-            if(componentPtr == nullptr)
-                    break;
-        }
-        // we need the distance from the last element to the current index position
-        return distance - counter;
-    }
-    
-    
-    /**
-     * @brief The function moves the iterator backward to the next element. 
-     * @param index in: current position of iterator; out: position of the 
-     * iterator after the move.
-     * @result the distance from the end element to the hypothetical position
-     * given by the distance parameter
-     */
-    HDINLINE
-    RangeType
-    previous(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &,
-        RangeType distance)
-    {
-
-        std::cout << "The wrong one" << std::endl;
-        RangeType counter = 0;
-        for(; counter<distance; ++counter)
-        {
-            for(decltype(jumpsize()) i=static_cast<decltype(jumpsize())>(0); i< jumpsize(); ++i)
-            {
-                componentPtr = componentPtr->previous;
-                if(componentPtr == nullptr)
-                {
-                    break;
-                }
-            }
-            if(componentPtr == nullptr)
-                    break;
-        }
-        // we need the distance from the last element to the current index position
-        return distance - counter;
-    }
-    
-    /**
-     * @brief set the iterator to the first element
-     * 
-     */
-
-    HDINLINE 
-    void 
-    begin(
-        ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &)
-    {
-        componentPtr = containerPtr->first;
-    }
-
-    
-    /**
-     * @brief set the iterator to the last element. It is possible that two iterators,
-     * the first start with begin, the second with last, never meet.
-     */
-
-    HDINLINE 
-    void 
-    rbegin(
-        ContainerPtr containerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &)
-    {
-        auto nbElements = size(containerPtr);
-        auto jumps = (nbElements % jumpsize()) - ((nbElements - offset()) % jumpsize()); 
-        componentPtr = containerPtr->last;
-
-        for( auto i=0u; i<jumps; ++i)
-        {
-            if(componentPtr == nullptr)
-                break;
-            componentPtr = componentPtr->previous;
-        }
-    }
-    
-    HDINLINE 
-    void 
-    end(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &)
-    {
-        componentPtr = nullptr;
-    }
-    
-    /**
-     * @brief set the iterator to the last element. It is possible that two iterators,
-     * the first start with begin, the second with last, never meet.
-     */
-
-    HDINLINE 
-    void 
-    rend(
-        ContainerPtr,  
-        ComponentPtr& componentPtr,
-        IndexType &)
-    {
-        componentPtr = nullptr;
-    }
-    
-    HDINLINE 
-    bool
-    isAfterLast(
-        ContainerPtr,  
-        ComponentPtr componentPtr,
-        IndexType const & )
-    const
-    {
-        return componentPtr == nullptr;
-    }
-    
-    HDINLINE 
-    bool
-    isBeforeFirst(
-        ContainerPtr,  
-        ComponentPtr componentPtr,
-        IndexType const &)
-    const
-    {
-        return componentPtr == nullptr;
-    }
-    
-//variables
-protected:
-    OffsetType offset;
-    JumpsizeType jumpsize;
-    
-    template<typename Container>
-    uint_fast32_t size(Container* containerPtr)
-    {
-        uint_fast32_t counter = 0u;
-        auto componentPtr = containerPtr->first;
-        while(componentPtr != nullptr)
-        {
-            ++counter;
-            componentPtr = componentPtr->next;
-        };
-        return counter;
-    }
-};
+// template<
+//     typename TContainer,
+//     typename TOffset,
+//     typename TJumpsize>
+// struct Navigator<
+//     TContainer,
+//     TOffset,
+//     TJumpsize,
+//     hzdr::container::categorie::ArrayLike>
+// {
+// // define the types 
+//     typedef typename std::decay<TContainer>::type                   ContainerType;
+//     typedef ContainerType*                                          ContainerPtr;
+//     typedef ContainerType&                                          ContainerRef;
+//     typedef typename hzdr::traits::ComponentType<ContainerType>::type ComponentType;
+//     typedef ComponentType*                                           ComponentPtr;
+//     typedef TJumpsize                                               JumpsizeType;
+//     typedef TOffset                                                 OffsetType;
+//     typedef hzdr::container::categorie::ArrayLike           ContainerCategoryType;
+//     typedef typename traits::IndexType<ContainerCategoryType>::type IndexType;
+//     typedef typename traits::RangeType<ContainerCategoryType>::type RangeType;
+//     typedef traits::NumberElements<ContainerType>                   NumberElements;
+//     
+// // the default constructors
+//     HDINLINE Navigator() = default;
+//     HDINLINE Navigator(Navigator const &) = default;
+//     HDINLINE Navigator(Navigator &&) = default;
+//     HDINLINE ~Navigator() = default;
+//     
+//     /**
+//      * @brief Set the offset and the jumpsize to the given values
+//        @param offset the distance from the start to the first element
+//        @param jumpsize distance between two elements
+//     */
+//     HDINLINE
+//     Navigator(
+//             OffsetType && offset, 
+//             JumpsizeType && jumpsize):
+//         offset(std::forward<OffsetType>(offset)),
+//         jumpsize(std::forward<JumpsizeType>(jumpsize))
+//     {}
+//     
+//     
+//     /**
+//      * @brief The function moves the iterator forward to the next element. 
+//      * @param index in: current position of iterator; out: position of the 
+//      * iterator after the move.
+//      * @result the distance from the end element to the hypothetical position
+//      * given by the distance parameter
+//      */
+//     HDINLINE
+//     RangeType
+//     next(
+//         ContainerPtr containerPtr,  
+//         ComponentPtr,
+//         IndexType & index,
+//         RangeType const & distance)
+//     {
+//         NumberElements size;
+//         index += distance * jumpsize();
+//         
+//         // we need the distance from the last element to the current index position
+//         return (index - size(containerPtr) + jumpsize() - static_cast<IndexType>(1)) / jumpsize();
+//     }
+//     
+//     
+//     /**
+//      * @brief The function moves the iterator backward to the next element. 
+//      * @param index in: current position of iterator; out: position of the 
+//      * iterator after the move.
+//      * @result the distance from the end element to the hypothetical position
+//      * given by the distance parameter
+//      */
+//      
+//     template< typename TRange_>
+//     HDINLINE
+//     RangeType
+//     previous(
+//         ContainerPtr,  
+//         ComponentPtr,
+//         IndexType & index,
+//         TRange_ && distance)
+//     {
+//         index -= distance * jumpsize();
+//         // index < 0
+//         // we need the distance from the last element to the current index position
+//         return (static_cast<IndexType>(-1) * index + jumpsize() - static_cast<IndexType>(1)) / jumpsize();
+//     }
+//     
+//     /**
+//      * @brief set the iterator to the first element
+//      * 
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     begin(
+//         ContainerPtr,  
+//         ComponentPtr,
+//         IndexType & index)
+//     {
+// 
+//         index = offset();
+//     }
+//     
+//     /**
+//      * @brief set the iterator to the last element. It is possible that two iterators,
+//      * the first start with begin, the second with last, never meet.
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     rbegin(
+//         ContainerPtr conPtr,  
+//         ComponentPtr,
+//         IndexType & index)
+//     {
+// 
+//         NumberElements size;
+//         auto nbOfJumps = ((size(conPtr) - offset() - 1) / jumpsize() );
+//         
+//         index = (nbOfJumps) * jumpsize() + offset();
+//     }
+//     
+//     
+//         /**
+//      * @brief set the iterator to the first element
+//      * 
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     end(
+//         ContainerPtr conPtr,  
+//         ComponentPtr,
+//         IndexType & index)
+//     {
+//         NumberElements size;
+//         /**
+//          * We need the index of the first Element outside the container
+//          */
+//         auto nbOfJumps = ((size(conPtr) - offset()-1) / jumpsize() );
+//         
+//         index = (nbOfJumps +1) * jumpsize() + offset();
+//     }
+//     
+//     /**
+//      * @brief set the iterator to the last element. It is possible that two iterators,
+//      * the first start with begin, the second with last, never meet.
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     rend(
+//         ContainerPtr conPtr,  
+//         ComponentPtr,
+//         IndexType & index)
+//     {
+// 
+//                 /**
+//          * We need the index of the first Element outside the container
+//          */
+//         index = -(nbElements(conPtr) - offset()) % jumpsize() - jumpsize() - 1;
+//     }
+//     
+//     HDINLINE 
+//     bool
+//     isAfterLast(
+//         ContainerPtr conPtr,  
+//         ComponentPtr,
+//         IndexType const & index)
+//     const
+//     {
+//         return index >= nbElements(conPtr);
+//     }
+//     
+//     HDINLINE 
+//     bool
+//     isBeforeFirst(
+//         ContainerPtr,  
+//         ComponentPtr,
+//         IndexType const & index)
+//     const
+//     {
+//         return index < static_cast<IndexType>(offset());
+//     }
+//     
+//     HDINLINE
+//     int_fast32_t
+//     nbElements( ContainerPtr conPtr)
+//     const 
+//     {
+//         NumberElements size;
+//         return size(conPtr);
+//     }
+//     
+//     HDINLINE
+//     int_fast32_t
+//     distanceToEnd( 
+//         ContainerPtr conPtr, 
+//         IndexType const & index)
+//     const 
+//     {
+//         return (nbElements(conPtr) - index + jumpsize() - 1) / jumpsize();
+//     }
+//     
+//     HDINLINE
+//     int_fast32_t
+//     distanceToBegin( 
+//         ContainerPtr, 
+//         IndexType const & index)
+//     const 
+//     {
+//         return (index - offset() + jumpsize() - 1) / jumpsize();
+//     }
+//     
+//     
+//         HDINLINE
+//     int_fast32_t
+//     size( 
+//         ContainerPtr conPtr)
+//     const 
+//     {
+//         return (nbElements(conPtr) - offset() + jumpsize() - 1) / jumpsize();
+//     }
+//     
+// // variables
+// protected:
+//     OffsetType offset;
+//     JumpsizeType jumpsize;
+// };
+// 
+// 
+// 
+// /** *************************************************************************
+//  * @brief The Doubly Link list like
+//  * ************************************************************************/
+// 
+// 
+// template<
+//     typename TContainer,
+//     typename TOffset,
+//     typename TJumpsize>
+// struct Navigator<
+//     TContainer,
+//     TOffset,
+//     TJumpsize,
+//     hzdr::container::categorie::DoublyLinkListLike>
+// {
+// // define the types 
+//     typedef typename std::decay<TContainer>::type                   ContainerType;
+//     typedef ContainerType*                                          ContainerPtr;
+//     typedef ContainerType&                                          ContainerRef;
+//     typedef typename hzdr::traits::ComponentType<ContainerType>::type ComponentType;
+//     typedef ComponentType*                                           ComponentPtr;
+//     typedef TJumpsize                                               JumpsizeType;
+//     typedef TOffset                                                 OffsetType;
+//     typedef hzdr::container::categorie::DoublyLinkListLike          ContainerCategoryType;
+//     typedef typename traits::IndexType<ContainerCategoryType>::type IndexType;
+//     typedef typename traits::RangeType<ContainerCategoryType>::type RangeType;
+//     typedef traits::NumberElements<ContainerType>                   NumberElements;
+//     
+// // the default constructors
+//     HDINLINE Navigator() = default;
+//     HDINLINE Navigator(Navigator const &) = default;
+//     HDINLINE Navigator(Navigator &&) = default;
+//     HDINLINE ~Navigator() = default;
+// 
+//     
+// public:
+//     /**
+//      * @brief Set the offset and the jumpsize to the given values
+//        @param offset the distance from the start to the first element
+//        @param jumpsize distance between two elements
+//     */
+//     HDINLINE
+//     Navigator(
+//             OffsetType && offset, 
+//             JumpsizeType && jumpsize):
+//         offset(std::forward<OffsetType>(offset)),
+//         jumpsize(std::forward<JumpsizeType>(jumpsize))
+//     {}
+//     
+//     
+//     /**
+//      * @brief The function moves the iterator forward to the next element. 
+//      * @param index in: current position of iterator; out: position of the 
+//      * iterator after the move.
+//      * @result the distance from the end element to the hypothetical position
+//      * given by the distance parameter
+//      */
+//     HDINLINE
+//     RangeType
+//     next(
+//         ContainerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &,
+//         RangeType const & distance)
+//     {
+//         RangeType counter = 0;
+//         for(; counter<distance; ++counter)
+//         {
+//             for(decltype(jumpsize()) i=0; i< jumpsize(); ++i)
+//             {
+//                 componentPtr = componentPtr->next;
+//                 if(componentPtr == nullptr)
+//                     break;
+//             }
+//             if(componentPtr == nullptr)
+//                     break;
+//         }
+//         // we need the distance from the last element to the current index position
+//         return distance - counter;
+//     }
+//     
+//     
+//     /**
+//      * @brief The function moves the iterator backward to the next element. 
+//      * @param index in: current position of iterator; out: position of the 
+//      * iterator after the move.
+//      * @result the distance from the end element to the hypothetical position
+//      * given by the distance parameter
+//      */
+//     HDINLINE
+//     RangeType
+//     previous(
+//         ContainerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &,
+//         RangeType distance)
+//     {
+// 
+//         std::cout << "The wrong one" << std::endl;
+//         RangeType counter = 0;
+//         for(; counter<distance; ++counter)
+//         {
+//             for(decltype(jumpsize()) i=static_cast<decltype(jumpsize())>(0); i< jumpsize(); ++i)
+//             {
+//                 componentPtr = componentPtr->previous;
+//                 if(componentPtr == nullptr)
+//                 {
+//                     break;
+//                 }
+//             }
+//             if(componentPtr == nullptr)
+//                     break;
+//         }
+//         // we need the distance from the last element to the current index position
+//         return distance - counter;
+//     }
+//     
+//     /**
+//      * @brief set the iterator to the first element
+//      * 
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     begin(
+//         ContainerPtr containerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &)
+//     {
+//         componentPtr = containerPtr->first;
+//     }
+// 
+//     
+//     /**
+//      * @brief set the iterator to the last element. It is possible that two iterators,
+//      * the first start with begin, the second with last, never meet.
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     rbegin(
+//         ContainerPtr containerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &)
+//     {
+//         auto nbElements = size(containerPtr);
+//         auto jumps = (nbElements % jumpsize()) - ((nbElements - offset()) % jumpsize()); 
+//         componentPtr = containerPtr->last;
+// 
+//         for( auto i=0u; i<jumps; ++i)
+//         {
+//             if(componentPtr == nullptr)
+//                 break;
+//             componentPtr = componentPtr->previous;
+//         }
+//     }
+//     
+//     HDINLINE 
+//     void 
+//     end(
+//         ContainerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &)
+//     {
+//         componentPtr = nullptr;
+//     }
+//     
+//     /**
+//      * @brief set the iterator to the last element. It is possible that two iterators,
+//      * the first start with begin, the second with last, never meet.
+//      */
+// 
+//     HDINLINE 
+//     void 
+//     rend(
+//         ContainerPtr,  
+//         ComponentPtr& componentPtr,
+//         IndexType &)
+//     {
+//         componentPtr = nullptr;
+//     }
+//     
+//     HDINLINE 
+//     bool
+//     isAfterLast(
+//         ContainerPtr,  
+//         ComponentPtr componentPtr,
+//         IndexType const & )
+//     const
+//     {
+//         return componentPtr == nullptr;
+//     }
+//     
+//     HDINLINE 
+//     bool
+//     isBeforeFirst(
+//         ContainerPtr,  
+//         ComponentPtr componentPtr,
+//         IndexType const &)
+//     const
+//     {
+//         return componentPtr == nullptr;
+//     }
+//     
+// //variables
+// protected:
+//     OffsetType offset;
+//     JumpsizeType jumpsize;
+//     
+//     template<typename Container>
+//     uint_fast32_t size(Container* containerPtr)
+//     {
+//         uint_fast32_t counter = 0u;
+//         auto componentPtr = containerPtr->first;
+//         while(componentPtr != nullptr)
+//         {
+//             ++counter;
+//             componentPtr = componentPtr->next;
+//         };
+//         return counter;
+//     }
+// };
 
 /**
  * @brief This navigator is a concept. It has an offset and a jumpsize.
@@ -775,15 +803,36 @@ template<
     typename TOffset,
     typename TJumpsize>
 struct Navigator<
-        details::UndefinedType,
-        TOffset,
-        TJumpsize,
-        details::UndefinedType,
-        details::UndefinedType>
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    TOffset,
+    TJumpsize,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
+    false>
 {
-    typedef TOffset OffsetType;
-    typedef TJumpsize JumpsizeType;
-    typedef details::UndefinedType ContainerType;
+    typedef hzdr::details::UndefinedType                            ContainerType;
+    typedef ContainerType*                                          ContainerPtr;
+    typedef ContainerType&                                          ContainerRef;
+    typedef hzdr::details::UndefinedType                            ComponentType;
+    typedef ComponentType*                                          ComponentPtr;
+    typedef TJumpsize                                               JumpsizeType;
+    typedef TOffset                                                 OffsetType;
+    typedef hzdr::details::UndefinedType                            IndexType;
+    typedef hzdr::details::UndefinedType                            RangeType;
+    typedef hzdr::details::UndefinedType                            NumberElements;
+    typedef hzdr::details::UndefinedType                            FirstElement;
+    typedef hzdr::details::UndefinedType                            NextElement;
+    typedef hzdr::details::UndefinedType                            AfterLastElement;
+    typedef hzdr::details::UndefinedType                            LastElement;
+    typedef hzdr::details::UndefinedType                            PreviousElement;
+    typedef hzdr::details::UndefinedType                            BeforeFirstElement;
     
     // the default constructors
     HDINLINE Navigator() = default;
@@ -829,19 +878,35 @@ makeNavigator(
 -> 
     hzdr::Navigator<
         details::UndefinedType,
-        typename std::decay<TOffset>::type ,
-        typename std::decay<TJumpsize>::type,
         details::UndefinedType,
-        details::UndefinedType>
+        typename std::decay<TOffset>::type,
+        typename std::decay<TJumpsize>::type,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        false>
 {
     typedef typename std::decay<TOffset>::type OffsetType;
     typedef typename std::decay<TJumpsize>::type JumpsizeType;
     typedef hzdr::Navigator<
         details::UndefinedType,
+        details::UndefinedType,
         OffsetType,
         JumpsizeType,
-        details::UndefinedType,
-        details::UndefinedType> ResultType;
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
+        false> ResultType;
     
     return ResultType(
         std::forward<TOffset>(offset),
@@ -858,38 +923,74 @@ namespace details
     template<typename T>
     struct NavigatorTemplates
     {
-        typedef typename std::decay<T>::type _T;
-        typedef typename _T::ContainerType ContainerType;
-        typedef typename _T::OffsetType OffsetType;
-        typedef typename _T::JumpsizeType JumpsizeType;
+        typedef typename std::decay<T>::type            _T;
+        typedef typename _T::ContainerType              ContainerType;
+        typedef typename _T::OffsetType                 OffsetType;
+        typedef typename _T::JumpsizeType               JumpsizeType;
+        typedef typename _T::IndexType                  IndexType;
+        typedef typename _T::RangeType                  RangeType;
+        typedef typename _T::NumberElements          NumberElements;
+        typedef typename _T::FirstElement               FirstElement;
+        typedef typename _T::NextElement                NextElement;
+        typedef typename _T::AfterLastElement           AfterLastElement;
+        typedef typename _T::LastElement                LastElement;
+        typedef typename _T::PreviousElement            PreviousElement;
+        typedef typename _T::BeforeFirstElement         BeforeFirstElement;
+        
     };
-    
-    
+
 
 template<
     typename TContainer,
+    typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename TNavigator,
     typename TOffset = typename details::NavigatorTemplates<TNavigator>::OffsetType,
-    typename TJumpsize = typename details::NavigatorTemplates<TNavigator>::JumpsizeType>
+    typename TJumpsize = typename details::NavigatorTemplates<TNavigator>::JumpsizeType,
+    typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
+    typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
+    typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
+    typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename TRange = typename OffsetRangeType<TOffset>::type,
+    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>,
+    typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
 auto
 makeNavigator(
     TNavigator && navi)
 ->
 hzdr::Navigator<
-        typename std::decay<TContainer>::type,
-        TOffset,
-        TJumpsize,
-        typename traits::ContainerCategory<
-            typename std::decay<TContainer>::type>::type>
+    TContainerNoRef,
+    TComponent,
+    TOffset,
+    TJumpsize,
+    TIndex,
+    TContainerSize,
+    TFirstElement,
+    TNextElement,
+    TAfterLastElement,
+    TLastElement,
+    TPreviousElement,
+    TBeforeFirstElement,
+    isBidirectional>
 {
-    typedef typename std::decay<TContainer>::type                   ContainerType;
-    typedef typename traits::ContainerCategory<ContainerType>::type ContainerCategoryType;
-
     typedef hzdr::Navigator<
-        ContainerType,
+        TContainerNoRef,
+        TComponent,
         TOffset,
         TJumpsize,
-        ContainerCategoryType> ResultType;
+        TIndex,
+        TContainerSize,
+        TFirstElement,
+        TNextElement,
+        TAfterLastElement,
+        TLastElement,
+        TPreviousElement,
+        TBeforeFirstElement,
+        isBidirectional> ResultType;
     return ResultType(std::forward<TOffset>(navi.offset), std::forward<TJumpsize>(navi.jumpsize));
 }
 
@@ -945,32 +1046,59 @@ hzdr::Navigator<
  * of the iterator
  * @param jumpsize distance between to elements within the container
  */
+
 template<
     typename TContainer,
+    typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename TOffset,
-    typename TJumpsize>
+    typename TJumpsize,
+    typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
+    typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
+    typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>::type,
+    typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename TRange = decltype(TOffset::operator()()),
+    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>::type,
+    typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
 auto 
 makeNavigator(
     TOffset && offset,
     TJumpsize && jumpsize)
 -> 
     hzdr::Navigator<
-        typename std::decay<TContainer>::type,
-        typename std::decay<TOffset>::type ,
-        typename std::decay<TJumpsize>::type,
-        typename traits::ContainerCategory<
-            typename std::decay<TContainer>::type>::type>
+        TContainerNoRef,
+        TComponent,
+        TOffset,
+        TJumpsize,
+        TIndex,
+        TContainerSize,
+        TFirstElement,
+        TNextElement,
+        TAfterLastElement,
+        TLastElement,
+        TPreviousElement,
+        TBeforeFirstElement,
+        isBidirectional>
 {
-    typedef typename std::decay<TContainer>::type               ContainerType;
-    typedef typename std::decay<TOffset>::type                  OffsetType;
-    typedef typename std::decay<TJumpsize>::type                JumpsizeType;
-    
-    typedef typename traits::ContainerCategory<ContainerType>::type ContainerCategoryType;
+
     typedef hzdr::Navigator<
-        ContainerType,
-        OffsetType,
-        JumpsizeType,
-        ContainerCategoryType> ResultType;
+        TContainerNoRef,
+        TComponent,
+        TOffset,
+        TJumpsize,
+        TIndex,
+        TContainerSize,
+        TFirstElement,
+        TNextElement,
+        TAfterLastElement,
+        TLastElement,
+        TPreviousElement,
+        TBeforeFirstElement,
+        isBidirectional> ResultType;
     
     return ResultType(
         std::forward<TOffset>(offset),

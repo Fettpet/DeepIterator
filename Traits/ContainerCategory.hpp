@@ -38,8 +38,8 @@ struct ContainerCategory<hzdr::Particle<TPos, dim> >
     typedef hzdr::container::categorie::ArrayLike type;
 };
     
-template<typename TSuperCell>
-struct ContainerCategory<hzdr::SupercellContainer<TSuperCell> >
+template<typename TSupercell>
+struct ContainerCategory<hzdr::SupercellContainer<TSupercell> >
 {
     typedef hzdr::container::categorie::ArrayLike type;
 };

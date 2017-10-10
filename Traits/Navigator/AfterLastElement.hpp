@@ -1,3 +1,4 @@
+
 #pragma once
 #include <cassert>
 #include "PIC/Supercell.hpp"
@@ -10,36 +11,30 @@ namespace hzdr
 {
 namespace traits
 {
-namespace accessor
+namespace navigator
 {
-namespace details
-{
-    
-}
-    
 template<
     typename TContainer,
-    typename TComponent,
     typename TIndex,
     typename TContainerCategory>
-struct Ahead
+struct AfterLastElement
 {
+    template<typename TRangeFunction>
     HDINLINE
-    bool
-    operator() (TContainer*, TIndex&, TContainer*, TIndex&)
+    void
+    operator() (TContainer*, TIndex const &, TRangeFunction const &)
+    const
     {
-        // is not implemented. Specify the trait
-        assert(true); 
+        // is not implemented. 
+        assert(true); // Specify the trait
     }
-    
-    // this function is used to 
-    HDINLINE void UNDEFINED(){};
 };
 
 
 
+} // namespace navigator
 
-} // namespace accessor
 } // namespace traits
     
 } // namespace hzdr
+

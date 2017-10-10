@@ -12,7 +12,8 @@
 #include "Definitions/hdinline.hpp"
 #include <iostream>
 #include <iomanip>
-#include "Iterator/Categorie/ArrayLike.hpp"
+#include "Iterator/Categorie.hpp"
+
 namespace hzdr
 {
 template<

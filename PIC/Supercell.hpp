@@ -12,7 +12,7 @@
 namespace hzdr
 {
 template<typename TFrame>
-struct SuperCell
+struct Supercell
 {
 
     typedef TFrame frame_type;
@@ -20,20 +20,20 @@ struct SuperCell
     typedef TFrame ValueType;
     
     HDINLINE 
-    SuperCell():
+    Supercell():
         firstFrame(nullptr),
         lastFrame(nullptr)
     {}
     
     HDINLINE 
-    SuperCell(const SuperCell & other)
+    Supercell(const Supercell & other)
     {
         firstFrame = other.firstFrame;
         lastFrame = other.lastFrame;
     }
     
     HDINLINE 
-    SuperCell( SuperCell && other)
+    Supercell( Supercell && other)
     {
         firstFrame = other.firstFrame;
         lastFrame = other.lastFrame;
@@ -42,7 +42,7 @@ struct SuperCell
     }
     
     HDINLINE
-    ~SuperCell() 
+    ~Supercell() 
     {
         TFrame* cur = firstFrame;
         while(cur != nullptr)
@@ -54,8 +54,8 @@ struct SuperCell
     }
     
     HDINLINE
-    SuperCell& 
-    operator=(const SuperCell& other)
+    Supercell& 
+    operator=(const Supercell& other)
     {
         firstFrame = other.firstFrame;
         lastFrame = other.lastFrame;
@@ -64,8 +64,8 @@ struct SuperCell
     
         
     HDINLINE
-    SuperCell& 
-    operator=( SuperCell&& other)
+    Supercell& 
+    operator=( Supercell&& other)
     {
         
         firstFrame = other.firstFrame;
@@ -80,7 +80,7 @@ struct SuperCell
      * @param nbParticle number of particles in the lastFrame frame
      */
     HDINLINE
-    SuperCell(uint32_t nbFrames, uint32_t nbParticles):
+    Supercell(uint32_t nbFrames, uint32_t nbParticles):
         firstFrame(new TFrame())
     {
         TFrame *curFrame;
@@ -105,7 +105,7 @@ struct SuperCell
     TFrame *firstFrame = nullptr;
     TFrame *lastFrame = nullptr;
  //   uint32_t nbParticlesInLastFrame;
-}; // struct SuperCell
+}; // struct Supercell
 
 // traits
 namespace traits 
@@ -115,7 +115,7 @@ struct IsBidirectional;
     
 template<
     typename TFrame>
-struct IsBidirectional<SuperCell<TFrame> >
+struct IsBidirectional<Supercell<TFrame> >
 {
     static const bool value = true;
 };
@@ -126,7 +126,7 @@ struct IsRandomAccessable;
 
 template<
     typename TFrame>
-struct IsRandomAccessable<SuperCell<TFrame> >
+struct IsRandomAccessable<Supercell<TFrame> >
 {
     static const bool value = true;
 };
@@ -136,7 +136,7 @@ struct HasConstantSize;
 
 template<
     typename TFrame>
-struct HasConstantSize<SuperCell<TFrame> >
+struct HasConstantSize<Supercell<TFrame> >
 {
     static const bool value = true;
 };
@@ -146,7 +146,7 @@ struct ComponentType;
 
 template<
     typename TFrame>
-struct ComponentType<SuperCell<TFrame> >
+struct ComponentType<Supercell<TFrame> >
 {
     typedef TFrame type;
 };
@@ -156,11 +156,11 @@ struct ComponentType<SuperCell<TFrame> >
 
 template<typename TFrame>
 HDINLINE
-std::ostream& operator<<(std::ostream& out, const SuperCell<TFrame>& SuperCell)
+std::ostream& operator<<(std::ostream& out, const Supercell<TFrame>& Supercell)
 {
     TFrame *curFrame;
     
-    curFrame = SuperCell.firstFrame;
+    curFrame = Supercell.firstFrame;
     
     while(curFrame != nullptr)
     {

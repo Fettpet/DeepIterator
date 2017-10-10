@@ -10,36 +10,31 @@ namespace hzdr
 {
 namespace traits
 {
-namespace accessor
+namespace navigator
 {
-namespace details
-{
-    
-}
-    
 template<
     typename TContainer,
-    typename TComponent,
     typename TIndex,
+    typename TRange,
     typename TContainerCategory>
-struct Ahead
+struct LastElement
 {
+    template<typename TSizeFunction>
     HDINLINE
-    bool
-    operator() (TContainer*, TIndex&, TContainer*, TIndex&)
+    void
+    operator() (TContainer*, TIndex&, TRange&, TRange&, TSizeFunction&)
     {
-        // is not implemented. Specify the trait
-        assert(true); 
+        // is not implemented. 
+        assert(true); // Specify the trait
     }
     
-    // this function is used to 
-    HDINLINE void UNDEFINED(){};
+    HDINLINE void UNDEFINED();
 };
 
 
-
-
-} // namespace accessor
+} // namespace navigator
 } // namespace traits
     
 } // namespace hzdr
+
+

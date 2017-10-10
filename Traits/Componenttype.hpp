@@ -37,7 +37,7 @@ struct ComponentType<hzdr::details::UndefinedType>
 };
 
 template<typename Frame>
-struct ComponentType< hzdr::SuperCell<Frame> >
+struct ComponentType< hzdr::Supercell<Frame> >
 {
     typedef Frame type;
 };

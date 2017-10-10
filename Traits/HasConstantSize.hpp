@@ -48,13 +48,13 @@ struct HasConstantSize<hzdr::Particle<TPos, dim> >
 };
     
 template<typename TFrame>
-struct HasConstantSize<hzdr::SuperCell<TFrame> >
+struct HasConstantSize<hzdr::Supercell<TFrame> >
 {
     const static bool value = false;
 };
     
-template<typename TSuperCell>
-struct HasConstantSize<hzdr::SupercellContainer<TSuperCell> >
+template<typename TSupercell>
+struct HasConstantSize<hzdr::SupercellContainer<TSupercell> >
 {
     const static bool value = false;
 };

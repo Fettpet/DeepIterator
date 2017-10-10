@@ -32,7 +32,7 @@ struct MaxElements<hzdr::SupercellContainer<Supercell> >
 };
 
 template<typename Frame>
-struct MaxElements<hzdr::SuperCell<Frame> >
+struct MaxElements<hzdr::Supercell<Frame> >
 {
     
     static const int_fast32_t value = RuntimeSize;

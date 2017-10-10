@@ -10,29 +10,18 @@ namespace hzdr
 {
 namespace traits
 {
-namespace accessor
+namespace navigator
 {
+    
+    
 template<
     typename TContainer,
-    typename TComponent,
     typename TIndex,
+    typename TOffset,
     typename TContainerCategory>
-struct Get
-{
-    HDINLINE
-    TComponent& 
-    operator() (TContainer*, TIndex&)
-    {
-        // is not implemented. Specify the trait
-        assert(true); 
-    }
-};
+struct FirstElement{};
 
-
-
-} // namespace accessor
-
-    
+} // namespace navigator
 } // namespace traits
     
 } // namespace hzdr

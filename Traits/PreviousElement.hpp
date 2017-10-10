@@ -32,7 +32,7 @@ struct PreviousElement<
 };
 
 template<typename TJumpsize, typename Frame>
-struct PreviousElement<hzdr::SuperCell<Frame>, void>
+struct PreviousElement<hzdr::Supercell<Frame>, void>
 {
     template<
         typename TContainer,

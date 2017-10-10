@@ -31,6 +31,28 @@ struct NumberElements
     }
     
 }; // NumberElements
+
+template<typename TFrame>
+struct NumberElements<Supercell<TFrame> >
+{
+    typedef Supercell<TFrame> Container;
+    
+    HDINLINE
+    int_fast32_t 
+    size(Container* container)
+    const
+    {
+        auto result = 0;
+        auto tmp = container->firstFrame;
+        while(tmp != nullptr)
+        {
+            tmp =tmp->nextFrame;
+            ++result;
+        }
+        return result;
+    }
+    
+}; // NumberElements
   
 template<typename Supercell>
 struct NumberElements<hzdr::SupercellContainer<Supercell> >
@@ -57,6 +79,7 @@ struct NumberElements<hzdr::Frame<TParticle, nb> >
     HDINLINE
     int_fast32_t 
     operator()( Frame const * const f)
+    const
     {
         return f->nbParticlesInFrame;    
     }

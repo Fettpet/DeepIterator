@@ -11,7 +11,7 @@ struct SupercellContainer
     
 public:
     typedef TSupercell                                          SupercellType;
-    typedef SupercellType*                                      SuperCellPtr;
+    typedef SupercellType*                                      SupercellPtr;
     typedef SupercellContainer<TSupercell>                      ThisType;
 
     
@@ -19,10 +19,10 @@ public:
     
     template<typename TIndex>
     HDINLINE
-    SupercellContainer(SuperCellPtr supercell,
+    SupercellContainer(SupercellPtr supercell,
                        const TIndex& nbSupercells):
         nbSupercells(nbSupercells),
-        supercells(new SuperCellPtr[nbSupercells])
+        supercells(new SupercellPtr[nbSupercells])
     {
 
         for(int_fast32_t i=0;i<nbSupercells; ++i)
@@ -38,7 +38,7 @@ public:
     SupercellContainer(const int_fast32_t& nbSupercells, 
                        const int_fast32_t& nbFramesInSupercell)
     {
-        supercells = new SuperCellPtr[nbSupercells];
+        supercells = new SupercellPtr[nbSupercells];
         for(int_fast32_t i=0; i<nbSupercells; ++i)
         {
             int_fast32_t nbParticleInLastFrame = rand() % nbFramesInSupercell;
@@ -80,7 +80,7 @@ public:
     }
 protected:
     uint_fast32_t nbSupercells;
-    SuperCellPtr* supercells;
+    SupercellPtr* supercells;
 }; // struct SupercellContainer
 
 // traits

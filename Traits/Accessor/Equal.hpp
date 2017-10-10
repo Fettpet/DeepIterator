@@ -1,5 +1,7 @@
 #pragma once
 #include <cassert>
+#include "PIC/Supercell.hpp"
+
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
  *
@@ -13,7 +15,8 @@ namespace accessor
 template<
     typename TContainer,
     typename TComponent,
-    typename TIndex>
+    typename TIndex,
+    typename TContainerCategory>
 struct Equal
 {
     HDINLINE
@@ -24,7 +27,10 @@ struct Equal
         assert(true); 
     }
 };
-}
+
+
+} // namespace accessor
+
 } // namespace traits
     
 } // namespace hzdr

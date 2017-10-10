@@ -10,29 +10,28 @@ namespace hzdr
 {
 namespace traits
 {
-namespace accessor
+namespace navigator
 {
 template<
     typename TContainer,
-    typename TComponent,
     typename TIndex,
+    typename TRange,
     typename TContainerCategory>
-struct Get
+struct BeforeFirstElement
 {
     HDINLINE
-    TComponent& 
-    operator() (TContainer*, TIndex&)
+    void
+    operator() (TContainer*, TIndex&, TRange&)
+    const
     {
-        // is not implemented. Specify the trait
-        assert(true); 
+        // is not implemented. 
+        assert(true); // Specify the trait
     }
 };
 
+}// namespace navigator
 
-
-} // namespace accessor
-
-    
 } // namespace traits
     
 } // namespace hzdr
+
