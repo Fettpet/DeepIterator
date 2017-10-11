@@ -1,4 +1,4 @@
-int main(){return 0;}
+int main(){}
 #if 0
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
@@ -24,7 +24,7 @@ using namespace boost::unit_test;
 
 typedef hzdr::Particle<int_fast32_t, 2u> Particle;
 typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(Frames)
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(Frames)
 
 
 
-BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
+BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 {
 
     uint_fast32_t nbFrames = 5u;

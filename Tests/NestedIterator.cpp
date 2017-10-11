@@ -14,7 +14,7 @@ int main(){return 0;}
 typedef int_fast32_t ParticleProperty;
 typedef hzdr::Particle<ParticleProperty, 2> Particle;
 typedef hzdr::Frame<Particle, 10> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 
 
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 }
 
 
-BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
+BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 {
 
 
@@ -222,28 +222,28 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
 #if 0
 BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
 {
-    const int nbSuperCells = 5;
+    const int nbSupercells = 5;
     const int nbFramesInSupercell = 2;
-    SupercellContainer supercellContainer(nbSuperCells, nbFramesInSupercell);
+    SupercellContainer supercellContainer(nbSupercells, nbFramesInSupercell);
     
     typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
     
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell1(supercellContainer[0]); 
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSupercell1(supercellContainer[0]); 
 // create the second iteartor
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSuperCell2(supercellContainer[1]);
+    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSupercell2(supercellContainer[1]);
 // first add all 
-    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+    for(auto it=iterSupercell1.begin(); it != iterSupercell1.end(); ++it)
     {
         if(*it)
         {
             (**it).data[0] = 0;
         }
 
-        for(auto it2 = iterSuperCell2.begin(); it2 != iterSuperCell2.end(); ++it2)
+        for(auto it2 = iterSupercell2.begin(); it2 != iterSupercell2.end(); ++it2)
         {
             // check wheter both are valid
             if(*it and *it2)
@@ -254,9 +254,9 @@ BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
     }
     
 // second all particles within the first supercell must have the same value
-    for(auto it=iterSuperCell1.begin(); it != iterSuperCell1.end(); ++it)
+    for(auto it=iterSupercell1.begin(); it != iterSupercell1.end(); ++it)
     {
-        for(auto it2 = iterSuperCell1.begin(); it2 != iterSuperCell1.end(); ++it2)
+        for(auto it2 = iterSupercell1.begin(); it2 != iterSupercell1.end(); ++it2)
         {
             // check wheter both are valid
             if(*it and *it2)

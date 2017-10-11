@@ -46,7 +46,7 @@ struct Get<
 {
     HDINLINE
     TComponent&
-    operator() (TContainer* con, TIndex& idx)
+    operator() (TContainer* con, TIndex const & idx)
     {
         // is not implemented. Specify the trait
         return (*con)[idx];
@@ -69,7 +69,11 @@ struct Equal<
 {
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator() (
+        TContainer * const con1, 
+        TIndex const & idx1, 
+        TContainer * const con2, 
+        TIndex const & idx2)
     {
         // is not implemented. Specify the trait
         return con1 == con2 && idx1 == idx2;
@@ -92,7 +96,11 @@ struct Ahead<
 {
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator() (
+        TContainer * const con1, 
+        TIndex const & idx1, 
+        TContainer * const con2, 
+        TIndex const & idx2)
     {
         // is not implemented. Specify the trait
         return idx1 > idx2 && con1 == con2;
@@ -115,7 +123,11 @@ struct Behind<
 {
     HDINLINE
     bool
-    operator() (TContainer*, TIndex& idx1, TContainer*, TIndex& idx2)
+    operator() (
+        TContainer * const, 
+        TIndex const & idx1, 
+        TContainer *, 
+        TIndex const & idx2)
     {
         // is not implemented. Specify the trait
         return idx1 < idx2;
@@ -204,7 +216,7 @@ struct AfterLastElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set(TContainer* conPtr, TIndex const & idx, TSizeFunction const & size)
+    set(TContainer* conPtr, TIndex & idx, TSizeFunction const & size)
     const
     {
         idx = size(conPtr);
@@ -255,11 +267,18 @@ struct PreviousElement<
     TRange,
     hzdr::container::categorie::ArrayLike>
 {
+    template<typename T>
     HDINLINE
-    void
-    operator() (TContainer*, TIndex& idx, TRange& jumpsize)
+    int
+    operator() (
+        TContainer*, 
+        TIndex& idx, 
+        TRange const & jumpsize,
+        T const &
+               )
     {
         idx -= jumpsize;
+        return (static_cast<int>(idx) < 0) *  static_cast<int>(idx);
     }
 };
 
@@ -280,16 +299,16 @@ struct BeforeFirstElement<
     template<typename TRangeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TRangeFunction&)
+    test (TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
     const
     {
-        return idx < static_cast<TIndex>(0);
+        return idx < static_cast<TIndex>(offset);
     }
     
     template<typename TRangeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex const & idx, TRangeFunction&)
+    set (TContainer*, TIndex & idx, TRange const &, TRangeFunction&)
     const
     {
         idx = static_cast<TIndex>(-1);

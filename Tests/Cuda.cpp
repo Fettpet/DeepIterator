@@ -26,7 +26,7 @@ int main(){return 0;}
 
 typedef hzdr::Particle<int32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 256> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 
 // 
 // /**

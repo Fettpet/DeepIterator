@@ -85,7 +85,7 @@ struct Accessor
     HDINLINE 
     ComponentRef
     get(ContainerPtr containerPtr,
-        IndexType & idx)
+        IndexType const & idx)
     {
         return _get(containerPtr, idx);
     }
@@ -93,10 +93,10 @@ struct Accessor
     
     HDINLINE
     bool
-    equal(ContainerPtr containerPtr1,
-          IndexType & index1,
-          ContainerPtr containerPtr2,
-          IndexType & index2)
+    equal(ContainerPtr const containerPtr1,
+          IndexType const & index1,
+          ContainerPtr const containerPtr2,
+          IndexType const & index2)
     {
         return _equal(containerPtr1, index1, containerPtr2, index2);
     }
@@ -105,10 +105,10 @@ struct Accessor
     template<bool T = isRandomAccessable>
     HDINLINE 
     bool
-    greater(ContainerPtr containerPtr1,
-          IndexType & index1,
-          ContainerPtr containerPtr2,
-          IndexType & index2,
+    greater(ContainerPtr const containerPtr1,
+          IndexType const & index1,
+          ContainerPtr const containerPtr2,
+          IndexType const & index2,
           std::enable_if<T>* = nullptr)
     {
         return _ahead(containerPtr1, index1, containerPtr2, index2);
@@ -117,10 +117,10 @@ struct Accessor
     template<bool T = isRandomAccessable>
     HDINLINE 
     bool
-    lesser(ContainerPtr containerPtr1,
-          IndexType & index1,
-          ContainerPtr containerPtr2,
-          IndexType & index2,
+    lesser(ContainerPtr const containerPtr1,
+          IndexType const & index1,
+          ContainerPtr const containerPtr2,
+          IndexType const & index2,
           std::enable_if<T>* = nullptr)
     {
         return _behind(containerPtr1, index1, containerPtr2, index2);

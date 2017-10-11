@@ -18,19 +18,7 @@ namespace hzdr
 namespace traits
 {
 template<typename T>
-struct NumberElements
-{
-    
-    HDINLINE
-    int_fast32_t 
-    constexpr
-    size(const T&)
-    const
-    {
-        return std::numeric_limits<int_fast32_t>::min();    
-    }
-    
-}; // NumberElements
+struct NumberElements;
 
 template<typename TFrame>
 struct NumberElements<Supercell<TFrame> >
@@ -39,7 +27,7 @@ struct NumberElements<Supercell<TFrame> >
     
     HDINLINE
     int_fast32_t 
-    size(Container* container)
+    operator()(Container* container)
     const
     {
         auto result = 0;

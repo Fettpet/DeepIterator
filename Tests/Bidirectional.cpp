@@ -1,4 +1,4 @@
-int main(){return 0;}
+int main(){}
 #if 0
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
@@ -27,7 +27,7 @@ using namespace boost::unit_test;
 
 typedef hzdr::Particle<int_fast32_t, 2u> Particle;
 typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(Frames)
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
 
 }
 
-BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
+BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 {
     uint_fast32_t nbFrames = 5u;
     uint_fast32_t nbParticlesInLastFrame = 2u;
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
 
 
 
-BOOST_AUTO_TEST_CASE(ParticleInSuperCellDifferentOffsets)
+BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
 {
     uint_fast32_t nbFrames = 5u;
     uint_fast32_t nbParticlesInLastFrame = 2u;
@@ -224,12 +224,13 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCellDifferentOffsets)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    std::vector<uint_fast32_t> offsetsInner({0u, 1u});
-    std::vector<uint_fast32_t> jumpsizesInner({ 1u});
+    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u, 4u, 5u});
+    std::vector<uint_fast32_t> jumpsizesInner({ 1u, 2u, 3u, 4u});
     std::cout << supercell << std::endl;
     for(auto off: offsetsInner)
         for(auto jump: jumpsizesInner)
         {
+            std::cout << "(Offset, Jumpsize): (" << off << ", " << jump << ")" << std::endl;
             auto && concept = makeIteratorConcept(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
@@ -247,16 +248,18 @@ BOOST_AUTO_TEST_CASE(ParticleInSuperCellDifferentOffsets)
             // calc the number of elements
             // fullframe
             auto nbParticles = 0u;
-            for(auto i =off; i<4; i+=jump)
+            for(auto i =off; i<nbFrames-1u; i+=jump)
             {
                 nbParticles += 10;
             }
-            nbParticles += ((5 - off) % jump == 0) * 2;
+            // if the last frame is hit
+            // minus 1u since we start at 0 with counting
+            nbParticles += ((nbFrames - 1u - off) % jump == 0 and off < nbFrames) * nbParticlesInLastFrame;
 
             uint counter{0u};
             for(auto it=view.rbegin(); it != view.rend(); --it)
             {
-                if(off == 1u)
+                if(off == 0u and jump == 3u)
                     std::cout << *it << std::endl;
                 counter++;            
             }

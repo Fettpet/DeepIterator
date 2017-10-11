@@ -258,10 +258,19 @@ struct LastElement<
         TIndex& index, 
         TRange const & offset, 
         TRange const & jumpsize, 
-        TSizeFunction& size)
+        TSizeFunction && containerSize)
     {
-        auto nbElements = size(containerPtr);
-        auto jumps = (nbElements % jumpsize) - ((nbElements - offset) % jumpsize); 
+        // minus 1, since we start at 0 with counting
+        auto nbElements = containerSize(containerPtr) - 1u ;
+        auto nbOfJumps = (nbElements - offset ) / jumpsize;
+        auto lastPosition = nbOfJumps * jumpsize + offset;
+        
+        if(offset == 0 and jumpsize == 3)
+        {
+            std::cout << "The container has " << nbElements << " Elements " << std::endl;
+        }
+        // We use the beginning as reference point
+        auto jumps = nbElements - lastPosition;
         index = containerPtr->lastFrame;
 
         for(TRange i=static_cast<TRange>(0); i<jumps; ++i)
@@ -303,7 +312,7 @@ struct PreviousElement<
         TRange i = 0;
         for(i = 0; i<range; ++i)
         {
-            idx = idx->previousElement;
+            idx = idx->previousFrame;
             if(idx == nullptr)
                 break;
         }
@@ -331,17 +340,24 @@ struct BeforeFirstElement<
     template<typename TRangeFunction>
     HDINLINE
     bool
-    test(TContainer*, TIndex const & idx, TRangeFunction&)
+    test(TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
     const
     {
-        return idx == nullptr;
+        TIndex tmp = idx;
+        for(TRange i = static_cast<TRange>(0); i < offset; ++i)
+        { 
+            if(tmp == nullptr)
+                return true;
+            tmp = tmp->previousFrame;
+        }
+        return tmp == nullptr;
     }
     
 
     template<typename TRangeFunction>
     HDINLINE
     void
-    set(TContainer*, TIndex & idx, TRangeFunction&)
+    set(TContainer*, TIndex & idx,TRange const &, TRangeFunction&)
     const
     {
         idx = nullptr;

@@ -26,7 +26,7 @@
 #include "Definitions/hdinline.hpp"
 typedef hzdr::Particle<int_fast32_t, 2u> Particle;
 typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 
 /**
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
 }
 
 
-BOOST_AUTO_TEST_CASE(ParticleInSuperCell)
+BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 {
     
 }
@@ -161,3 +161,4 @@ BOOST_AUTO_TEST_CASE(Frames)
 {
     
 }
+

@@ -179,7 +179,7 @@ public:
         RangeType distance)
     {
         // test if the iterator is before the first element
-        if(beforeFirstElement.test(containerPtr, index, containerSize))
+        if(beforeFirstElement.test(containerPtr, index, offset(), containerSize))
         {
             firstElement(
                 containerPtr,
@@ -215,7 +215,7 @@ public:
         RangeType distance)
     {
         // test if the iterator is before the first element
-        if(afterLastElement.test(containerPtr, index))
+        if(afterLastElement.test(containerPtr, index, containerSize))
         {
             lastElement(
                 containerPtr,
@@ -229,7 +229,8 @@ public:
         auto remainingJumpsize = previousElement(
             containerPtr, 
             index,
-            static_cast<RangeType>(jumpsize() * distance));
+            static_cast<RangeType>(jumpsize() * distance),
+            containerSize);
         
         /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
@@ -284,7 +285,7 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index)
     {
-        beforeFirstElement.set(containerPtr, index, containerSize);
+        beforeFirstElement.set(containerPtr, index, offset(), containerSize);
     }
     
     HDINLINE 
@@ -304,7 +305,7 @@ public:
         IndexType const & index)
     const
     {
-        return beforeFirstElement.test(containerPtr, index, containerSize);
+        return beforeFirstElement.test(containerPtr, index, offset(), containerSize);
     }
     
     

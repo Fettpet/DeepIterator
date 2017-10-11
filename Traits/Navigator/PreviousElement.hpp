@@ -17,16 +17,7 @@ template<
     typename TIndex,
     typename TRange,
     typename TContainerCategory>
-struct PreviousElement
-{
-    HDINLINE
-    void
-    operator() (TContainer*, TIndex&, TRange&)
-    {
-        // is not implemented
-        assert(true); // Specify the trait
-    }
-};
+struct PreviousElement;
 
 
 } // namespace navigator

@@ -16,7 +16,7 @@ using namespace boost::unit_test;
 typedef int_fast32_t ParticleProperty; 
 typedef hzdr::Particle<ParticleProperty, 2> Particle;
 typedef hzdr::Frame<Particle, 10> Frame;
-typedef hzdr::SuperCell<Frame> Supercell;
+typedef hzdr::Supercell<Frame> Supercell;
 
 /**
  * @brief This test iterate over all Positions in a Particle

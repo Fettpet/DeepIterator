@@ -475,33 +475,27 @@ public:
     typename std::enable_if<T, DeepIterator&>::type
     operator+=(uint const & jumpsize)
     {
-        // We abuse the the fact, that all childs know, where they are and how 
-        // much elements to the end of the container are needed.
-        // The jumpsize would be split in three parts:
-        // 1. The remaining size to the end of the current element in the child 
-        // elements (remaining)
-        // 2. The number of elements, the iterator can overjump (overjump)
-        // 3. The distance of new element to there child element (childJumps)
+        gotoNext(jumpsize);
+        return *this;
 
-
+    }
+    
+    HDINLINE 
+    uint 
+    gotoNext(uint const & jumpsize)
+    {
         auto && remaining = childIterator.gotoNext(jumpsize);
-//         std::cout << "jumpsize, nbElements: " << jumpsize << ", " << childIterator.nbElements() << std::endl;
-        
-
         auto && childNbElements = childIterator.nbElements();
         auto && overjump = (remaining + childNbElements - 1) / childNbElements;
         int childJumps = (remaining - 1) % childNbElements;
                 
-        navigator.next(containerPtr, index, overjump);
+        auto && result = navigator.next(containerPtr, index, overjump);
         if((overjump > 0) && not isAfterLast())
         {
             childIterator.setToBegin(accessor.get(containerPtr, index));
             childIterator += childJumps;
         }
-        std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
-
-        return *this;
-
+        return result * childNbElements + childJumps;
     }
     
     template<
@@ -540,47 +534,30 @@ public:
     DeepIterator&
     operator-=(typename std::enable_if<T, int>::type jumpsize)
     {
-        // We abuse the the fact, that all childs know, where they are and how 
-        // much elements to the end of the container are needed.
-        // The jumpsize would be split in three parts:
-        // 1. The remaining size to the end of the current element in the child 
-        // elements (remaining)
-        // 2. The number of elements, the iterator can overjump (overjump)
-        // 3. The distance of new element to there child element (childJumps)
-
-        auto && remaining = childIterator.getRangeToBegin();
-        childIterator += remaining;
-        jumpsize -= remaining;
-        
-        if(jumpsize >= 0)
-        {
-            --(*this);
-            auto && overjump = (jumpsize) / childIterator.nbElements();
-                
-            int childJumps = jumpsize % childIterator.nbElements();
-            
-     //       std::cout << "(remaining, overjump, childJump, nbElements): ( " << remaining << ", " << overjump << ", " << childJumps << ", " << childIterator.nbElements() << ")" << std::endl;
-            navigator.previous(containerPtr, index, overjump);
-            childIterator.setToRbegin(accessor.get(containerPtr, index));
-            childIterator -= childJumps;
-            if(childIterator.isBeforeFirst())
-            {
-                --(*this);
-            }
-        }
+        gotoPrevious(jumpsize);
         return *this;
     }
     
-    
-//     template<
-//         bool T = isRandomAccessable && not hasConstantSizeChild>    
-//     HDINLINE 
-//     DeepIterator
-//     operator+(typename std::enable_if<T, int>::type jumpsize)
-//     {
-//         
-//     }
-//     
+    HDINLINE 
+    uint
+    gotoPrevious(uint const & jumpsize)
+    {
+        auto && remaining = childIterator.gotoPrevious(jumpsize);
+//         std::cout << "jumpsize, nbElements: " << jumpsize << ", " << childIterator.nbElements() << std::endl;
+        
+
+        auto && childNbElements = childIterator.nbElements();
+        auto && overjump = (remaining + childNbElements - 1) / childNbElements;
+        int childJumps = (remaining - 1) % childNbElements;
+                
+        auto result = navigator.previous(containerPtr, index, overjump);
+        if((overjump > 0) && not isAfterLast())
+        {
+            childIterator.setToBegin(accessor.get(containerPtr, index));
+            childIterator -= childJumps;
+        }
+        return result * childNbElements + childJumps;
+    }
     
     HDINLINE
     void

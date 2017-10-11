@@ -225,7 +225,7 @@ struct AfterLastElement<
     
     template<typename TRangeFunction>
     HDINLINE
-    bool
+    void
     set (TContainer*, TIndex const & idx, TRangeFunction const &)
     const
     {
@@ -321,15 +321,22 @@ struct BeforeFirstElement<
     template<typename TRangeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TRangeFunction&)
+    test (TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
     const
     {
-        return idx == nullptr;
+                auto tmp = idx;
+        for(TRange i=0; i < offset; ++i)
+        {
+            if(tmp == nullptr)
+                return true;
+            tmp = tmp->previous;
+        }
+        return tmp == nullptr;
     }
     
     template<typename TRangeFunction>
     HDINLINE
-    bool
+    void
     set (TContainer*, TIndex const & idx, TRangeFunction const &)
     const
     {
