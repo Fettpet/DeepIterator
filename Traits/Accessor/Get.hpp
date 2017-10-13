@@ -1,10 +1,12 @@
 #pragma once
-#include <cassert>
-#include "PIC/Supercell.hpp"
+
 
 /**
- * @author Sebastian Hahn t.hahn <at> hzdr.de
- *
+ * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @brief This trait is used to get a component out of the container. We had two 
+ * arguments:
+ * 1. A pointer to the container of the iterator,
+ * 2. The index of the iterator,
  */
 namespace hzdr
 {
@@ -21,11 +23,7 @@ struct Get
 {
     HDINLINE
     TComponent& 
-    operator() (TContainer*, TIndex&)
-    {
-        // is not implemented. Specify the trait
-        assert(true); 
-    }
+    operator() (TContainer*, TIndex&);
 };
 
 
