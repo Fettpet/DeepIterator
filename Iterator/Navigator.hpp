@@ -196,7 +196,7 @@ public:
         
         /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
-        return remainingJumpsize / jumpsize();
+        return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
     }
     
     
@@ -229,12 +229,13 @@ public:
         auto remainingJumpsize = previousElement(
             containerPtr, 
             index,
+            offset(),
             static_cast<RangeType>(jumpsize() * distance),
             containerSize);
         
         /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
-        return remainingJumpsize / jumpsize();
+        return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
     }
     
     /**

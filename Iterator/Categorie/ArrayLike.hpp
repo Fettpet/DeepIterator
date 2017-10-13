@@ -273,12 +273,14 @@ struct PreviousElement<
     operator() (
         TContainer*, 
         TIndex& idx, 
+        TRange const & offset,
         TRange const & jumpsize,
         T const &
                )
     {
         idx -= jumpsize;
-        return (static_cast<int>(idx) < 0) *  static_cast<int>(idx);
+        
+        return (static_cast<int>(idx) < static_cast<int>(offset)) * (static_cast<int>(offset) - static_cast<int>(idx));
     }
 };
 
@@ -302,7 +304,7 @@ struct BeforeFirstElement<
     test (TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
     const
     {
-        return idx < static_cast<TIndex>(offset);
+        return static_cast<int>(idx) < static_cast<int>(offset);
     }
     
     template<typename TRangeFunction>

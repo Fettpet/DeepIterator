@@ -265,10 +265,6 @@ struct LastElement<
         auto nbOfJumps = (nbElements - offset ) / jumpsize;
         auto lastPosition = nbOfJumps * jumpsize + offset;
         
-        if(offset == 0 and jumpsize == 3)
-        {
-            std::cout << "The container has " << nbElements << " Elements " << std::endl;
-        }
         // We use the beginning as reference point
         auto jumps = nbElements - lastPosition;
         index = containerPtr->lastFrame;
@@ -306,17 +302,19 @@ struct PreviousElement<
     operator() (
         TContainer*, 
         TIndex& idx, 
-        TRange const & range,
+        TRange const &,
+        TRange const & jumpsize,
         TContainerSize&)
     {
         TRange i = 0;
-        for(i = 0; i<range; ++i)
+        for(i = 0; i<jumpsize; ++i)
         {
             idx = idx->previousFrame;
             if(idx == nullptr)
-                break;
+                return jumpsize - i;
         }
-        return range - i;
+
+        return jumpsize - i;
     }
 };
 

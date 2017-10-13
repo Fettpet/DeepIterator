@@ -381,15 +381,9 @@ public:
         if(isBeforeFirst())
         {
             setToBegin();
-            return *this;  
+            return *this;
         }
-        ++childIterator;
-        while(not navigator.isAfterLast(containerPtr, index) and childIterator.isAfterLast() )
-        {
-            navigator.next(containerPtr, index, 1);
-            if(not navigator.isAfterLast(containerPtr, index))
-                childIterator.setToBegin(accessor.get(containerPtr, index)) ;
-        }
+        gotoNext(1u);
         return *this;
     }
     
@@ -401,38 +395,23 @@ public:
         if(isBeforeFirst())
         {
             setToBegin();
-            return tmp;  
+            return tmp;
         }
-        childIterator++;
-        while(not navigator.isAfterLast(containerPtr, index) and childIterator.isAfterLast() )
-        {
-            navigator.next(containerPtr, index, 1u);
-            if(not navigator.isAfterLast(containerPtr, index))
-                childIterator.setToBegin(accessor.get(containerPtr, index)) ;
-        }
-        return *this;
+        gotoNext(1u);
         return tmp;
     }
     
-    template<
-        bool T = isBidirectional>
+
     HDINLINE
-    typename std::enable_if<T, DeepIterator>::type
+    DeepIterator
     operator--()
     {
         if(isAfterLast())
         {
             setToRbegin();
-            return *this;  
+            return *this;
         }
-        --childIterator;
-        while(not navigator.isBeforeFirst(containerPtr, index) and childIterator.isBeforeFirst() )
-        {
-
-            navigator.previous(containerPtr, index, 1u);
-            if(not navigator.isBeforeFirst(containerPtr, index))
-                childIterator.setToRbegin(accessor.get(containerPtr, index)) ;
-        }
+        gotoPrevious(1u);
         return *this;
     }
     
@@ -443,18 +422,13 @@ public:
     operator--(int)
     {
         DeepIterator tmp(*this);
+        
         if(isAfterLast())
         {
             setToRbegin();
-            return tmp;  
+            return tmp;
         }
-        childIterator--;
-        while(not navigator.isBeforeFirst(containerPtr, index) and childIterator.isBeforeFirst() )
-        {
-            navigator.previous(containerPtr, index, 1u);
-            if(not navigator.isBeforeFirst(containerPtr, index))
-                childIterator.setToRbegin(accessor.get(containerPtr, index)) ;
-        }
+        gotoPrevious(1u);
         return tmp;
     }
 
@@ -462,101 +436,158 @@ public:
         bool T = isRandomAccessable>    
     HDINLINE 
     DeepIterator
-    operator+(typename std::enable_if<T, int>::type jumpsize)
+    operator+(typename std::enable_if<T  == true, int>::type jumpsize)
     {
         DeepIterator tmp(*this);
         tmp += jumpsize;
         return tmp;
     }
     
-    template<
-        bool T = isRandomAccessable && hasConstantSizeChild>    
+
     HDINLINE 
-    typename std::enable_if<T, DeepIterator&>::type
+    DeepIterator&
     operator+=(uint const & jumpsize)
     {
+        auto tmpJump = jumpsize;
+        if(isBeforeFirst())
+        {
+            --tmpJump;
+            setToBegin();
+        }
         gotoNext(jumpsize);
         return *this;
 
     }
     
+    template< 
+        bool T = hasConstantSizeChild> 
     HDINLINE 
-    uint 
+    typename std::enable_if<T == true, uint>::type 
     gotoNext(uint const & jumpsize)
     {
+        /**
+         * The variable jumpsize is component from three other variables:
+         * 1. The distance of the child to these end
+         * 2. the number of childs we can overjump
+         * 3. the remaining jumpsize for the new child
+         */
+        
         auto && remaining = childIterator.gotoNext(jumpsize);
+        if(childIterator.isAfterLast() and remaining == 0)
+        {
+                remaining = jumpsize;
+        }
+        
         auto && childNbElements = childIterator.nbElements();
         auto && overjump = (remaining + childNbElements - 1) / childNbElements;
-        int childJumps = (remaining - 1) % childNbElements;
-                
-        auto && result = navigator.next(containerPtr, index, overjump);
-        if((overjump > 0) && not isAfterLast())
-        {
-            childIterator.setToBegin(accessor.get(containerPtr, index));
-            childIterator += childJumps;
-        }
-        return result * childNbElements + childJumps;
-    }
-    
-    template<
-        bool T = isRandomAccessable && (not hasConstantSizeChild),
-        typename R = typename std::enable_if<T>::type>    
-    HDINLINE 
-    DeepIterator&
-    operator+=(typename std::enable_if<T, int>::type jumpsize)
-    {
-        auto && remaining = childIterator.getRangeToEnd();
-        childIterator += remaining;
-        jumpsize -= remaining;
+        int childJumps = ((remaining - 1) % childNbElements);
         
-        if(jumpsize >= 0)
+        auto && result = navigator.next(containerPtr, index, overjump);
+        if((result == 0) && (overjump > 0) && not isAfterLast())
         {
-            ++(*this);
-            auto && overjump = (jumpsize) / childIterator.nbElements();
-                
-            int childJumps = jumpsize % childIterator.nbElements();
-            
-            navigator.next(containerPtr, index, overjump);
             childIterator.setToBegin(accessor.get(containerPtr, index));
             childIterator += childJumps;
-            if(childIterator.isAfterLast())
-            {
-                ++(*this); 
-            }
         }
-        return *this;
+        // we only need to return something, if we are at the end
+        uint const condition = (result > 0);
+        // the size of the jumps
+        uint const notOverjumpedElements = (result-1) * childNbElements;
+        
+        // The 1 is to set to the first element
+        return condition * (notOverjumpedElements + childJumps + 1u);
     }
     
-    
-    template<
-        bool T = isRandomAccessable && hasConstantSizeChild>    
+    /**
+     * This is the case where the child hasn't a constant size. This means we
+     * can not calculate the number of childjumps
+     * 1. We move the child iterator as wide as possible
+     * 2. we move this iterator one element
+     * 3.
+     */
+    HDINLINE 
+    uint
+    gotoNext(uint const & jumpsize)
+    {
+        auto remaining = jumpsize;
+        while(remaining > 0u and not isAfterLast())
+        {
+            remaining = childIterator.gotoNext(remaining);
+            if(remaining == 0u)
+                break;
+            --remaining;
+            navigator.next(containerPtr, index, 1u);
+            if(not isAfterLast())
+                childIterator.setToBegin(accessor.get(containerPtr, index));
+            
+        }
+        return remaining;
+    }
+
+
     HDINLINE 
     DeepIterator&
-    operator-=(typename std::enable_if<T, int>::type jumpsize)
+    operator-=(const uint & jumpsize)
     {
+        auto tmpJump = jumpsize;
+        if(isAfterLast())
+        {
+            --tmpJump;
+            setToRbegin();
+        }
         gotoPrevious(jumpsize);
         return *this;
     }
     
+    template< 
+        bool T = hasConstantSizeChild> 
     HDINLINE 
     uint
-    gotoPrevious(uint const & jumpsize)
+    gotoPrevious(uint const & jumpsize, typename std::enable_if<T == true>::type* = nullptr)
     {
-        auto && remaining = childIterator.gotoPrevious(jumpsize);
-//         std::cout << "jumpsize, nbElements: " << jumpsize << ", " << childIterator.nbElements() << std::endl;
         
-
+        auto && remaining = childIterator.gotoPrevious(jumpsize);
+        if(childIterator.isBeforeFirst() and remaining == 0)
+        {
+                remaining = jumpsize;
+        }
+        
         auto && childNbElements = childIterator.nbElements();
         auto && overjump = (remaining + childNbElements - 1) / childNbElements;
-        int childJumps = (remaining - 1) % childNbElements;
-                
-        auto result = navigator.previous(containerPtr, index, overjump);
-        if((overjump > 0) && not isAfterLast())
+        int childJumps = ((remaining - 1) % childNbElements);
+        
+        auto && result = navigator.previous(containerPtr, index, overjump);
+        if((result == 0u) && (overjump > 0u) && not isBeforeFirst())
         {
-            childIterator.setToBegin(accessor.get(containerPtr, index));
+            childIterator.setToRbegin(accessor.get(containerPtr, index));
             childIterator -= childJumps;
         }
-        return result * childNbElements + childJumps;
+        // we only need to return something, if we are at the end
+        uint const condition = (result > 0u);
+        // the size of the jumps
+        uint const notOverjumpedElements = (result-1u) * childNbElements;
+        
+        // The 1 is to set to the first element
+        return condition * (notOverjumpedElements + childJumps + 1u);
+    }
+    
+    template< 
+        bool T = hasConstantSizeChild> 
+    HDINLINE 
+    uint 
+    gotoPrevious(uint const & jumpsize, typename std::enable_if<T == false>::type* = nullptr)
+    {
+        auto remaining = jumpsize;
+        while(remaining > 0u and not isBeforeFirst())
+        {
+            remaining = childIterator.gotoPrevious(remaining);
+            if(remaining == 0u)
+                break;
+            --remaining;
+            navigator.previous(containerPtr, index, 1u);
+            if(not isBeforeFirst())
+                childIterator.setToRbegin(accessor.get(containerPtr, index));
+        }
+        return remaining;
     }
     
     HDINLINE
@@ -625,9 +656,8 @@ public:
     setToRbegin()
     {
         navigator.rbegin(containerPtr, index);
-        if(not isBeforeFirst() and not isAfterLast())
+        if(not isBeforeFirst() && not isAfterLast())
         {
-            
             childIterator.setToRbegin((accessor.get(containerPtr, index)));
         }
     }
@@ -870,7 +900,14 @@ public:
     DeepIterator&
     operator++()
     {
-        navigator.next(containerPtr, index,1);
+        if(isBeforeFirst())
+        {
+            setToBegin();
+        }
+        else 
+        {
+            navigator.next(containerPtr, index,1);
+        }
         return *this;
     }
     
@@ -879,7 +916,13 @@ public:
     typename std::enable_if<T, DeepIterator&>::type
     operator+=(TJump const & jump)
     {
-        navigator.next(containerPtr, index, jump);
+        auto tmpJump = jump;
+        if(isBeforeFirst())
+        {
+            --tmpJump;
+            setToBegin();
+        }
+        navigator.next(containerPtr, index, tmpJump);
         return *this;
     }
     
@@ -888,6 +931,12 @@ public:
     typename std::enable_if<T, DeepIterator&>::type
     operator-=(TJump const & jump)
     {
+        auto tmpJump = jump;
+        if(isAfterLast())
+        {
+            --tmpJump;
+            setToRbegin();
+        }
         navigator.previous(containerPtr, index, jump);
         return *this;
     }
@@ -911,27 +960,6 @@ public:
         tmp-=jump;
         return tmp;
     }
-    
-    template<typename TJump, bool T = isRandomAccessable>
-    HDINLINE
-    auto
-    moveBackward(TJump const & jump)
-    -> 
-    typename std::enable_if<T, int_fast32_t>::type
-    {
-        return navigator.previous(containerPtr, index, jump);
-    }
-
-    template<typename TJump, bool TRandom = isRandomAccessable>
-    HDINLINE
-    auto
-    moveForward(TJump const & jump)
-    ->
-    typename std::enable_if<TRandom, int_fast32_t>::type
-    {
-        return navigator.next(containerPtr, index, jump);
-    }
-    
     
     template< bool T=isRandomAccessable>
     HDINLINE
@@ -1156,6 +1184,7 @@ public:
     ->
     uint
     {
+        
         return navigator.next(containerPtr, index, steps);
     }
     
@@ -1165,7 +1194,9 @@ public:
     ->
     uint
     {
-        return navigator.previous(containerPtr, index, steps);
+        auto result = navigator.previous(containerPtr, index, steps);
+
+        return result;
     }
     
     

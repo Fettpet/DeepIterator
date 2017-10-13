@@ -1,5 +1,4 @@
-int main(){}
-#if 0
+
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
  * @brief We verify the correct implementation of the bidirectional functionality.
@@ -224,13 +223,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u, 4u, 5u});
-    std::vector<uint_fast32_t> jumpsizesInner({ 1u, 2u, 3u, 4u});
+    std::vector<uint_fast32_t> offsetsInner({0u});
+    std::vector<uint_fast32_t> jumpsizesInner({3u, 4u});
     std::cout << supercell << std::endl;
     for(auto off: offsetsInner)
         for(auto jump: jumpsizesInner)
         {
-            std::cout << "(Offset, Jumpsize): (" << off << ", " << jump << ")" << std::endl;
             auto && concept = makeIteratorConcept(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
@@ -274,7 +272,57 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             }
             // There are 4 full frames with 10 Elements an one frame with 2 elements
             BOOST_TEST(counter == nbParticles);
+            
+            /*******************
+             * Second test: We test the inner jumpsize and offset
+             * 
+             * *****************/
+            auto && conceptInner = makeIteratorConcept(
+                                    hzdr::makeAccessor(),
+                                    hzdr::makeNavigator(
+                                        Offset(0u),
+                                        Jumpsize(1u)),
+                                    hzdr::makeIteratorConcept(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(off),
+                                            Jumpsize(jump))));
+            auto && viewInner = hzdr::makeView(
+                                supercell,
+                                conceptInner);
+            
+            // calc the number of elements
+            // fullframe
+            nbParticles = 0u;
+            for(auto i =off; i<10u; i+=jump)
+            {
+                ++nbParticles;
+
+            }
+            nbParticles *= nbFrames - 1u;
+            // add the last frame
+            for(auto j=off; j < nbParticlesInLastFrame; j+=jump)
+            {
+                ++nbParticles;
+            }
+            counter = 0u;
+            for(auto it=viewInner.rbegin(); it != viewInner.rend(); --it)
+            {
+                std::cout << *it << std::endl;
+                counter++;            
+            }
+            
+            // There are 4 full frames with 10 Elements an one frame with 2 elements
+            
+            BOOST_TEST(counter == nbParticles);
+            
+            counter = 0u;
+            for(auto it=viewInner.rbegin(); it != viewInner.rend(); it--)
+            {
+                counter++;            
+            }
+            // There are 4 full frames with 10 Elements an one frame with 2 elements
+            BOOST_TEST(counter == nbParticles);
         }
 
 }
-#endif

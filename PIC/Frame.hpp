@@ -165,7 +165,7 @@ template<
     int_fast32_t maxParticles>
 struct HasConstantSize<Frame<TParticle, maxParticles> >
 {
-    static const bool value = true;
+    static const bool value = false;
 };
 
 template<typename>

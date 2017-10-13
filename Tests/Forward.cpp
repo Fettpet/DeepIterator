@@ -1,5 +1,4 @@
-int main(){}
-#if 0
+
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
  * @brief In this test collection we verify the functionality of the simple 
@@ -112,4 +111,3 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     BOOST_TEST(counter == 42u);
 
 }
-#endif

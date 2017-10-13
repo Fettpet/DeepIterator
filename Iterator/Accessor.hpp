@@ -85,7 +85,7 @@ struct Accessor
     HDINLINE 
     ComponentRef
     get(ContainerPtr containerPtr,
-        IndexType const & idx)
+        IndexType & idx)
     {
         return _get(containerPtr, idx);
     }
@@ -117,7 +117,8 @@ struct Accessor
     template<bool T = isRandomAccessable>
     HDINLINE 
     bool
-    lesser(ContainerPtr const containerPtr1,
+    lesser(ContainerPtr const 
+    containerPtr1,
           IndexType const & index1,
           ContainerPtr const containerPtr2,
           IndexType const & index2,

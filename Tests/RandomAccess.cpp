@@ -2,10 +2,8 @@
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
  * @brief Within these test collection we need to test the following operations:
- * 1. it+=n
- * 2. it-=n
- * 3. it+n
- * 4. it-n
+ * 1. it+=n // done
+ * 2. it-=n // done
  * 5. it1 > it2
  * 6. it1 < it2
  * 7. it1 <= it2
@@ -35,6 +33,7 @@ typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
  */
 BOOST_AUTO_TEST_CASE(ParticleInFrame)
 {
+    
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
         
@@ -105,16 +104,14 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     
     BOOST_TEST((it1 < it2 + 2));
     BOOST_TEST(not (it1 > it2 + 8));
+
     
     auto  childConceptJump3 = hzdr::makeIteratorConcept(
                              hzdr::makeAccessor(),
                              hzdr::makeNavigator(
                                  Offset(0),
                                  Jumpsize(3)));
-    // check []
-    ++it1;
-    BOOST_TEST((it1[4] == it2[4]));
-    BOOST_TEST((*(it2+4) == it1[4]));
+
     
     
     // check other jumpsizes
@@ -152,13 +149,198 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
 }
 
 
-BOOST_AUTO_TEST_CASE(ParticleInSupercell)
+BOOST_AUTO_TEST_CASE(ParticlInSupercell)
 {
+
+    /** We like to test the following things
+     * 1. += -= 
+     * 2. different offsets and jumpsizes and n
+     */
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
+    auto nbFrames = 5u;
+    auto nbParticleInLastFrame = 5u;
+    
+    Supercell supercell(nbFrames, nbParticleInLastFrame);
+    
+    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
+    std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
+    std::vector<uint> ns{1u, 2u, 3u, 4u};
+    std::cout << supercell << std::endl;
+   // 1. we change the outer iterator
+    for(auto jump : jumpsizes)
+        for(auto off : offsets)
+            for(auto  n : ns)
+            {
+                
+                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(off),
+                                            Jumpsize(jump)),
+                                            hzdr::makeIteratorConcept(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(0),
+                                                    Jumpsize(1))));
+                
+                // We calc the number of elements, which would be the result
+                auto nbFullFrames = (nbFrames - 1u - off + jump - 1u) / jump;
+                auto nbParticles = (nbFullFrames * 10u);
+                
+                // calculate the first index in the last frame
+                
+                uint first = (n - (nbParticles % n)) % n;
+                nbParticles = (nbParticles + n - 1 ) / n;
+                if((nbFrames - 1u - off) % jump == 0 and off < nbFrames)
+                    // we add the unfull frame
+                    for(uint i=first; i<nbParticleInLastFrame; i+= n)
+                    {
+
+                        nbParticles++;
+                    }
+                
+                auto view = makeView(supercell,childConceptJump1);
+                uint counter = 0u;
+                for(auto it=view.begin(); it!=view.end(); it+=n)
+                {
+                    
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+                
+                counter = 0u;
+                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                {
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+                
+            }
+
+   // 2. we change the inner iterator
+    for(auto jump : jumpsizes)
+        for(auto off : offsets)
+            for(auto  n : ns)
+            {
+                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(0),
+                                            Jumpsize(1)),
+                                            hzdr::makeIteratorConcept(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(off),
+                                                    Jumpsize(jump))));
+                
+                // We calc the number of elements, which would be the result
+                auto nbParticlesPerFrame = (10u - off + jump - 1u) / jump;
+                auto nbParticles = (nbFrames - 1u) * nbParticlesPerFrame;
+                
+                // calculate the first index in the last frame
+                
+                
+                for(uint i=off; i<nbParticleInLastFrame; i+= jump)
+                {
+                    nbParticles++;
+                }
+                nbParticles = (nbParticles + n - 1u) / n;
+                
+                auto view = makeView(supercell,childConceptJump1);
+                uint counter = 0u;
+                for(auto it=view.begin(); it!=view.end(); it+=n)
+                {
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+                
+                counter = 0u;
+                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                {
+
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+                
+            }
+
 }
 
-BOOST_AUTO_TEST_CASE(Frames)
+BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
 {
+    /** We like to test the following things
+     * 1. += -= 
+     * 2. different offsets and jumpsizes and n
+     */
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
+    auto nbFrames = 5u;
+    auto nbParticleInLastFrame = 5u;
+    
+    Supercell supercell(nbFrames, nbParticleInLastFrame);
+    
+    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
+    std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
+    std::vector<uint> ns{1u, 2u, 3u};
+    std::cout << supercell << std::endl;
+   // 1. we change the outer iterator
+    for(auto jump : jumpsizes)
+        for(auto off : offsets)
+            for(auto  n : ns)
+            {
+                std::cout << "jump " << jump << " off " << off << " n " << n << std::endl;
+                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(off),
+                                            Jumpsize(jump)),
+                                            hzdr::makeIteratorConcept(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(0),
+                                                    Jumpsize(1)),
+                                            hzdr::makeIteratorConcept(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(0),
+                                                    Jumpsize(1)))));
+                
+                // We calc the number of elements, which would be the result
+                auto nbFullFrames = (nbFrames - 1u - off + jump - 1u) / jump;
+                auto nbParticles = (nbFullFrames * 20u);
+                
+                // calculate the first index in the last frame
+                
+                uint first = (n - (nbParticles % n)) % n;
+                nbParticles = (nbParticles + n - 1 ) / n;
+                if((nbFrames - 1u - off) % jump == 0 and off < nbFrames)
+                    // we add the unfull frame
+                    for(uint i=first; i<nbParticleInLastFrame * 2u; i+= n)
+                    {
+
+                        nbParticles++;
+                    }
+                
+                auto view = makeView(supercell,childConceptJump1);
+                uint counter = 0u;
+                for(auto it=view.begin(); it!=view.end(); it+=n)
+                {
+                    
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+                
+                counter = 0u;
+                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                {
+                    std::cout << *it << std::endl;
+                    ++counter;
+                }
+                BOOST_TEST(counter == nbParticles);
+            }
+            
 }
 
