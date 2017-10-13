@@ -9,7 +9,11 @@
  * 2. The index of the first iterator,
  * 3. A pointer to the container of the second iterator 
  * 4. The index of the second iterator
- * 
+ * This trait is needed in the random access case.
+ * @tparam TContainer The container over which the iteartor walks.
+ * @tparam TComponent The component of the container.
+ * @tparam TIndex The type of the index to get a component out of the container.
+ * @tparam TContainerCategory An SFINAE type for categories.
  * @return true, if the first iterator is ahead the second one, false otherwise
  *
  */

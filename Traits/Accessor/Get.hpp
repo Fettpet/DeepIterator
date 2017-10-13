@@ -6,7 +6,12 @@
  * @brief This trait is used to get a component out of the container. We had two 
  * arguments:
  * 1. A pointer to the container of the iterator,
- * 2. The index of the iterator,
+ * 2. The index of the iterator
+ * 
+ * @tparam TContainer The container over which the iteartor walks.
+ * @tparam TComponent The component of the container.
+ * @tparam TIndex The type of the index to get a component out of the container.
+ * @tparam TContainerCategory An SFINAE type for categories.
  */
 namespace hzdr
 {
