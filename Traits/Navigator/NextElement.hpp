@@ -31,13 +31,7 @@ template<
     typename TIndex,
     typename TRange = void,
     typename TContainerCategory = void>
-struct NextElement
-{
-    template<typename TContainerSize, typename TJumpsize>
-    HDINLINE
-    TRange
-    operator() (TContainer*, TIndex&, TJumpsize const &, TContainerSize&);
-};
+struct NextElement;
 
 
 } // namespace navigator

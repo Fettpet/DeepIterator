@@ -23,10 +23,6 @@ namespace traits
 {
 namespace accessor
 {
-namespace details
-{
-    
-}
     
 template<
     typename TContainer,

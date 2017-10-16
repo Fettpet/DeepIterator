@@ -32,16 +32,17 @@ namespace navigator
 template<
     typename TContainer,
     typename TIndex,
+    typename TOffset,
     typename TContainerCategory>
 struct BeforeFirstElement
 {
-    template<typename TSizeFunction, typename TOffset>
+    template<typename TSizeFunction>
     HDINLINE
     void
     set(TContainer*, TIndex&, TOffset&, TSizeFunction&)
     const;
 
-    template<typename TSizeFunction, typename TOffset>
+    template<typename TSizeFunction>
     HDINLINE
     bool
     set(TContainer*, TIndex&, TOffset&, TSizeFunction&)

@@ -8,10 +8,6 @@
  * 
  */
 #pragma once
-#include "PIC/Frame.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Particle.hpp"
-#include "PIC/SupercellContainer.hpp"
 
 namespace hzdr 
 {
@@ -22,38 +18,10 @@ struct UndefinedType;
 namespace traits 
 {
 template<typename T>
-struct ComponentType;
-/*
-template<typename Particle, int_fast32_t size>
-struct ComponentType< hzdr::Frame<Particle, size> >
+struct ComponentType
 {
-    typedef Particle type;
+    static_assert(true, "ComponentType wasnt specilized");
 };
-
-template<>
-struct ComponentType<hzdr::details::UndefinedType>
-{
-    typedef hzdr::details::UndefinedType type;
-};
-
-template<typename Frame>
-struct ComponentType< hzdr::Supercell<Frame> >
-{
-    typedef Frame type;
-};
-
-template<typename TElem, int_fast32_t size>
-struct ComponentType< hzdr::Particle< TElem, size> >
-{
-    typedef TElem type;
-};
-
-template<typename Supercell>
-struct ComponentType< hzdr::SupercellContainer<Supercell> >
-{
-    typedef Supercell type;
-};
-*/
 
 }//traits
 }//hzdr

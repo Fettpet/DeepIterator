@@ -29,6 +29,7 @@ namespace navigator
 template<
     typename TContainer,
     typename TIndex,
+    typename TRange,
     typename TContainerCategory>
 struct FirstElement{
     

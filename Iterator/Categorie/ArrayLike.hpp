@@ -147,17 +147,17 @@ namespace navigator
  */
 template<
     typename TContainer,
-    typename TIndex,
-    typename TRange>
+    typename TOffset,
+    typename TIndex>
 struct FirstElement<
     TContainer, 
     TIndex, 
-    TRange,
+    TOffset,
     hzdr::container::categorie::ArrayLike>
 {
     HDINLINE
     void
-    operator() (TContainer*, TIndex& idx, TRange const & range)
+    operator() (TContainer*, TIndex& idx, TOffset const & range)
     {
         idx = static_cast<TIndex>(range);
     }
@@ -291,26 +291,26 @@ struct PreviousElement<
 template<
     typename TContainer,
     typename TIndex,
-    typename TRange>
+    typename TOffset>
 struct BeforeFirstElement<
     TContainer, 
-    TIndex, 
-    TRange,
+    TIndex,
+    TOffset,
     hzdr::container::categorie::ArrayLike>
 {
-    template<typename TRangeFunction>
+    template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
+    test (TContainer*, TIndex const & idx, TOffset const & offset, TSizeFunction&)
     const
     {
         return static_cast<int>(idx) < static_cast<int>(offset);
     }
     
-    template<typename TRangeFunction>
+    template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TRange const &, TRangeFunction&)
+    set (TContainer*, TIndex & idx, TOffset const &, TSizeFunction&)
     const
     {
         idx = static_cast<TIndex>(-1);

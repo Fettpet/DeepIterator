@@ -1,18 +1,27 @@
 /**
- * \struct IsIndexable
+ * \struct ContainerCategory
  * @author Sebastian Hahn (t.hahn < at > hzdr) 
- * @brief The function of this trait is to decide wheter a container is random 
- * accessable. A container is random accessable if it has the operator[] overloaded.
- * 
- */
+ * @brief This trait is used to specify a categorie of a container. Currently are
+ * three categories implemented. They are in the folder Iterator/Categorie. If 
+ * a container has no categorie, you need to specify the following traits to use
+ * the DeepIterator:
+ * The first four are needed for the accesor:
+ * 1. hzdr::traits::accessor::Ahead
+ * 2. hzdr::traits::accessor::Behind
+ * 3. hzdr::traits::accessor::Equal
+ * 4. hzdr::traits::accessor::Get
+ * The next six are needed for the navigator
+ * 5. hzdr::traits::navigator::AfterLastElement
+ * 6. hzdr::traits::navigator::BeforeFirstElement
+ * 7. hzdr::traits::navigator::FirstElement
+ * 8. hzdr::traits::navigator::LastElement 
+ * 9. hzdr::traits::navigator::NextElement
+ * 10. hzdr::traits::navigator::PreviousElement 
+ * If a container isnt bidirectional you doesnt need 1, 2, 6, 8, 10.
+ * If a container isnt randon accessable you doesnt need 1,2
+ */ 
 
 #pragma once
-#include <PIC/Frame.hpp>
-#include <PIC/Particle.hpp>
-#include <PIC/Supercell.hpp>
-#include <PIC/SupercellContainer.hpp>
-#include "Iterator/Categorie/ArrayLike.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
 
 namespace hzdr 
 {
@@ -25,25 +34,7 @@ struct ContainerCategory
 {
     typedef T type;
 };
-/*
-template<typename TParticle, int_fast32_t nb>
-struct ContainerCategory<hzdr::Frame<TParticle, nb> >
-{
-    typedef hzdr::container::categorie::ArrayLike type;
-};
 
-template<typename TPos, int_fast32_t dim>
-struct ContainerCategory<hzdr::Particle<TPos, dim> >
-{
-    typedef hzdr::container::categorie::ArrayLike type;
-};
-    
-template<typename TSupercell>
-struct ContainerCategory<hzdr::SupercellContainer<TSupercell> >
-{
-    typedef hzdr::container::categorie::ArrayLike type;
-};
-  */
 }// namespace traits
     
 }// namespace hzdr

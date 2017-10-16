@@ -1,8 +1,7 @@
 /**
  * @author Sebastian Hahn t.hahn < at > hzdr.de
- * @brief Each container categorie need to determine if it is a random accessable.
- * A container categorie is random accessable if there is a way to overjump some
- * values easily.
+ * @brief A container is bidirectional it is possible to go to the previous element.
+ * The deepiterator has the functions --it and it-- if it is bidirectional.
  */
 #pragma once
 #include "Iterator/Categorie/ArrayLike.hpp"
