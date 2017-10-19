@@ -151,6 +151,10 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
 }
 
 
+/**
+ * @brief Within this test we try the simple nested iterator with two layers.
+ * 
+ */
 BOOST_AUTO_TEST_CASE(ParticlInSupercell)
 {
 
@@ -331,7 +335,6 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {
-                    std::cout << *it << " after " << std::boolalpha << it.isAfterLast() << std::endl;
                     ++counter;
                 }
                 BOOST_TEST(counter == nbParticles);
