@@ -100,6 +100,7 @@ template<
     typename TJumpsize,
     typename TIndex,
     typename TContainerSize,
+    typename TRange,
     typename TFirstElement,
     typename TNextElement,
     typename TAfterLastElement,
@@ -119,7 +120,7 @@ struct Navigator
     typedef TJumpsize                                               JumpsizeType;
     typedef TOffset                                                 OffsetType;
     typedef TIndex                                                  IndexType;
-    typedef typename details::OffsetRangeType<TOffset>::type        RangeType;
+    typedef TRange                                                  RangeType;
     typedef TContainerSize                                          NumberElements;
     typedef TFirstElement                                           FirstElement;
     typedef TNextElement                                            NextElement;
@@ -348,6 +349,7 @@ struct Navigator<
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
+    hzdr::details::UndefinedType,
     false>
 {
     typedef hzdr::details::UndefinedType                            ContainerType;
@@ -423,6 +425,7 @@ makeNavigator(
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
+        hzdr::details::UndefinedType,
         false>
 {
     typedef typename std::decay<TOffset>::type OffsetType;
@@ -432,6 +435,7 @@ makeNavigator(
         details::UndefinedType,
         OffsetType,
         JumpsizeType,
+        hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
@@ -504,6 +508,7 @@ hzdr::Navigator<
     TJumpsize,
     TIndex,
     TContainerSize,
+    TRange,
     TFirstElement,
     TNextElement,
     TAfterLastElement,
@@ -519,6 +524,7 @@ hzdr::Navigator<
         TJumpsize,
         TIndex,
         TContainerSize,
+        TRange,
         TFirstElement,
         TNextElement,
         TAfterLastElement,
@@ -571,6 +577,7 @@ makeNavigator(
         TJumpsize,
         TIndex,
         TContainerSize,
+        TRange,
         TFirstElement,
         TNextElement,
         TAfterLastElement,
@@ -587,6 +594,7 @@ makeNavigator(
         TJumpsize,
         TIndex,
         TContainerSize,
+        TRange,
         TFirstElement,
         TNextElement,
         TAfterLastElement,

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
  * attributes within a frame. 
  */
     auto && view = hzdr::makeView(
-                        *(supercell.first), 
+                        *(supercell.firstFrame), 
                         hzdr::makeIteratorConcept(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator( 

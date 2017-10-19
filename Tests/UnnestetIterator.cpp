@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     ********************/
 
     // the 2 is the number of elements in Last Frame
-    auto && view = hzdr::makeView(*(supercell.first), 
+    auto && view = hzdr::makeView(*(supercell.firstFrame), 
                                   hzdr::makeIteratorConcept(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
@@ -124,7 +124,7 @@ We implement a own collectivity class
         
     }
     
-    auto && viewJump3 = hzdr::makeView(*(supercell.first), 
+    auto && viewJump3 = hzdr::makeView(*(supercell.firstFrame), 
                                 hzdr::makeIteratorConcept(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
