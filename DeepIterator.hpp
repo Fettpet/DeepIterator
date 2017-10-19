@@ -120,7 +120,6 @@
 #include "Traits/IsBidirectional.hpp"
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/ContainerCategory.hpp"
-#include "Traits/MaxElements.hpp"
 #include "Traits/HasConstantSize.hpp"
 namespace hzdr 
 {
@@ -197,9 +196,9 @@ public:
                  TNavigator_ && navigator,
                  TChild_ && child
                 ):
-        childIterator(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
         
     {}
     
@@ -216,9 +215,9 @@ public:
                 details::constructorType::begin 
                 ):
         containerPtr(container),
-        childIterator(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
         setToBegin(container);
@@ -237,9 +236,9 @@ public:
                 details::constructorType::rbegin
                 ):
         containerPtr(container),
-        childIterator(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
         setToRbegin(container);
@@ -258,9 +257,9 @@ public:
                 details::constructorType::end
                 ):
         containerPtr(container),
-        childIterator(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
         setToEnd(container);
@@ -279,9 +278,9 @@ public:
                 details::constructorType::rend
                 ):
         containerPtr(container),
-        childIterator(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
         setToRend(container);
@@ -296,10 +295,10 @@ public:
         Navigator&& navigator,
         ChildIterator&& child):
             containerPtr(containerPtr),
-            index(std::forward<IndexType>(index)),
-            childIterator(std::forward<ChildIterator>(child)),
-            navigator(std::forward<Navigator>(navigator)),
-            accessor(std::forward<Accessor>(accessor))
+            index(hzdr::forward<IndexType>(index)),
+            childIterator(hzdr::forward<ChildIterator>(child)),
+            navigator(hzdr::forward<Navigator>(navigator)),
+            accessor(hzdr::forward<Accessor>(accessor))
     {}
 
     
@@ -390,7 +389,7 @@ public:
     template<
         bool T = isBidirectional>
     HDINLINE
-    typename std::enable_if<T, DeepIterator>::type
+    typename std::enable_if<T == true, DeepIterator>::type
     operator--(int)
     {
         DeepIterator tmp(*this);
@@ -408,7 +407,7 @@ public:
         bool T = isRandomAccessable>    
     HDINLINE 
     DeepIterator
-    operator+(typename std::enable_if<T  == true, int>::type jumpsize)
+    operator+(typename std::enable_if<T == true, int>::type jumpsize)
     {
         DeepIterator tmp(*this);
         tmp += jumpsize;
@@ -426,7 +425,7 @@ public:
             --tmpJump;
             setToBegin();
         }
-        gotoNext(jumpsize);
+        gotoNext(tmpJump);
         return *this;
 
     }
@@ -476,8 +475,10 @@ public:
      * 2. we move this iterator one element
      * 3.
      */
+    template< 
+        bool T = hasConstantSizeChild> 
     HDINLINE 
-    uint
+    typename std::enable_if<T == false, uint>::type 
     gotoNext(uint const & jumpsize)
     {
         auto remaining = jumpsize;
@@ -506,7 +507,7 @@ public:
             --tmpJump;
             setToRbegin();
         }
-        gotoPrevious(jumpsize);
+        gotoPrevious(tmpJump);
         return *this;
     }
     
@@ -743,8 +744,8 @@ public:
                 TChild_ const &,
                 details::constructorType::begin 
                 ):
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container)
 
         
@@ -766,8 +767,8 @@ public:
                 details::constructorType::rbegin
                 ):
         
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container)
         
     {
@@ -787,8 +788,8 @@ public:
                 details::constructorType::end
                 ):
         
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container)
         
     {
@@ -808,8 +809,8 @@ public:
                 details::constructorType::rend
                 ):
         
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container)
         
     {
@@ -825,8 +826,8 @@ public:
     HDINLINE
     DeepIterator(TAccessor_ && accessor, 
                  TNavigator_ && navigator):
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
     {}
     
     template<
@@ -837,8 +838,8 @@ public:
                  TNavigator_ && navigator,
                  hzdr::NoChild const &
                 ):
-        navigator(std::forward<TNavigator_>(navigator)),
-        accessor(std::forward<TAccessor_>(accessor))
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
     {}
     
     
@@ -868,7 +869,7 @@ public:
     operator+=(TJump const & jump)
     {
         auto tmpJump = jump;
-        if(isBeforeFirst())
+        if(jump != 0 && isBeforeFirst())
         {
             --tmpJump;
             setToBegin();
@@ -879,22 +880,22 @@ public:
     
     template<typename TJump, bool T = isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, DeepIterator&>::type
+    typename std::enable_if<T == true, DeepIterator&>::type
     operator-=(TJump const & jump)
     {
         auto tmpJump = jump;
-        if(isAfterLast())
+        if(jump != 0 && isAfterLast())
         {
             --tmpJump;
             setToRbegin();
         }
-        navigator.previous(containerPtr, index, jump);
+        navigator.previous(containerPtr, index, tmpJump);
         return *this;
     }
     
     template<typename TJump, bool T=isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, DeepIterator>::type
+    typename std::enable_if<T == true, DeepIterator>::type
     operator+(TJump const & jump)
     {
         DeepIterator tmp = *this;
@@ -904,7 +905,7 @@ public:
     
     template<typename TJump, bool T = isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, DeepIterator>::type
+    typename std::enable_if<T == true, DeepIterator>::type
     operator-(TJump const & jump)
     {
         DeepIterator tmp = *this;
@@ -914,7 +915,7 @@ public:
     
     template< bool T=isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, bool>::type
+    typename std::enable_if<T == true, bool>::type
     operator<(DeepIterator const & other)
     {
 
@@ -927,7 +928,7 @@ public:
     
     template<bool T = isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, bool>::type
+    typename std::enable_if<T == true, bool>::type
     operator>(DeepIterator const & other)
     {
         return accessor.greater(
@@ -939,7 +940,7 @@ public:
     
     template< bool T=isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, bool>::type
+    typename std::enable_if<T == true, bool>::type
     operator<=(DeepIterator const & other)
     {
 
@@ -948,7 +949,7 @@ public:
     
     template<bool T = isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, bool>::type
+    typename std::enable_if<T == true, bool>::type
     operator>=(DeepIterator const & other)
     {
         return *this > other || *this == other;
@@ -956,7 +957,7 @@ public:
     
     template<bool T = isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, ComponentReference>::type
+    typename std::enable_if<T == true, ComponentReference>::type
     operator[](IndexType const & index)
     {
         return accessor.get(containerPtr, index);
@@ -967,7 +968,7 @@ public:
     operator++(int)
     {
         DeepIterator tmp(*this);
-        navigator.next(containerPtr, index,1);
+        navigator.next(containerPtr, index, 1);
         return tmp;
     }
     
@@ -1227,17 +1228,17 @@ makeIterator (
 ->
 DeepIterator<
         TContainer,
-        decltype(makeAccessor<TContainer>(std::forward<TConcept>(concept).accessor)),
-        decltype(makeNavigator<TContainer>(std::forward<TConcept>(concept).navigator)),
+        decltype(makeAccessor<TContainer>(hzdr::forward<TConcept>(concept).accessor)),
+        decltype(makeNavigator<TContainer>(hzdr::forward<TConcept>(concept).navigator)),
         decltype(makeIterator<
-            typename traits::ComponentType<TContainer>::type>(std::forward<TConcept>(concept).child))>  
+            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child))>  
 {
     typedef TContainer                                          ContainerType;
 
-    typedef decltype(makeAccessor<ContainerType>(std::forward<TConcept>(concept).accessor))      AccessorType;
-    typedef decltype(makeNavigator<ContainerType>(std::forward<TConcept>(concept).navigator))    NavigatorType;
+    typedef decltype(makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor))      AccessorType;
+    typedef decltype(makeNavigator<ContainerType>(hzdr::forward<TConcept>(concept).navigator))    NavigatorType;
     typedef decltype(makeIterator<
-            typename traits::ComponentType<TContainer>::type>(std::forward<TConcept>(concept).child)) ChildType;
+            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child)) ChildType;
 
 
     typedef DeepIterator<
@@ -1247,9 +1248,9 @@ DeepIterator<
         ChildType>         Iterator;
         
     return Iterator(
-        makeAccessor<ContainerType>(std::forward<TConcept>(concept).accessor),
-        makeNavigator<ContainerType>(std::forward<TConcept>(concept).navigator),
-        makeIterator<typename traits::ComponentType<TContainer>::type>(std::forward<TConcept>(concept).child));
+        makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor),
+        makeNavigator<ContainerType>(hzdr::forward<TConcept>(concept).navigator),
+        makeIterator<typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child));
 }
 
 } // namespace details
@@ -1305,3 +1306,5 @@ DeepIterator<
         details::makeNavigator<ContainerType>(concept.navigator),
         details::makeIterator<ComponentType>(concept.childIterator));
 }
+
+} // namespace hzdr

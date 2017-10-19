@@ -52,8 +52,10 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
                          childConceptJump1);
 
     int_fast32_t sum = 0; 
+
     for(auto it=view.begin(); it!=view.end()-2; it++)
     {
+        std::cout << *it << std::endl;
         sum += (*it).data[0] + (*it).data[1];
     }
     // sum [0, 15] = 120
@@ -270,6 +272,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
 
 BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
 {
+
     /** We like to test the following things
      * 1. += -= 
      * 2. different offsets and jumpsizes and n
@@ -328,7 +331,7 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {
-                    
+                    std::cout << *it << " after " << std::boolalpha << it.isAfterLast() << std::endl;
                     ++counter;
                 }
                 BOOST_TEST(counter == nbParticles);
@@ -336,11 +339,11 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
                 counter = 0u;
                 for(auto it=view.rbegin(); it!=view.rend(); it-=n)
                 {
-                    std::cout << *it << std::endl;
+                    
                     ++counter;
                 }
                 BOOST_TEST(counter == nbParticles);
             }
-            
+
 }
 

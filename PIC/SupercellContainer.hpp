@@ -86,8 +86,6 @@ protected:
 // traits
 namespace traits 
 {
-template<typename>
-struct IsBidirectional;
     
 template<
     typename TSupercell>
@@ -96,13 +94,9 @@ struct IsBidirectional<SupercellContainer<TSupercell> >
     static const bool value = true;
 };
 
-
-template<typename>
-struct IsRandomAccess;
-
 template<
     typename TSupercell>
-struct IsRandomAccess<SupercellContainer<TSupercell> >
+struct IsRandomAccessable<SupercellContainer<TSupercell> >
 {
     static const bool value = true;
 };

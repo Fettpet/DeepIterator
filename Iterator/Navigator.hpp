@@ -48,6 +48,7 @@
  */
 
 #pragma once
+#include "Definitions/forward.hpp"
 #include "Policies.hpp"
 #include "PIC/Frame.hpp"
 #include <boost/core/ignore_unused.hpp>
@@ -146,8 +147,8 @@ public:
     Navigator(
             OffsetType && offset, 
             JumpsizeType && jumpsize):
-        offset(std::forward<OffsetType>(offset)),
-        jumpsize(std::forward<JumpsizeType>(jumpsize))
+        offset(hzdr::forward<OffsetType>(offset)),
+        jumpsize(hzdr::forward<JumpsizeType>(jumpsize))
     {}
     
     
@@ -384,8 +385,8 @@ struct Navigator<
     Navigator(
             TOffset_ && offset, 
             TJumpsize_ && jumpsize):
-        offset(std::forward<TOffset_>(offset)),
-        jumpsize(std::forward<TJumpsize_>(jumpsize))
+        offset(hzdr::forward<TOffset_>(offset)),
+        jumpsize(hzdr::forward<TJumpsize_>(jumpsize))
     {}
     
     OffsetType offset;
@@ -403,6 +404,7 @@ struct Navigator<
 template<
     typename TOffset,
     typename TJumpsize>
+HDINLINE
 auto 
 makeNavigator(
     TOffset && offset,
@@ -441,8 +443,8 @@ makeNavigator(
         false> ResultType;
     
     return ResultType(
-        std::forward<TOffset>(offset),
-        std::forward<TJumpsize>(jumpsize));
+        hzdr::forward<TOffset>(offset),
+        hzdr::forward<TJumpsize>(jumpsize));
 }
 
 
@@ -491,6 +493,7 @@ template<
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
 auto
+HDINLINE
 makeNavigator(
     TNavigator && navi)
 ->
@@ -523,7 +526,7 @@ hzdr::Navigator<
         TPreviousElement,
         TBeforeFirstElement,
         isBidirectional> ResultType;
-    return ResultType(std::forward<TOffset>(navi.offset), std::forward<TJumpsize>(navi.jumpsize));
+    return ResultType(hzdr::forward<TOffset>(navi.offset), hzdr::forward<TJumpsize>(navi.jumpsize));
 }
 
 
@@ -556,6 +559,7 @@ template<
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
     bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
 auto 
+HDINLINE
 makeNavigator(
     TOffset && offset,
     TJumpsize && jumpsize)
@@ -592,8 +596,8 @@ makeNavigator(
         isBidirectional> ResultType;
     
     return ResultType(
-        std::forward<TOffset>(offset),
-        std::forward<TJumpsize>(jumpsize));
+        hzdr::forward<TOffset>(offset),
+        hzdr::forward<TJumpsize>(jumpsize));
 }
 
 }// namespace hzdr

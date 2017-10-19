@@ -1,6 +1,4 @@
 
-int main(){return 0;}
-#if 0
 /**
  * @author Sebastian Hahn < t.hahn@hzdr.de >
  * @brief Within this file we test the cuda implementation of the DeepIterator. 
@@ -34,33 +32,36 @@ typedef hzdr::Supercell<Frame> Supercell;
 //  */
 BOOST_AUTO_TEST_CASE(PositionsInFrames)
 {
-    Supercell* super;
-    auto nbParticleInLastFrame = 100;
-    auto nbFrames = 5;
-    callSupercellAddOne(&super, nbFrames, nbParticleInLastFrame);
+    Supercell* supercell;
+    auto nbParticleInLastFrame = 100u;
+    auto nbFrames = 5u;
+    callSupercellAddOne(&supercell, nbFrames, nbParticleInLastFrame);
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto && it = hzdr::makeIterator(*super, 
-                             hzdr::makeAccessor(*super),
-                             hzdr::makeNavigator(*super,
-                                            hzdr::Direction::Forward(),
-                                            Offset(0),
-                                            Jumpsize(1)),
-                             hzdr::make_child(hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(hzdr::Direction::Forward(),
-                                                       Offset(0),
-                                                       Jumpsize(1))));
+    auto concept = hzdr::makeIteratorConcept(
+                            hzdr::makeAccessor(),
+                            hzdr::makeNavigator(
+                                Offset(0u),
+                                Jumpsize(1u)),
+                            hzdr::makeIteratorConcept(
+                                hzdr::makeAccessor(),
+                                hzdr::makeNavigator(
+                                    Offset(0u),
+                                    Jumpsize(1u))));
+    
+    auto view = hzdr::makeView(*supercell, concept);
+
                                
 
-    auto counter=0;
-    for(; not it.isAtEnd(); ++it)
+    auto counter = 0u;
+    for(auto it=view.begin(); it != view.end(); ++it)
     {
         counter++;
-        BOOST_TEST((*it).data[0] == (*it).data[1]);
+        BOOST_TEST((*it).data[0u] == (*it).data[1u]);
     }
     // 4 full Frames, 1 with 100 elements
-    BOOST_TEST(counter == 256 * 4 +100);
+    BOOST_TEST(counter == 256u * 4u + 100u);
 }
 
 
@@ -72,13 +73,13 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    const int nbSupercells = 3;
+    const uint nbSupercells = 3u;
     Supercell** super;
     std::vector<int> nbFrames, nbParticles;
-    for(int i=0; i<nbSupercells; ++i)
+    for(uint i=0u; i<nbSupercells; ++i)
     {
-        nbFrames.push_back(rand()%16);
-        nbParticles.push_back(rand()%256);
+        nbFrames.push_back(rand()%16u);
+        nbParticles.push_back(rand()%256u);
     }
 
     callSupercellSquareAdd(&super, nbSupercells, nbFrames, nbParticles);
@@ -86,40 +87,36 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
     // all first elements need to have the same number of elements
     SupercellContainer supercellContainer(*super, nbSupercells);  
     
+    auto concept = hzdr::makeIteratorConcept(
+        hzdr::makeAccessor(),
+        hzdr::makeNavigator(
+            Offset(0u),
+            Jumpsize(1u)));
+                        
 
-    
-    auto it = hzdr::makeIterator(
-                supercellContainer, 
-                hzdr::makeAccessor(supercellContainer),
-                hzdr::makeNavigator(
-                    supercellContainer,
-                    hzdr::Direction::Forward(),
-                    Offset(0),
-                    Jumpsize(1)));
-    
-    for(; not it.isAtEnd(); ++it)
+    auto view = hzdr::makeView(supercellContainer, concept);
+
+    for(auto it=view.begin(); it!=view.end(); ++it)
     {
-        auto itPart = hzdr::makeIterator(
-            *it,
-            hzdr::makeAccessor(*it),
+        auto conceptParticle = hzdr::makeIteratorConcept(
+            hzdr::makeAccessor(),
             hzdr::makeNavigator(
-                *it,
-                hzdr::Direction::Forward(),
-                Offset(0),
-                Jumpsize(1)),
-            hzdr::make_child(
+                Offset(0u),
+                Jumpsize(1u)),
+            hzdr::makeIteratorConcept(
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
-                    hzdr::Direction::Forward(),
-                    Offset(0),
-                    Jumpsize(1))));
-        auto value = (*itPart).data[1];
-        BOOST_TEST(value > 0);
-        for(; not itPart.isAtEnd(); ++itPart)
+                    Offset(0u),
+                    Jumpsize(1u))));
+        auto viewParticle = hzdr::makeView(*it, conceptParticle);
+        auto itParticle = viewParticle.begin();
+        auto value = (*itParticle).data[0u];
+        BOOST_TEST((value > 0));
+        for(; itParticle != viewParticle.end(); ++itParticle)
         {
-            BOOST_TEST((*itPart).data[1] == value);
+            BOOST_TEST((*itParticle).data[1u] == value);
         }
     }
     
 }
-#endif
+

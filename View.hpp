@@ -49,10 +49,13 @@
 
 #pragma once
 #include "DeepIterator.hpp"
+#include "Definitions/forward.hpp"
+#include "Iterator/Concept.hpp"
 #include "Iterator/Accessor.hpp"
 #include "Iterator/Navigator.hpp"
 #include "Iterator/Policies.hpp"
 #include "Traits/NumberElements.hpp"
+#include "Traits/Componenttype.hpp"
 #include "Definitions/hdinline.hpp"
 #include <type_traits>
 namespace hzdr 
@@ -62,6 +65,7 @@ namespace hzdr
 
 template<
     typename TContainer,
+    typename ComponentType,
     typename TAccessor,
     typename TNavigator,
     typename TChild>
@@ -72,7 +76,6 @@ public:
     typedef ContainerType* ContainerPtr;
     typedef ContainerType& ContainerRef;
     
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
     typedef ComponentType*                                              ComponentPtr;
     typedef ComponentType&                                              ComponentRef;
     
@@ -86,14 +89,15 @@ public:
         NavigatorType,
         ChildType> IteratorType;
         
-    View() = default;
-    View(View const &) = default;
-    View(View &&) = default;
+    HDINLINE View() = default;
+    HDINLINE View(View const &) = default;
+    HDINLINE View(View &&) = default;
     
     template<
         typename TAccessor_,
         typename TNavigator_,
         typename TChild_>
+    HDINLINE
     View(
          ContainerType& container,
          TAccessor_ && accessor,
@@ -101,9 +105,9 @@ public:
          TChild_ && child
         ):
         containerPtr(&container),
-        accessor(std::forward<TAccessor_>(accessor)),
-        navigator(std::forward<TNavigator_>(navigator)),
-        child(std::forward<TChild_>(child))
+        accessor(hzdr::forward<TAccessor_>(accessor)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        child(hzdr::forward<TChild_>(child))
     {}
         
     HDINLINE
@@ -149,35 +153,38 @@ template<
     typename ContainerNoRef = typename std::decay<TContainer>::type,
     typename ComponentType = typename traits::ComponentType<ContainerNoRef>::type>
 auto 
+HDINLINE
 makeView(
     TContainer && con, 
     TConcept && concept)
 ->
     View<
         ContainerNoRef,
-        decltype(details::makeAccessor<ContainerNoRef>(std::forward<TConcept>(concept).accessor)),
-        decltype(details::makeNavigator<ContainerNoRef>(std::forward<TConcept>(concept).navigator)),
-        decltype(details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child))>
+        ComponentType,
+        decltype(details::makeAccessor<ContainerNoRef>(hzdr::forward<TConcept>(concept).accessor)),
+        decltype(details::makeNavigator<ContainerNoRef>(hzdr::forward<TConcept>(concept).navigator)),
+        decltype(details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child))>
 {
 
         
         typedef ContainerNoRef                          ContainerType;
 
-        typedef decltype(details::makeAccessor<ContainerNoRef>( std::forward<TConcept>(concept).accessor)) AccessorType;
-        typedef decltype(details::makeNavigator<ContainerNoRef>( std::forward<TConcept>(concept).navigator)) NavigatorType;
-        typedef decltype(details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child)) ChildType;
+        typedef decltype(details::makeAccessor<ContainerNoRef>( hzdr::forward<TConcept>(concept).accessor)) AccessorType;
+        typedef decltype(details::makeNavigator<ContainerNoRef>( hzdr::forward<TConcept>(concept).navigator)) NavigatorType;
+        typedef decltype(details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child)) ChildType;
         typedef View<
             ContainerType,
+            ComponentType,
             AccessorType,
             NavigatorType,
             ChildType> ResultType;
-     //   std::forward<TConcept>(concept).navigator.T();
+     //   hzdr::forward<TConcept>(concept).navigator.T();
         
         return ResultType(
-            std::forward<TContainer>(con), 
-            details::makeAccessor<ContainerNoRef>(std::forward<TConcept>(concept).accessor), 
-            details::makeNavigator<ContainerNoRef>(std::forward<TConcept>(concept).navigator), 
-            details::makeIterator<ComponentType>(std::forward<TConcept>(concept).child));
+            hzdr::forward<TContainer>(con), 
+            details::makeAccessor<ContainerNoRef>(hzdr::forward<TConcept>(concept).accessor), 
+            details::makeNavigator<ContainerNoRef>(hzdr::forward<TConcept>(concept).navigator), 
+            details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child));
 }
 
 } // namespace hzdr

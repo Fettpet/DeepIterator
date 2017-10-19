@@ -17,24 +17,6 @@ struct IsBidirectional
     static const bool value = false;
 };
 
-template<>
-struct IsBidirectional<hzdr::container::categorie::ArrayLike>
-{
-    static const bool value = true;
-};
-
-template<>
-struct IsBidirectional<hzdr::container::categorie::DoublyLinkListLike>
-{
-    static const bool value = true;
-};
-
-template<>
-struct IsBidirectional<details::UndefinedType>
-{
-    static const bool value = false;
-};
-
 }// namespace traits
 }// namespace hzdr
 

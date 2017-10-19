@@ -1,4 +1,5 @@
 #pragma once
+#include "Definitions/forward.hpp"
 
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
@@ -26,24 +27,26 @@ struct IteratorConcept
     template<
         typename TNavigator_,
         typename TAccessor_>
+    HDINLINE
     IteratorConcept(TAccessor_ && acc,
                     TNavigator_ && navi):
         child(hzdr::NoChild()),
-        navigator(std::forward<TNavigator_>(navi)),
-        accessor(std::forward<TAccessor_>(acc))
+        navigator(hzdr::forward<TNavigator_>(navi)),
+        accessor(hzdr::forward<TAccessor_>(acc))
     {}
     
     template<
         typename TNavigator_,
         typename TAccessor_,
         typename TChild_>
+    HDINLINE
     IteratorConcept(TAccessor_ && acc,
                     TNavigator_ && navi,
                     TChild_ && child
                    ):
-        child(std::forward<TChild_>(child)),
-        navigator(std::forward<TNavigator_>(navi)),
-        accessor(std::forward<TAccessor_>(acc))
+        child(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navi)),
+        accessor(hzdr::forward<TAccessor_>(acc))
     {}
     
     ChildType child;
@@ -88,8 +91,8 @@ makeIteratorConcept(TAccessor&& accessor,
         hzdr::NoChild> Iterator;
     
     return Iterator(
-        std::forward<TAccessor>(accessor), 
-        std::forward<TNavigator>(navigator));
+        hzdr::forward<TAccessor>(accessor), 
+        hzdr::forward<TNavigator>(navigator));
 }
   
 /**
@@ -120,9 +123,9 @@ makeIteratorConcept(TAccessor && accessor,
         typename std::decay<TChild>::type> Iterator;
     
     return Iterator(
-        std::forward<TAccessor>(accessor), 
-        std::forward<TNavigator>(navigator),
-        std::forward<TChild>(child));
+        hzdr::forward<TAccessor>(accessor), 
+        hzdr::forward<TNavigator>(navigator),
+        hzdr::forward<TChild>(child));
 }
 
 } // namespace hzdr

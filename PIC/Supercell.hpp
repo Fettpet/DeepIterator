@@ -8,6 +8,7 @@
  */
 #pragma once
 #include "Definitions/hdinline.hpp"
+#include <iostream>
 
 namespace hzdr
 {

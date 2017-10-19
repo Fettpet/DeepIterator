@@ -1,5 +1,4 @@
-int main(){return 0;}
-#if 0
+
 #define BOOST_TEST_MODULE NestedIterator
 #include <boost/test/included/unit_test.hpp>
 
@@ -358,5 +357,5 @@ BOOST_AUTO_TEST_CASE(ParticlesWithSimulatedThreads)
 
 }
 #endif
-#endif
+
 
