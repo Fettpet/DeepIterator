@@ -4,7 +4,6 @@
  * specify the position to get the current component out of the container.
  */
 #pragma once
-#include "PIC/Supercell.hpp"
 
 namespace hzdr
 {
@@ -21,12 +20,6 @@ template<
 struct IndexType
 {
     typedef int_fast32_t type; 
-};
-
-template<typename TFrame>
-struct IndexType<hzdr::Supercell<TFrame> >
-{
-    typedef TFrame* type; 
 };
 
 

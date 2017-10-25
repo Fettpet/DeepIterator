@@ -15,8 +15,7 @@
  * @tparam TContainer The container over which the iteartor walks.
  * @tparam TIndex The type of the index to get a component out of the container.
  * @tparam TContainerCategory An SFINAE type for categories.
- * @tparam TOffset Type of the offset. This is a template of the function, not
- * of the trait.
+
  */
 namespace hzdr
 {
@@ -29,17 +28,14 @@ namespace navigator
 template<
     typename TContainer,
     typename TIndex,
-    typename TRange,
     typename TContainerCategory>
-struct FirstElement{
-    
-    template<typename TOffset>
+struct FirstElement
+{
     HDINLINE
     void
     operator() (
         TContainer*, 
-        TIndex&, 
-        TOffset const &);
+        TIndex&);
     
 };
 

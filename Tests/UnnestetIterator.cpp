@@ -146,20 +146,23 @@ We implement a own collectivity class
     [x, , ,x, , ,x, , ]. The x stands for access to these value. The second case
     is the iteration from rbegin to rend: [ , ,x, , ,x, , ,x].
     ********************/
-
+    std::cout << *(supercell.firstFrame) << std::endl;
+    std::cout << "Values from it" << std::endl;
     counter = 0;
     for(auto && it=view.rbegin(); it != view.rend(); it -= 3)
     {   
+        std::cout << "\t" << *it << std::endl;
             counter += (*it).data[0u] + (*it).data[1u];
     }
-    
+    std::cout << "Values from it3" << std::endl;
     auto counterBackwardJump3 = 0;
     for(auto && it=viewJump3.rbegin(); it != viewJump3.rend(); --it)
     {   
+        std::cout << "\t" << *it << std::endl;
             counterBackwardJump3 += (*it).data[0u] + (*it).data[1u];
     }
     // the first particle (0, 1), fourth ( 6, 7) seventh ( 12, 13) and last (18, 19) add together
-    BOOST_TEST((counter == counterBackwardJump3));
+    BOOST_TEST(counter == counterBackwardJump3);
 }
 
 /**

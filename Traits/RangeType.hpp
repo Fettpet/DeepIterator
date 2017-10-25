@@ -12,23 +12,23 @@ namespace hzdr
 {
 namespace traits
 {
-template<typename TContainerCategorie>
+template<typename TContainerCategorie, typename SFIANE = void>
 struct RangeType;
 
-template<>
-struct RangeType<hzdr::container::categorie::ArrayLike>
+template<typename TContainer>
+struct RangeType<TContainer, hzdr::container::categorie::ArrayLike>
+{
+    typedef int_fast32_t type;
+};
+
+template<typename TContainer>
+struct RangeType<TContainer, hzdr::container::categorie::DoublyLinkListLike>
 {
     typedef int_fast32_t type;
 };
 
 template<>
-struct RangeType<hzdr::container::categorie::DoublyLinkListLike>
-{
-    typedef int_fast32_t type;
-};
-
-template<>
-struct RangeType<details::UndefinedType>
+struct RangeType<details::UndefinedType, void>
 {
     typedef void type;
 };

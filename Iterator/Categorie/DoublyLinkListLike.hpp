@@ -1,5 +1,6 @@
 #pragma once
-#include "PIC/Supercell.hpp"
+#include "Traits/IsBidirectional.hpp"
+#include "Traits/IsRandomAccessable.hpp"
 #include "Traits/Accessor/Ahead.hpp"
 #include "Traits/Accessor/Behind.hpp"
 #include "Traits/Accessor/Equal.hpp"
@@ -27,6 +28,23 @@ struct DoublyLinkListLike;
 
 namespace traits 
 {
+    
+template<typename TContainer>
+struct IsBidirectional<
+    TContainer, 
+    hzdr::container::categorie::DoublyLinkListLike>
+{
+    static const bool value = true;
+};    
+
+template<typename TContainer>
+struct IsRandomAccessable<
+    TContainer, 
+    hzdr::container::categorie::DoublyLinkListLike>
+{
+    static const bool value = true;
+};
+
 namespace accessor
 {
 
@@ -147,25 +165,18 @@ namespace navigator
  */
 template<
     typename TContainer,
-    typename TIndex,
-    typename TRange>
+    typename TIndex>
 struct FirstElement<
     TContainer, 
     TIndex, 
-    TRange,
     hzdr::container::categorie::DoublyLinkListLike>
 {
     HDINLINE
     void
-    operator() (TContainer* container, TIndex& idx, TRange const & range)
+    operator() (TContainer* container, TIndex& idx)
     {
         idx = container->first;
-        for(auto i=static_cast<TRange>(0); i<range; ++i)
-        {
-            idx = idx->next;
-            if(idx == nullptr) 
-                return;
-        }
+
     }
 };
 /**
@@ -238,12 +249,10 @@ struct AfterLastElement<
  */
 template<
     typename TContainer,
-    typename TIndex,
-    typename TRange>
+    typename TIndex>
 struct LastElement<
     TContainer,
     TIndex,
-    TRange,
     hzdr::container::categorie::DoublyLinkListLike>
 {
     template<typename TSizeFunction>
@@ -252,20 +261,10 @@ struct LastElement<
     operator() (
         TContainer* containerPtr, 
         TIndex& index, 
-        TRange const & offset, 
-        TRange const & jumpsize, 
         TSizeFunction& size)
     {
-        auto nbElements = size(containerPtr);
-        auto jumps = (nbElements % jumpsize) - ((nbElements - offset) % jumpsize); 
         index = containerPtr->last;
 
-        for(TRange i=static_cast<TRange>(0); i<jumps; ++i)
-        {
-            if(index == nullptr)
-                break;
-            index = index->previous;
-        }
     }
 };
 

@@ -8,12 +8,7 @@
  */
 
 #pragma once
-#include <PIC/Frame.hpp>
-#include <PIC/Particle.hpp>
-#include <PIC/Supercell.hpp>
-#include <PIC/SupercellContainer.hpp>
-#include "Iterator/Categorie/ArrayLike.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
+
 
 namespace hzdr 
 {

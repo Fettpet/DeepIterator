@@ -6,17 +6,15 @@
  * overloaded. 
  */
 #pragma once
-#include "Iterator/Categorie/ArrayLike.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
 
 namespace hzdr 
 {
 namespace traits
 {
-template<typename TContainerCategorie>
+template<typename TContainerCategorie, typename SFIANE = void>
 struct IsRandomAccessable
 {
-    static const bool value = false;    
+    static const bool value = true;    
 };
 
 

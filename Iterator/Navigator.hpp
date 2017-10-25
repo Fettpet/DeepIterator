@@ -170,10 +170,12 @@ public:
         // test if the iterator is before the first element
         if(beforeFirstElement.test(containerPtr, index, offset(), containerSize))
         {
-            firstElement(
-                containerPtr,
-                index, 
-                offset());
+            firstElement(containerPtr, index);
+            nextElement(
+                containerPtr, 
+                index,  
+                static_cast<RangeType>(offset()),
+                containerSize);
             --distance;
         }
         // We jump over distance * jumpsize elements
@@ -203,15 +205,13 @@ public:
         IndexType & index,
         RangeType distance)
     {
+
         // test if the iterator is before the first element
         if(afterLastElement.test(containerPtr, index, containerSize))
         {
-            lastElement(
+            rbegin(
                 containerPtr,
-                index, 
-                offset(),
-                jumpsize(),
-                containerSize);
+                index);
             --distance;
         }
         // We jump over distance * jumpsize elements
@@ -222,7 +222,7 @@ public:
             static_cast<RangeType>(jumpsize() * distance),
             containerSize);
         
-        /// @todo Test ob es aufgerundet werden muss
+
         // we need the distance from the last element to the current index position
         return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
     }
@@ -238,7 +238,12 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index)
     {
-        firstElement(containerPtr, index, offset());
+        firstElement(containerPtr, index);
+        nextElement(
+            containerPtr, 
+            index,  
+            static_cast<RangeType>(offset()),
+            containerSize);
     }
     
     /**
@@ -252,7 +257,22 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index)
     {
-        lastElement(containerPtr, index, offset(), jumpsize(), containerSize);
+        auto nbElementsVar = nbElements(containerPtr);
+        // -1 since we dont like to jump outside
+        auto nbJumps = (nbElementsVar - offset() - 1) / jumpsize();
+        auto lastPosition = nbJumps * jumpsize() + offset();
+        // -1 since we need the last position
+        auto neededJumps = (nbElementsVar - 1) - lastPosition;
+
+        lastElement(containerPtr, index, containerSize);
+        previousElement(
+            containerPtr, 
+            index,
+            offset(),
+            static_cast<RangeType>(neededJumps),
+            containerSize);
+
+        
     }
     
     HDINLINE 
@@ -488,11 +508,11 @@ template<
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
     typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
-    typename TRange = typename OffsetRangeType<TOffset>::type,
-    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TRange = typename std::decay<typename OffsetRangeType<TOffset>::type>::type,
+    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
-    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
+    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
@@ -557,10 +577,10 @@ template<
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>::type,
     typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
     typename TRange = decltype(TOffset::operator()()),
-    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TContainerCategorie>::type,
     typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>::type,
     typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
-    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
+    typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TContainerCategorie>::type,
     typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>::type,
     bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>

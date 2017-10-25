@@ -109,7 +109,7 @@ struct Accessor
           IndexType const & index1,
           ContainerPtr const containerPtr2,
           IndexType const & index2,
-          std::enable_if<T>* = nullptr)
+          std::enable_if<T == true>* = nullptr)
     {
         return _ahead(containerPtr1, index1, containerPtr2, index2);
     }
@@ -122,7 +122,7 @@ struct Accessor
           IndexType const & index1,
           ContainerPtr const containerPtr2,
           IndexType const & index2,
-          std::enable_if<T>* = nullptr)
+          std::enable_if<T == true>* = nullptr)
     {
         return _behind(containerPtr1, index1, containerPtr2, index2);
     }
@@ -134,125 +134,6 @@ struct Accessor
     TEqual _equal;
     TBehind _behind;
 };
-
-/*
-template<
-    typename TContainer,
-    typename TComponent,
-    typename TIndex>
-struct Accessor<
-    TContainer,
-    TComponent,
-    TIndex,
-    hzdr::container::categorie::ArrayLike,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType>
-{
-    typedef TContainer                                              ContainerType;
-    typedef ContainerType*                                          ContainerPtr;
-    typedef TComponent                                              ComponentType;
-    typedef ComponentType*                                          ComponentPtr;
-    typedef ComponentType&                                          ComponentRef;
-    typedef container::categorie::ArrayLike                         ContainerCategory;
-    typedef TIndex                                                  IndexType;
-    
-    HDINLINE 
-    ComponentRef
-    get(ContainerPtr containerPtr,
-        ComponentPtr,
-        IndexType const & index)
-    const
-    {
-        return (*containerPtr)[index];
-    }
-    
-    HDINLINE
-    bool
-    equal(ContainerPtr containerPtr1,
-          ComponentPtr ,
-          IndexType const & index1,
-          ContainerPtr containerPtr2,
-          ComponentPtr ,
-          IndexType const & index2)
-    const
-    {
-        return (index1 == index2) && (containerPtr1 == containerPtr2);
-    }
-    
-    HDINLINE 
-    bool
-    greater(ContainerPtr containerPtr1,
-          ComponentPtr,
-          IndexType const & index1,
-          ContainerPtr containerPtr2,
-          ComponentPtr,
-          IndexType const & index2)
-    const
-    {
-        return (index1 > index2) &&  (containerPtr1 == containerPtr2);
-    }
-    
-    HDINLINE 
-    bool
-    lesser(ContainerPtr containerPtr1,
-          ComponentPtr,
-          IndexType const & index1,
-          ContainerPtr containerPtr2,
-          ComponentPtr,
-          IndexType const & index2)
-    const
-    {
-        return (index1 < index2)  &&  (containerPtr1 == containerPtr2);
-    }
-    
-};
-
-template<
-    typename TContainer,
-    typename TComponent,
-    typename TIndex>
-struct Accessor<
-    TContainer,
-    TComponent,
-    TIndex,
-    hzdr::container::categorie::DoublyLinkListLike,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType>
-{
-    typedef TContainer                                                  ContainerType;
-    typedef ContainerType*                                              ContainerPtr;
-    typedef TComponent                                                  ComponentType;
-    typedef ComponentType*                                              ComponentPtr;
-    typedef ComponentType&                                              ComponentRef;
-    typedef container::categorie::ArrayLike                             ContainerCategory;
-
-    typedef TIndex                                                      IndexType;
-    
-    HDINLINE 
-    ComponentRef
-    get(ContainerPtr,
-        ComponentPtr componentPtr,
-        IndexType &)
-    {
-        return *componentPtr;
-    }
-    
-    HDINLINE
-    bool
-    equal(ContainerPtr containerPtr1,
-          ComponentPtr componentPtr1,
-          IndexType && index1,
-          ContainerPtr containerPtr2,
-          ComponentPtr componentPtr2,
-          IndexType && index2)
-    {
-        return (componentPtr1 == componentPtr2);
-    }
-};*/
 
 /**
  * @brief the accessor concept.

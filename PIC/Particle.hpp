@@ -141,31 +141,8 @@ struct Particle<TPosition, 2>
 // traits
 namespace traits 
 {
-template<typename>
-struct IsBidirectional;
-    
-template<
-    typename TProperty,
-    int_fast32_t maxParticles>
-struct IsBidirectional<Particle<TProperty, maxParticles> >
-{
-    static const bool value = true;
-};
 
 
-template<typename>
-struct IsRandomAccessable;
-
-template<
-    typename TProperty,
-    int_fast32_t maxParticles>
-struct IsRandomAccessable<Particle<TProperty, maxParticles> >
-{
-    static const bool value = true;
-};
-    
-template<typename>
-struct HasConstantSize;
 
 template<
     typename TProperty,
@@ -175,8 +152,6 @@ struct HasConstantSize<Particle<TProperty, maxParticles> >
     static const bool value = true;
 };
 
-template<typename>
-struct ComponentType;
 
 template<
     typename TProperty,
@@ -186,8 +161,6 @@ struct ComponentType<Particle<TProperty, maxParticles> >
     typedef TProperty type;
 };
 
-template<typename>
-struct ContainerCategory;
 
 template<typename TProperty, int_fast32_t nb>
 struct ContainerCategory<Particle<TProperty, nb> >

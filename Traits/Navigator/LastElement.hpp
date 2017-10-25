@@ -30,7 +30,6 @@ namespace navigator
 template<
     typename TContainer,
     typename TIndex,
-    typename TRange,
     typename TContainerCategory>
 struct LastElement
 {
@@ -38,7 +37,7 @@ struct LastElement
         typename TSizeFunction>
     HDINLINE
     void
-    operator() (TContainer*, TIndex&, TRange&, TRange&, TSizeFunction&);
+    operator() (TContainer*, TIndex&, TSizeFunction&);
     
     HDINLINE void UNDEFINED();
 };

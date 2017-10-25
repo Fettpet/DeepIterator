@@ -18,6 +18,7 @@
  * @return true, if the first iterator is behind the second one, false otherwise
  *
  */
+#include "Definitions/hdinline.hpp"
 namespace hzdr
 {
 namespace traits

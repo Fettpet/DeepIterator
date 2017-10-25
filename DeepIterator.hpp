@@ -143,7 +143,11 @@ template<
     typename TContainer, 
     typename TAccessor, 
     typename TNavigator, 
-    typename TChild>
+    typename TChild,
+    typename TIndexType,
+    bool hasConstantSizeSelf = false,
+    bool isBidirectionalSelf = true,
+    bool isRandomAccessableSelf = true>
 struct DeepIterator
 {
 // datatypes
@@ -153,10 +157,6 @@ public:
     typedef ContainerType&                                              ContainerRef;
     typedef ContainerType*                                              ContainerPtr;
     
-    typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
-    typedef ComponentType*                                              ComponentPointer;
-    typedef ComponentType&                                              ComponentReference;
-    
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
     
@@ -165,16 +165,15 @@ public:
     typedef typename ChildIterator::ReturnType                      ReturnType;
 
 // container stuff
-    typedef typename traits::ContainerCategory<TContainer>::type    ContainerCategoryType;
-    typedef typename traits::IndexType<ContainerCategoryType>::type   IndexType;
+    typedef TIndexType   IndexType;
     
-    static const bool isBidirectional = ChildIterator::isBidirectional && hzdr::traits::IsBidirectional<ContainerType>::value;
-    static const bool isRandomAccessable = ChildIterator::isRandomAccessable && hzdr::traits::IsRandomAccessable<ContainerType>::value;
+    static const bool isBidirectional = ChildIterator::isBidirectional && isBidirectionalSelf;
+    static const bool isRandomAccessable = ChildIterator::isRandomAccessable && isRandomAccessableSelf;
     
     static const bool hasConstantSizeChild = ChildIterator::hasConstantSize;
 
     
-    static const bool hasConstantSize = traits::HasConstantSize<ContainerType>::value && hasConstantSizeChild;
+    static const bool hasConstantSize = hasConstantSizeSelf && hasConstantSizeChild;
 
     
 public:
@@ -373,8 +372,11 @@ public:
     }
     
 
+        
+    template<
+        bool T = isBidirectional>
     HDINLINE
-    DeepIterator
+    typename std::enable_if<T == true, DeepIterator>::type
     operator--()
     {
         if(isAfterLast())
@@ -696,12 +698,20 @@ private:
 template<
     typename TContainer, 
     typename TAccessor, 
-    typename TNavigator>
+    typename TNavigator,
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf>
 struct DeepIterator<
     TContainer,     
     TAccessor, 
     TNavigator,
-    hzdr::NoChild>
+    hzdr::NoChild,
+    TIndexType,
+    hasConstantSizeSelf,
+    isBidirectionalSelf,
+    isRandomAccessableSelf>
 {
 // datatypes
 public:
@@ -715,15 +725,14 @@ public:
     typedef ComponentReference                                          ReturnType;
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
-    
-    typedef typename traits::ContainerCategory<ContainerType>::type     ContainerCategoryType;
-    typedef typename traits::IndexType<ContainerType>::type   IndexType;
+
+    typedef TIndexType   IndexType;
 // container stuff
 
     
-    static const bool isBidirectional = hzdr::traits::IsBidirectional<ContainerType>::value;
-    static const bool isRandomAccessable = hzdr::traits::IsRandomAccessable<ContainerType>::value;
-    static const bool hasConstantSize = traits::HasConstantSize<ContainerType>::value;
+    static const bool isBidirectional = isBidirectionalSelf;
+    static const bool isRandomAccessable = isRandomAccessableSelf;
+    static const bool hasConstantSize = hasConstantSizeSelf;
 // functions 
 public:
 
@@ -1152,24 +1161,6 @@ public:
     }
     
     
-//     template<
-//         bool T = hasConstantSize>
-//     typename std::enable_if<T, int>::type
-//     getRangeToEnd()
-//     const
-//     {
-//         return navigator.distanceToEnd(containerPtr, index);
-//     }
-    
-//     template<
-//         bool T = hasConstantSize>
-//     typename std::enable_if<T, int>::type
-//     getRangeToBegin()
-//     const
-//     {
-//         return navigator.distanceToBegin(containerPtr, index);
-//     }
-    
     template<
         bool T = hasConstantSize>
     typename std::enable_if<T, int>::type
@@ -1219,19 +1210,29 @@ hzdr::NoChild
 template<
     typename TContainer,
     typename TConcept,
-    typename TConceptNoRef = typename std::decay<TConcept>::type>
+    typename TConceptNoRef =typename std::decay<TConcept>::type, 
+    typename TContainerNoRef = typename std::decay<TContainer>::type, 
+    typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
+    typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    bool isBidirectional = hzdr::traits::IsBidirectional<TContainer, ContainerCategoryType>::value,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainer, ContainerCategoryType>::value,
+    bool hasConstantSize = traits::HasConstantSize<TContainer>::value>
 HDINLINE
 auto 
 makeIterator (
     TConcept && concept,
-    typename std::enable_if<not std::is_same<TConceptNoRef, hzdr::NoChild>::value>::type* = nullptr)
+    typename std::enable_if<not std::is_same<TContainerNoRef, hzdr::NoChild>::value>::type* = nullptr)
 ->
 DeepIterator<
         TContainer,
         decltype(makeAccessor<TContainer>(hzdr::forward<TConcept>(concept).accessor)),
         decltype(makeNavigator<TContainer>(hzdr::forward<TConcept>(concept).navigator)),
         decltype(makeIterator<
-            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child))>  
+            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child)),
+        IndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable>  
 {
     typedef TContainer                                          ContainerType;
 
@@ -1245,7 +1246,11 @@ DeepIterator<
         ContainerType,
         AccessorType,
         NavigatorType,
-        ChildType>         Iterator;
+        ChildType,
+        IndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable>         Iterator;
         
     return Iterator(
         makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor),
@@ -1265,10 +1270,15 @@ DeepIterator<
  */
 template<
     typename TContainer,
+    typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename TAccessor,
     typename TNavigator,
     typename TChild,
-    typename TIndex>
+    typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
+    typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    bool isBidirectional = hzdr::traits::IsBidirectional<TContainerNoRef, ContainerCategoryType>::value,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainerNoRef, ContainerCategoryType>::value,
+    bool hasConstantSize = traits::HasConstantSize<TContainerNoRef>::value>
 HDINLINE 
 auto
 makeIterator(
@@ -1284,7 +1294,11 @@ DeepIterator<
         decltype(details::makeNavigator(container, concept.navigator)),
         decltype(details::makeIterator<
             typename traits::ComponentType<
-                typename std::decay<TContainer>::type>::type>(concept.childIterator))>         
+                typename std::decay<TContainer>::type>::type>(concept.childIterator)),
+        IndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable>         
 {
     typedef typename std::decay<TContainer>::type               ContainerType;
     typedef typename traits::ComponentType<ContainerType>::type ComponentType;
@@ -1298,7 +1312,12 @@ DeepIterator<
         ContainerType,
         AccessorType,
         NavigatorType,
-        ChildType>         Iterator;
+        ChildType,
+        IndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable
+        >         Iterator;
     
     return Iterator(
         container, 

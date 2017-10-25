@@ -180,11 +180,12 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
                         Offset(0),
                         Jumpsize(1))))));
      
-    
+    std::cout << "Data structure: " << std::endl << supercell << std::endl;
     // test ++it
     uint counter = 0u;
     for(auto it = view.begin(); it != view.end(); ++it)
     {
+        std::cout << *it << std::endl;
         counter++;            
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements

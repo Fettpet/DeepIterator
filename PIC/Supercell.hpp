@@ -9,6 +9,11 @@
 #pragma once
 #include "Definitions/hdinline.hpp"
 #include <iostream>
+#include "Traits/Componenttype.hpp"
+#include "Traits/IndexType.hpp"
+#include "Traits/IsRandomAccessable.hpp"
+#include "Traits/IsBidirectional.hpp"
+#include "Traits/HasConstantSize.hpp"
 
 namespace hzdr
 {
@@ -111,39 +116,23 @@ struct Supercell
 // traits
 namespace traits 
 {
-template<typename>
-struct IsBidirectional;
     
-template<
-    typename TFrame>
-struct IsBidirectional<Supercell<TFrame> >
+template<typename TFrame>
+struct IndexType<hzdr::Supercell<TFrame> >
 {
-    static const bool value = true;
+    typedef TFrame* type; 
 };
 
-
-template<typename>
-struct IsRandomAccessable;
-
-template<
-    typename TFrame>
-struct IsRandomAccessable<Supercell<TFrame> >
-{
-    static const bool value = true;
-};
     
-template<typename>
-struct HasConstantSize;
+
 
 template<
     typename TFrame>
 struct HasConstantSize<Supercell<TFrame> >
 {
-    static const bool value = true;
+    static const bool value = false;
 };
 
-template<typename>
-struct ComponentType;
 
 template<
     typename TFrame>

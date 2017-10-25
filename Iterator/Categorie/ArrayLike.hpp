@@ -1,4 +1,6 @@
 #pragma once
+#include "Traits/IsBidirectional.hpp"
+#include "Traits/IsRandomAccessable.hpp"
 #include "Traits/Accessor/Ahead.hpp"
 #include "Traits/Accessor/Behind.hpp"
 #include "Traits/Accessor/Equal.hpp"
@@ -8,6 +10,7 @@
 #include "Traits/Navigator/LastElement.hpp"
 #include "Traits/Navigator/NextElement.hpp"
 #include "Traits/Navigator/PreviousElement.hpp"
+#include "Traits/Navigator/FirstElement.hpp"
 
 namespace hzdr
 {
@@ -26,7 +29,22 @@ struct ArrayLike;
 // implementation of the traits
 namespace traits
 {
-    
+template<typename TContainer>
+struct IsBidirectional<
+    TContainer, 
+    hzdr::container::categorie::ArrayLike>
+{
+    static const bool value = true;
+};    
+
+template<typename TContainer>
+struct IsRandomAccessable<
+    TContainer, 
+    hzdr::container::categorie::ArrayLike>
+{
+    static const bool value = true;
+};
+
 namespace accessor 
 {
 /**
@@ -147,19 +165,17 @@ namespace navigator
  */
 template<
     typename TContainer,
-    typename TOffset,
     typename TIndex>
 struct FirstElement<
     TContainer, 
     TIndex, 
-    TOffset,
     hzdr::container::categorie::ArrayLike>
 {
     HDINLINE
     void
-    operator() (TContainer*, TIndex& idx, TOffset const & range)
+    operator() (TContainer*, TIndex& idx)
     {
-        idx = static_cast<TIndex>(range);
+        idx = static_cast<TIndex>(0);
     }
 };
 
@@ -230,12 +246,10 @@ struct AfterLastElement<
  */
 template<
     typename TContainer,
-    typename TIndex,
-    typename TRange>
+    typename TIndex>
 struct LastElement<
     TContainer,
     TIndex,
-    TRange,
     hzdr::container::categorie::ArrayLike>
 {
     template<typename TSizeFunction>
@@ -243,13 +257,9 @@ struct LastElement<
     void
     operator() (TContainer* conPtr, 
                 TIndex& index, 
-                TRange const & offset, 
-                TRange const & jumpsize, 
                 TSizeFunction& size)
     {
-        auto nbOfJumps = ((size(conPtr) - offset - 1) / jumpsize );
-        
-        index = (nbOfJumps) * jumpsize + offset;
+        index = size(conPtr) - 1;
     }
 };
 

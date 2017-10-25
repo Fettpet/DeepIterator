@@ -1,5 +1,7 @@
 #pragma once
 #include "PIC/Supercell.hpp"
+#include "Traits/IsBidirectional.hpp"
+#include "Traits/IsRandomAccessable.hpp"
 #include "Traits/Accessor/Ahead.hpp"
 #include "Traits/Accessor/Behind.hpp"
 #include "Traits/Accessor/Equal.hpp"
@@ -15,6 +17,21 @@ namespace hzdr
 {
 namespace traits 
 {
+template<typename SFIANE, typename TFrame>
+struct IsBidirectional<
+    hzdr::Supercell<TFrame>, 
+    SFIANE>
+{
+    static const bool value = true;
+};    
+
+template<typename SFIANE, typename TFrame>
+struct IsRandomAccessable<
+    hzdr::Supercell<TFrame>, 
+    SFIANE>
+{
+    static const bool value = true;
+};
 namespace accessor
 {
 
@@ -144,26 +161,18 @@ namespace navigator
 template<
     typename TFrame,
     typename TIndex,
-    typename TContainerCategorie,
-    typename TRange>
+    typename TContainerCategorie>
 struct FirstElement<
     hzdr::Supercell<TFrame>,
     TIndex, 
-    TRange,
     TContainerCategorie>
 {
     typedef hzdr::Supercell<TFrame> TContainer;
     HDINLINE
     void
-    operator() (TContainer* container, TIndex& idx, TRange const & range)
+    operator() (TContainer* container, TIndex& idx)
     {
         idx = container->firstFrame;
-        for(auto i=static_cast<TRange>(0); i<range; ++i)
-        {
-            idx = idx->nextFrame;
-            if(idx == nullptr) 
-                return;
-        }
     }
 };
 /**
@@ -241,12 +250,10 @@ struct AfterLastElement<
 template<
     typename TFrame,
     typename TIndex,
-    typename TContainerCategorie,
-    typename TRange>
+    typename TContainerCategorie>
 struct LastElement<
     hzdr::Supercell<TFrame>,
     TIndex,
-    TRange,
     TContainerCategorie>
 {
     typedef hzdr::Supercell<TFrame> TContainer;
@@ -256,25 +263,12 @@ struct LastElement<
     operator() (
         TContainer* containerPtr, 
         TIndex& index, 
-        TRange const & offset, 
-        TRange const & jumpsize, 
-        TSizeFunction && containerSize)
+        TSizeFunction &&)
     {
-        // minus 1, since we start at 0 with counting
-        auto nbElements = containerSize(containerPtr) - 1u ;
-        auto nbOfJumps = (nbElements - offset ) / jumpsize;
-        auto lastPosition = nbOfJumps * jumpsize + offset;
-        
-        // We use the beginning as reference point
-        auto jumps = nbElements - lastPosition;
+
         index = containerPtr->lastFrame;
 
-        for(TRange i=static_cast<TRange>(0); i<jumps; ++i)
-        {
-            if(index == nullptr)
-                break;
-            index = index->previousFrame;
-        }
+
     }
 };
 

@@ -68,7 +68,11 @@ template<
     typename ComponentType,
     typename TAccessor,
     typename TNavigator,
-    typename TChild>
+    typename TChild,
+    typename TIndexType,
+    bool hasConstantSize,
+    bool isBidirectional,
+    bool isRandomAccessable>
 struct View
 {
 public:
@@ -87,7 +91,11 @@ public:
         ContainerType,
         AccessorType,
         NavigatorType,
-        ChildType> IteratorType;
+        ChildType,
+        TIndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable> IteratorType;
         
     HDINLINE View() = default;
     HDINLINE View(View const &) = default;
@@ -150,8 +158,14 @@ protected:
 template<
     typename TContainer,
     typename TConcept,
-    typename ContainerNoRef = typename std::decay<TContainer>::type,
-    typename ComponentType = typename traits::ComponentType<ContainerNoRef>::type>
+    typename TContainerNoRef = typename std::decay<TContainer>::type,
+    typename ComponentType = typename traits::ComponentType<TContainerNoRef>::type,
+    typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
+
+    bool hasConstantSize = traits::HasConstantSize<TContainerNoRef>::value,
+    bool isBidirectional = hzdr::traits::IsBidirectional<TContainerNoRef, ContainerCategoryType>::value,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainerNoRef, ContainerCategoryType>::value>
 auto 
 HDINLINE
 makeView(
@@ -159,31 +173,39 @@ makeView(
     TConcept && concept)
 ->
     View<
-        ContainerNoRef,
+        TContainerNoRef,
         ComponentType,
-        decltype(details::makeAccessor<ContainerNoRef>(hzdr::forward<TConcept>(concept).accessor)),
-        decltype(details::makeNavigator<ContainerNoRef>(hzdr::forward<TConcept>(concept).navigator)),
-        decltype(details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child))>
+        decltype(details::makeAccessor<TContainerNoRef>(hzdr::forward<TConcept>(concept).accessor)),
+        decltype(details::makeNavigator<TContainerNoRef>(hzdr::forward<TConcept>(concept).navigator)),
+        decltype(details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child)),
+        IndexType,
+        hasConstantSize,
+        isBidirectional,
+        isRandomAccessable>
 {
 
         
-        typedef ContainerNoRef                          ContainerType;
+        typedef TContainerNoRef                          ContainerType;
 
-        typedef decltype(details::makeAccessor<ContainerNoRef>( hzdr::forward<TConcept>(concept).accessor)) AccessorType;
-        typedef decltype(details::makeNavigator<ContainerNoRef>( hzdr::forward<TConcept>(concept).navigator)) NavigatorType;
+        typedef decltype(details::makeAccessor<ContainerType>( hzdr::forward<TConcept>(concept).accessor)) AccessorType;
+        typedef decltype(details::makeNavigator<ContainerType>( hzdr::forward<TConcept>(concept).navigator)) NavigatorType;
         typedef decltype(details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child)) ChildType;
         typedef View<
             ContainerType,
             ComponentType,
             AccessorType,
             NavigatorType,
-            ChildType> ResultType;
-     //   hzdr::forward<TConcept>(concept).navigator.T();
+            ChildType,
+            IndexType,
+            hasConstantSize,
+            isBidirectional,
+            isRandomAccessable> ResultType;
+     
         
         return ResultType(
             hzdr::forward<TContainer>(con), 
-            details::makeAccessor<ContainerNoRef>(hzdr::forward<TConcept>(concept).accessor), 
-            details::makeNavigator<ContainerNoRef>(hzdr::forward<TConcept>(concept).navigator), 
+            details::makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor), 
+            details::makeNavigator<ContainerType>(hzdr::forward<TConcept>(concept).navigator), 
             details::makeIterator<ComponentType>(hzdr::forward<TConcept>(concept).child));
 }
 

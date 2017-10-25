@@ -190,4 +190,3 @@ void callSupercellSquareAdd(Supercell*** superCellContainer, int nbSupercells, s
     }
     
 }
-

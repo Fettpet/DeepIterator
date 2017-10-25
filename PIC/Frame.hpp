@@ -13,7 +13,11 @@
 #include <iostream>
 #include <iomanip>
 #include "Iterator/Categorie.hpp"
-
+#include "Traits/Componenttype.hpp"
+#include "Traits/IndexType.hpp"
+#include "Traits/IsRandomAccessable.hpp"
+#include "Traits/IsBidirectional.hpp"
+#include "Traits/HasConstantSize.hpp"
 namespace hzdr
 {
 template<
@@ -134,8 +138,7 @@ std::ostream& operator<<(std::ostream& out, const Frame<TParticle, maxParticles>
 // traits
 namespace traits 
 {
-template<typename>
-struct IsBidirectional;
+
     
 template<
     typename TParticle,
@@ -146,8 +149,6 @@ struct IsBidirectional<Frame<TParticle, maxParticles> >
 };
 
 
-template<typename>
-struct IsRandomAccessable;
 
 template<
     typename TParticle,
@@ -156,9 +157,7 @@ struct IsRandomAccessable<Frame<TParticle, maxParticles> >
 {
     static const bool value = true;
 };
-    
-template<typename>
-struct HasConstantSize;
+
 
 template<
     typename TParticle,
@@ -168,8 +167,7 @@ struct HasConstantSize<Frame<TParticle, maxParticles> >
     static const bool value = false;
 };
 
-template<typename>
-struct ComponentType;
+
 
 template<
     typename TParticle,
@@ -179,8 +177,6 @@ struct ComponentType<Frame<TParticle, maxParticles> >
     typedef TParticle type;
 };
 
-template<typename>
-struct ContainerCategory;
 
 template<typename TParticle, int_fast32_t nb>
 struct ContainerCategory<hzdr::Frame<TParticle, nb> >

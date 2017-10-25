@@ -49,6 +49,7 @@ BOOST_AUTO_TEST_CASE(Frames)
     auto counter = 0u;
     for(auto && it = view.rbegin(); it != view.rend(); --it)
     {
+        std::cout << *it <<std::endl;
         buffer[counter++] = *it;
     }
     BOOST_TEST(counter == 10u);
@@ -93,13 +94,14 @@ BOOST_AUTO_TEST_CASE(Frames)
 BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
 {
     
-    Frame testFrame;
     
+
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    
-    std::array<uint_fast32_t, 5u> offsets({0u, 1u, 2u, 3u, 4u});
-    std::array<uint_fast32_t, 7u> jumpsizes({ 1u, 2u, 3u, 4u, 5u, 6u, 7u});
+
+        
+    std::vector<uint_fast32_t> offsets({0u, 1u, 2u, 3u, 4u});
+    std::vector<uint_fast32_t> jumpsizes({1u, 2u, 3u, 4u});
     
     const static uint nbParticle = 10u;
     std::array<Particle, nbParticle> buffer;
@@ -108,7 +110,9 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
     for( auto off: offsets)
     {
         for(auto jump: jumpsizes)
-        {        
+        {   
+            std::cout << "Offset " << off << " Jumpsize " << jump << std::endl;
+            Frame testFrame;
             // 0. We create a concept
             auto && concept = hzdr::makeIteratorConcept(
                 hzdr::makeAccessor(),
@@ -121,6 +125,8 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             auto counter = 0u;
             for(auto && it = view.rbegin(); it != view.rend(); --it)
             {
+                if(off == 1 and jump == 2)
+                    std::cout << *it << std::endl;
                 buffer[counter++] = *it;
             }
             BOOST_TEST(counter == (nbParticle - off+ jump - 1) / jump);

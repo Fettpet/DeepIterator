@@ -13,6 +13,7 @@
  * @tparam TIndex The type of the index to get a component out of the container.
  * @tparam TContainerCategory An SFINAE type for categories.
  */
+#include "Definitions/hdinline.hpp"
 namespace hzdr
 {
 namespace traits

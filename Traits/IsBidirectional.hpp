@@ -4,18 +4,13 @@
  * The deepiterator has the functions --it and it-- if it is bidirectional.
  */
 #pragma once
-#include "Iterator/Categorie/ArrayLike.hpp"
-#include "Iterator/Categorie/DoublyLinkListLike.hpp"
 
 namespace hzdr 
 {
 namespace traits
 {
-template<typename TContainerCategorie>
-struct IsBidirectional
-{
-    static const bool value = false;
-};
+template<typename TContainerCategorie, typename SFIANE = void>
+struct IsBidirectional;
 
 }// namespace traits
 }// namespace hzdr

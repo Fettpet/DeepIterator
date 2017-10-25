@@ -19,6 +19,7 @@
  * @return true, if the first iterator is at same position as the second one, false otherwise
  *
  */
+#include "Definitions/hdinline.hpp"
 namespace hzdr
 {
 namespace traits
