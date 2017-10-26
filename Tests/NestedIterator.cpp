@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
                                     Offset(0),
                                     Jumpsize(1)))));
                             
-
+    std::cout << *(supercell.firstFrame) << std::endl;
     // 1. test ++it
     uint counter = 0u;
     for(auto && it = view.begin(); it != view.end(); ++it)
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
         counter += (*it);
     }
     // sum([0, 19]) = 190
-    BOOST_TEST((counter == 190u)); 
+    BOOST_TEST(counter == 190u); 
     
     // 2. test it++
     counter = 0;
@@ -61,16 +61,17 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
         counter += (*it);
     }
     // sum([0, 19]) = 190
-    BOOST_TEST((counter == 190u)); 
+    BOOST_TEST(counter == 190u); 
     
     // 3. test --it
     counter = 0u;
     for(auto && it = view.rbegin(); it != view.rend(); --it)
     {
+        std::cout << *it << std::endl;
         counter += (*it);
     }
     // sum([0, 19]) = 190
-    BOOST_TEST((counter == 190u)); 
+    BOOST_TEST(counter == 190u); 
     
     // 4. test it--
     counter = 0u;
@@ -80,7 +81,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     }
 
 //     // sum([0, 19]) = 190
-    BOOST_TEST((counter == 190u)); 
+    BOOST_TEST(counter == 190u); 
 }
 
 

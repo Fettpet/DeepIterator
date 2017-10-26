@@ -82,28 +82,22 @@ addParticle(Supercell & supercell, int *value)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     typedef hzdr::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
-    auto conceptFrame = hzdr::makeIteratorConcept(
+    auto conceptParticle = hzdr::makeIteratorConcept(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0),
-            Jumpsize(1)));
-
-        // over all frames in a supercell
-    auto viewFrame= makeView(supercell, conceptFrame);
-    for(auto itFrame = viewFrame.begin(); itFrame != viewFrame.end(); ++itFrame)
-    {
-            Frame frame =  *itFrame;
-            auto conceptParticle = hzdr::makeIteratorConcept(
+            Jumpsize(1)),
+        hzdr::makeIteratorConcept(
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
                     Offset(threadIdx.x),
-                    Jumpsize_256()));
-            auto viewParticle = hzdr::makeView(frame, conceptParticle);
-            __syncthreads();
-            for(auto itParticle = viewParticle.begin(); itParticle != viewParticle.end(); ++itParticle)
-            {
-                value[threadIdx.x] += (*itParticle).data[0];
-            }
+                    Jumpsize_256())));
+
+        // over all frames in a supercell
+    auto view= makeView(supercell, conceptParticle);
+    for(auto it = view.begin(); it != view.end(); ++it)
+    {
+        value[threadIdx.x] += (*it).data[0];
     }
 }
 
@@ -113,7 +107,6 @@ __global__
 void 
 addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
 {
-
     const int nbSupercellAdd = 2;
     // define all needed types 
     typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
@@ -129,10 +122,21 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
         hzdr::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
-    
+            
+    auto conceptParticle = hzdr::makeIteratorConcept(
+            hzdr::makeAccessor(),
+            hzdr::makeNavigator(
+                Offset(0u),
+                Jumpsize(1u)),
+            hzdr::makeIteratorConcept(
+                hzdr::makeAccessor(),
+                hzdr::makeNavigator(
+                    Offset(threadIdx.x),
+                    Jumpsize_256())));
+                    
     auto viewSupercellContainer = hzdr::makeView(supercellContainer, conceptSupercell);
     auto test = viewSupercellContainer.begin();
-
+    // Add all the particles where enough supercell are there
     for(auto it=viewSupercellContainer.begin(); it != viewSupercellContainer.end() - (nbSupercellAdd - 1); ++it)
     {
         __shared__ int value[256];
@@ -150,16 +154,7 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
         atomicAdd(&result, value[threadIdx.x]);
         __syncthreads();
         
-        auto conceptParticle = hzdr::makeIteratorConcept(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
-                Offset(0u),
-                Jumpsize(1u)),
-            hzdr::makeIteratorConcept(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
-                    Offset(threadIdx.x),
-                    Jumpsize_256())));
+
         auto viewParticle = hzdr::makeView(*it, conceptParticle);
         
         for(auto itParticle = viewParticle.begin();
@@ -170,9 +165,37 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
         }
         
     }
-
+    // add the remaining supercells
+    auto counter = (nbSupercellAdd - 1);
+    for(auto it=viewSupercellContainer.end() - (nbSupercellAdd - 1); it != viewSupercellContainer.end(); ++it)
+    {
+        __shared__ int value[256];
+        value[threadIdx.x] = 0;
+        __syncthreads();
+        for(int i = 0; i < counter; ++i)
+        {
+            addParticle( *(it + i), value);
+        }
+        --counter;
+        // write back
+        __shared__ int result;
+        result = 0;
+        __syncthreads();
+        
+        atomicAdd(&result, value[threadIdx.x]);
+        __syncthreads();
         
 
+        auto viewParticle = hzdr::makeView(*it, conceptParticle);
+        
+        for(auto itParticle = viewParticle.begin();
+            itParticle != viewParticle.end();
+            ++itParticle)
+        {
+            (*itParticle).data[1] = result;
+        }
+        
+    }
 }
 
 void callSupercellSquareAdd(Supercell*** superCellContainer, int nbSupercells, std::vector<int> nbFramesSupercell, std::vector<int> nbParticlesInFrame)

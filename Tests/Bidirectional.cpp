@@ -219,6 +219,57 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 }
 
 
+BOOST_AUTO_TEST_CASE(Borders)
+{
+    uint_fast32_t nbFrames = 5u;
+    uint_fast32_t nbParticlesInLastFrame = 2u;
+    Supercell supercell(nbFrames, nbParticlesInLastFrame);
+
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    
+    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u});
+    std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
+    
+    for(jump: jumpsizesInner)
+        for(off: offsetsInner)
+        {
+            auto && view = hzdr::makeView(
+                        supercell, 
+                        hzdr::makeIteratorConcept(
+                            hzdr::makeAccessor(),
+                            hzdr::makeNavigator( 
+                                Offset(0u),
+                                Jumpsize(1u)),
+                            hzdr::makeIteratorConcept(
+                                hzdr::makeAccessor(),
+                                hzdr::makeNavigator(
+                                    Offset(3u),
+                                    Jumpsize(1u)),
+                                hzdr::makeIteratorConcept(
+                                    hzdr::makeAccessor(),
+                                    hzdr::makeNavigator(
+                                        Offset(0u),
+                                        Jumpsize(2u))))));
+
+            auto sumForward = 0u;
+            for(auto && it = view.begin(); it != view.end(); ++it)
+            {
+                sumForward += *it;
+            }
+            
+            auto sumBackward = 0u;
+            for(auto && it = view.rbegin(); it != view.rend(); --it)
+            {
+                std::cout << *it << std::endl;
+                sumBackward += *it;
+            }
+            BOOST_TEST(sumForward == sumBackward);
+        }
+    
+
+}
+
 
 BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
 {
@@ -229,8 +280,8 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    std::vector<uint_fast32_t> offsetsInner({0u});
-    std::vector<uint_fast32_t> jumpsizesInner({3u, 4u});
+    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u});
+    std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
     std::cout << supercell << std::endl;
     for(auto off: offsetsInner)
         for(auto jump: jumpsizesInner)

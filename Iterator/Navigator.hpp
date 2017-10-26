@@ -206,12 +206,24 @@ public:
         RangeType distance)
     {
 
-        // test if the iterator is before the first element
+        // test if the iterator is after the last element
         if(afterLastElement.test(containerPtr, index, containerSize))
         {
-            rbegin(
-                containerPtr,
-                index);
+            // set the index to the last element
+            auto nbElementsVar = nbElements(containerPtr);
+            // -1 since we dont like to jump outside
+            auto nbJumps = (nbElementsVar - offset() - 1) / jumpsize();
+            auto lastPosition = nbJumps * jumpsize() + offset();
+            // -1 since we need the last position
+            auto neededJumps = (nbElementsVar - 1) - lastPosition;
+
+            lastElement(containerPtr, index, containerSize);
+            previousElement(
+                containerPtr, 
+                index,
+                offset(),
+                static_cast<RangeType>(neededJumps),
+                containerSize);
             --distance;
         }
         // We jump over distance * jumpsize elements
@@ -305,6 +317,7 @@ public:
         IndexType const & index)
     const
     {
+//         std::cout << "IsAfterLast: " << std::boolalpha <<  afterLastElement.test(containerPtr, index, containerSize) << "index " << index << " container " << containerSize(containerPtr) << std::endl;
         return afterLastElement.test(containerPtr, index, containerSize);
     }
     

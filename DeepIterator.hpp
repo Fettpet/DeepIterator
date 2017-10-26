@@ -333,7 +333,6 @@ public:
     operator==(const DeepIterator& other)
     const
     {
-//        std::cout << std::boolalpha << other.isBeforeFirst() << " && " << isBeforeFirst() << " index " << index << " " << other.index << std::endl;
         return (isAfterLast() && other.isAfterLast())
             || (isBeforeFirst() && other.isBeforeFirst())
             ||(containerPtr == other.containerPtr
@@ -396,12 +395,7 @@ public:
     {
         DeepIterator tmp(*this);
         
-        if(isAfterLast())
-        {
-            setToRbegin();
-            return tmp;
-        }
-        gotoPrevious(1u);
+        --(*this);
         return tmp;
     }
 
@@ -455,11 +449,14 @@ public:
         auto && overjump = (remaining + childNbElements - 1) / childNbElements;
         int childJumps = ((remaining - 1) % childNbElements);
         
-        auto && result = navigator.next(containerPtr, index, overjump);
+        int && result = navigator.next(containerPtr, index, overjump);
         if((result == 0) && (overjump > 0) && not isAfterLast())
         {
-            childIterator.setToBegin(accessor.get(containerPtr, index));
-            childIterator += childJumps;
+            while(childIterator.isAfterLast() && not isAfterLast())
+            {
+                childIterator.setToBegin(accessor.get(containerPtr, index));
+                childIterator += childJumps;
+            }
         }
         // we only need to return something, if we are at the end
         uint const condition = (result > 0);
@@ -490,10 +487,12 @@ public:
             if(remaining == 0u)
                 break;
             --remaining;
-            navigator.next(containerPtr, index, 1u);
-            if(not isAfterLast())
-                childIterator.setToBegin(accessor.get(containerPtr, index));
-            
+            while(childIterator.isAfterLast() && not isAfterLast())
+            {
+                navigator.next(containerPtr, index, 1u);
+                if(not isAfterLast())
+                    childIterator.setToBegin(accessor.get(containerPtr, index));
+            }
         }
         return remaining;
     }
@@ -519,8 +518,7 @@ public:
     uint
     gotoPrevious(uint const & jumpsize, typename std::enable_if<T == true>::type* = nullptr)
     {
-        
-        auto && remaining = childIterator.gotoPrevious(jumpsize);
+        int && remaining = childIterator.gotoPrevious(jumpsize);
         if(childIterator.isBeforeFirst() and remaining == 0)
         {
                 remaining = jumpsize;
@@ -528,13 +526,16 @@ public:
         
         auto && childNbElements = childIterator.nbElements();
         auto && overjump = (remaining + childNbElements - 1) / childNbElements;
-        int childJumps = ((remaining - 1) % childNbElements);
+        auto && childJumps = ((remaining - 1) % childNbElements);
         
         auto && result = navigator.previous(containerPtr, index, overjump);
-        if((result == 0u) && (overjump > 0u) && not isBeforeFirst())
+        if((result == 0) && (overjump > 0) && not isBeforeFirst())
         {
-            childIterator.setToRbegin(accessor.get(containerPtr, index));
-            childIterator -= childJumps;
+            while(childIterator.isBeforeFirst() && not isBeforeFirst())
+            {
+                childIterator.setToRbegin(accessor.get(containerPtr, index));
+                childIterator -= childJumps;
+            }
         }
         // we only need to return something, if we are at the end
         uint const condition = (result > 0u);
@@ -558,9 +559,12 @@ public:
             if(remaining == 0u)
                 break;
             --remaining;
-            navigator.previous(containerPtr, index, 1u);
-            if(not isBeforeFirst())
-                childIterator.setToRbegin(accessor.get(containerPtr, index));
+            while(childIterator.isBeforeFirst() && not isBeforeFirst())
+            {
+                navigator.previous(containerPtr, index, 1u);
+                if(not isBeforeFirst())
+                    childIterator.setToRbegin(accessor.get(containerPtr, index));
+            }
         }
         return remaining;
     }
@@ -573,6 +577,13 @@ public:
         if(not isBeforeFirst() and not isAfterLast())
         {
             childIterator.setToBegin((accessor.get(containerPtr, index)));
+            while(childIterator.isAfterLast() and not isAfterLast())
+            {
+                ++(*this);
+                if(not isAfterLast())
+                    childIterator.setToBegin((accessor.get(containerPtr, index)));
+            }
+                
         }
     }
 
@@ -634,6 +645,12 @@ public:
         if(not isBeforeFirst() && not isAfterLast())
         {
             childIterator.setToRbegin((accessor.get(containerPtr, index)));
+            while(childIterator.isBeforeFirst() and not isBeforeFirst())
+            {
+                --(*this);
+                if(not isBeforeFirst())
+                    childIterator.setToRbegin((accessor.get(containerPtr, index)));
+            }
         }
     }
     
@@ -1006,6 +1023,7 @@ public:
     -> 
     ComponentReference
     {
+        
         return (accessor.get(containerPtr, index));
     }
     

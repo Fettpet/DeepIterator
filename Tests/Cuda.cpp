@@ -1,5 +1,4 @@
-int main(){return 0;} 
-#if 0
+
 /**
  * @author Sebastian Hahn < t.hahn@hzdr.de >
  * @brief Within this file we test the cuda implementation of the DeepIterator. 
@@ -93,32 +92,32 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
         hzdr::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
-                        
-
-    auto view = hzdr::makeView(supercellContainer, concept);
-
-    for(auto it=view.begin(); it!=view.end(); ++it)
-    {
-        auto conceptParticle = hzdr::makeIteratorConcept(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
-                Offset(0u),
-                Jumpsize(1u)),
-            hzdr::makeIteratorConcept(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
-                    Offset(0u),
-                    Jumpsize(1u))));
-        auto viewParticle = hzdr::makeView(*it, conceptParticle);
-        auto itParticle = viewParticle.begin();
-        auto value = (*itParticle).data[0u];
-        BOOST_TEST((value > 0));
-        for(; itParticle != viewParticle.end(); ++itParticle)
-        {
-            BOOST_TEST((*itParticle).data[1u] == value);
-        }
-    }
+    std::cout << supercellContainer[2] << std::endl;
+//                         
+// 
+//     auto view = hzdr::makeView(supercellContainer, concept);
+// 
+//     for(auto it=view.begin(); it!=view.end(); ++it)
+//     {
+//         auto conceptParticle = hzdr::makeIteratorConcept(
+//             hzdr::makeAccessor(),
+//             hzdr::makeNavigator(
+//                 Offset(0u),
+//                 Jumpsize(1u)),
+//             hzdr::makeIteratorConcept(
+//                 hzdr::makeAccessor(),
+//                 hzdr::makeNavigator(
+//                     Offset(0u),
+//                     Jumpsize(1u))));
+//         auto viewParticle = hzdr::makeView(*it, conceptParticle);
+//         auto itParticle = viewParticle.begin();
+//         auto value = (*itParticle).data[0u];
+//         BOOST_TEST((value > 0));
+//         for(; itParticle != viewParticle.end(); ++itParticle)
+//         {
+//             BOOST_TEST((*itParticle).data[1u] == value);
+//         }
+//     }
     
 }
 
-#endif

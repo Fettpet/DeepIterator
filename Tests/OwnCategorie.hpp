@@ -1,48 +1,56 @@
-#pragma once
-#include "Traits/IsBidirectional.hpp"
-#include "Traits/IsRandomAccessable.hpp"
-#include "Traits/Accessor/Ahead.hpp"
-#include "Traits/Accessor/Behind.hpp"
-#include "Traits/Accessor/Equal.hpp"
-#include "Traits/Accessor/Get.hpp"
-#include "Traits/Navigator/AfterLastElement.hpp"
-#include "Traits/Navigator/BeforeFirstElement.hpp"
-#include "Traits/Navigator/LastElement.hpp"
-#include "Traits/Navigator/NextElement.hpp"
-#include "Traits/Navigator/PreviousElement.hpp"
-#include "Traits/Navigator/FirstElement.hpp"
+#include <map>
+/**
+ * @brief We use this test to give you an advice how you can create an own 
+ * categorie. We like to use the map out of the std library as a categorie. The 
+ * namespacing is like the namespacing in the iterator package. The first thing 
+ * you need to do, give the categorie a name. 
+ */
 
-namespace hzdr
+namespace hzdr 
 {
 namespace container
 {
 namespace categorie
 {
-struct ArrayLike;
-
-
-
+// We name our new categorie MapLike.
+struct MapLike;
 } //namespace container
 
 } // namespace Categorie
 
-// implementation of the traits
-namespace traits
-{
-template<typename TContainer>
-struct IsBidirectional<
-    TContainer, 
-    hzdr::container::categorie::ArrayLike>
-{
-    static const bool value = true;
-};    
+/**
+ * The next thing you need to do, specify the needed traits for accessor and 
+ * navigator and the other needed:
+ * 1. IndexType,
+ * 2. RangeType,
+ * Four for the accessor Behaviour
+ * 3. get
+ * 4. equal
+ * 5. ahead
+ * 6. behind
+ * Six for the navigator Behaviour
+ * 7. firstElement
+ * 8. nextElement
+ * 9. afterLastElement
+ * 10. lastElement 
+ * 11. previousElement
+ * 12. beforeFIrstElement
+ * We use the std iterator to iterate over the data struc
+ */
 
-template<typename TContainer>
-struct IsRandomAccessable<
-    TContainer, 
-    hzdr::container::categorie::ArrayLike>
+template<
+    typename Key, 
+    typename T>
+struct IndexType<std::map<key, T> > 
 {
-    static const bool value = true;
+    typedef std::map<key,T>::iterator type; 
+};
+
+template<
+    typename T>
+struct RangeType<boost::container::vector<T>, void> 
+{
+    typedef int_fast32_t type; 
 };
 
 namespace accessor 
@@ -52,16 +60,18 @@ namespace accessor
  * \see Get.hpp
  */
 template<
-    typename TContainer,
     typename TComponent,
+    typename TCategorie,
     typename TIndex>
 struct Get<
-    TContainer, 
+    boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    TCategorie
     >
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     HDINLINE
     TComponent&
     operator() (TContainer* con, TIndex const & idx)
@@ -75,16 +85,17 @@ struct Get<
  * @brief check whether to iterators are at the same position. \see Equal.hpp
  */
 template<
-    typename TContainer,
     typename TComponent,
+    typename TCategorie,
     typename TIndex>
 struct Equal<
-    TContainer, 
+    boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    TCategorie
     >
 {
+    typedef boost::container::vector<TComponent> TContainer;
     HDINLINE
     bool
     operator() (
@@ -103,15 +114,18 @@ struct Equal<
  * \see Ahead.hpp
  */
 template<
-    typename TContainer,
     typename TComponent,
+    typename TCategorie,
     typename TIndex>
 struct Ahead<
-    TContainer, 
+    boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
+    
     HDINLINE
     bool
     operator() (
@@ -129,33 +143,34 @@ struct Ahead<
  * @brief check whether the first iterator is behind the first one. 
  */
 template<
-    typename TContainer,
     typename TComponent,
+    typename TCategorie,
     typename TIndex>
 struct Behind<
-    TContainer, 
+    boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    TCategorie
     >
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
+    
     HDINLINE
     bool
     operator() (
-        TContainer * const, 
+        TContainer * const con1, 
         TIndex const & idx1, 
-        TContainer *, 
+        TContainer * const con2, 
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
-        return idx1 < idx2;
+        return con1 == con2 && idx1 < idx2 ;
     }
 };
     
 } // namespace accessor
-    
-    
-    
+
     
 namespace navigator
 {
@@ -164,13 +179,16 @@ namespace navigator
  * details \see FirstElement.hpp
  */
 template<
-    typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex,
+    typename TCategorie>
 struct FirstElement<
-    TContainer, 
+    boost::container::vector<TComponent>, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     HDINLINE
     void
     operator() (TContainer*, TIndex& idx)
@@ -184,15 +202,18 @@ struct FirstElement<
  * NExtElement.hpp
  */
 template<
-    typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TRange>
+    typename TRange,
+    typename TCategorie>
 struct NextElement<
-    TContainer,
+    boost::container::vector<TComponent>,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     template<
         typename TContainerSize>
     HDINLINE
@@ -213,13 +234,16 @@ struct NextElement<
  * informations \see AfterLastElement.hpp
  */
 template<
-    typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex,
+    typename TCategorie>
 struct AfterLastElement<
-    TContainer, 
+    boost::container::vector<TComponent>, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     template<typename TSizeFunction>
     HDINLINE
     bool
@@ -245,13 +269,16 @@ struct AfterLastElement<
  * \see LastElement.hpp
  */
 template<
-    typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex,
+    typename TCategorie>
 struct LastElement<
-    TContainer,
+    boost::container::vector<TComponent>,
     TIndex,
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     template<typename TSizeFunction>
     HDINLINE
     void
@@ -268,15 +295,18 @@ struct LastElement<
  * structure. For futher details \see PreviousElement.hpp
  */
 template<
-    typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TRange>
+    typename TRange,
+    typename TCategorie>
 struct PreviousElement<
-    TContainer,
+    boost::container::vector<TComponent>,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     template<typename T>
     HDINLINE
     int
@@ -289,7 +319,7 @@ struct PreviousElement<
                )
     {
         idx -= jumpsize;
-        // only return if idx < offset
+        
         return (static_cast<int>(idx) < static_cast<int>(offset)) * (static_cast<int>(offset) - static_cast<int>(idx));
     }
 };
@@ -299,15 +329,18 @@ struct PreviousElement<
  * before the first one. \see BeforeFirstElement.hpp
  */
 template<
-    typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TOffset>
+    typename TOffset,
+    typename TCategorie>
 struct BeforeFirstElement<
-    TContainer, 
+    boost::container::vector<TComponent>, 
     TIndex,
     TOffset,
-    hzdr::container::categorie::ArrayLike>
+    TCategorie>
 {
+    typedef boost::container::vector<TComponent> TContainer;
+    
     template<typename TSizeFunction>
     HDINLINE
     bool
@@ -327,8 +360,4 @@ struct BeforeFirstElement<
     }
 };
 
-    
-}// namespace navigator
-} // namespace traits
-    
-}// namespace hzdr
+} // namespace hzdr
