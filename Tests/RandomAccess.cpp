@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     Frame test;
     
     
-    auto  childConceptJump1 = hzdr::makeIteratorConcept(
+    auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                              hzdr::makeAccessor(),
                              hzdr::makeNavigator(
                                  Offset(0),
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     
 
     auto view = makeView(test,
-                         childConceptJump1);
+                         childPrescriptionJump1);
 
     int_fast32_t sum = 0; 
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     BOOST_TEST(not (it1 > it2 + 8));
 
     
-    auto  childConceptJump3 = hzdr::makeIteratorConcept(
+    auto  childPrescriptionJump3 = hzdr::makeIteratorPrescription(
                              hzdr::makeAccessor(),
                              hzdr::makeNavigator(
                                  Offset(0),
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     // check other jumpsizes
     auto viewJump3 = makeView(
         test,
-        childConceptJump3);
+        childPrescriptionJump3);
     
     BOOST_TEST((view.begin() + 3 == viewJump3.begin() + 1));
     BOOST_TEST((view.begin() + 3 == viewJump3.begin() + 1));
@@ -180,12 +180,12 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
             for(auto  n : ns)
             {
                 
-                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jump)),
-                                            hzdr::makeIteratorConcept(
+                                            hzdr::makeIteratorPrescription(
                                                 hzdr::makeAccessor(),
                                                 hzdr::makeNavigator(
                                                     Offset(0),
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
                         nbParticles++;
                     }
                 
-                auto view = makeView(supercell,childConceptJump1);
+                auto view = makeView(supercell,childPrescriptionJump1);
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {
@@ -230,12 +230,12 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
         for(auto off : offsets)
             for(auto  n : ns)
             {
-                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)),
-                                            hzdr::makeIteratorConcept(
+                                            hzdr::makeIteratorPrescription(
                                                 hzdr::makeAccessor(),
                                                 hzdr::makeNavigator(
                                                     Offset(off),
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
                 }
                 nbParticles = (nbParticles + n - 1u) / n;
                 
-                auto view = makeView(supercell,childConceptJump1);
+                auto view = makeView(supercell,childPrescriptionJump1);
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {
@@ -299,17 +299,17 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
             for(auto  n : ns)
             {
                 std::cout << "jump " << jump << " off " << off << " n " << n << std::endl;
-                auto  childConceptJump1 = hzdr::makeIteratorConcept(
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jump)),
-                                            hzdr::makeIteratorConcept(
+                                            hzdr::makeIteratorPrescription(
                                                 hzdr::makeAccessor(),
                                                 hzdr::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1)),
-                                            hzdr::makeIteratorConcept(
+                                            hzdr::makeIteratorPrescription(
                                                 hzdr::makeAccessor(),
                                                 hzdr::makeNavigator(
                                                     Offset(0),
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
                         nbParticles++;
                     }
                 
-                auto view = makeView(supercell,childConceptJump1);
+                auto view = makeView(supercell,childPrescriptionJump1);
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {

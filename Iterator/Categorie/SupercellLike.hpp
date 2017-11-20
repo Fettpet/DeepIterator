@@ -23,7 +23,7 @@ struct IsBidirectional<
     SFIANE>
 {
     static const bool value = true;
-};    
+} ;    
 
 template<typename SFIANE, typename TFrame>
 struct IsRandomAccessable<
@@ -31,7 +31,7 @@ struct IsRandomAccessable<
     SFIANE>
 {
     static const bool value = true;
-};
+} ;
 namespace accessor
 {
 
@@ -57,7 +57,7 @@ struct Get<
     {
         return *idx;
     }
-};    
+} ;    
 
 /**
  * @brief check if both iterators are at the same element. \see Equal.hpp
@@ -81,7 +81,7 @@ struct Equal<
     {
         return con1 == con2 && idx1 == idx2;
     }
-};
+} ;
 
  /**
  * @brief Check if the iterator one is ahead the second one. \see Ahead.hpp
@@ -114,7 +114,7 @@ struct Ahead<
         }
         return false;
     }
-};
+} ;
 
 
 
@@ -147,7 +147,7 @@ struct Behind<
         }
         return false;
     }
-};
+} ;
 
 } // namespace accessor
     
@@ -174,7 +174,7 @@ struct FirstElement<
     {
         idx = container->firstFrame;
     }
-};
+} ;
 /**
  * @brief Implementation to get the next element. For futher details \see 
  * NExtElement.hpp
@@ -210,7 +210,7 @@ struct NextElement<
         }
         return range - i;
     }
-};
+} ;
 /**
  * @brief Implementation to check whether the iterator is after the last element.
  * \see AfterLastElement.hpp
@@ -242,7 +242,7 @@ struct AfterLastElement<
     {
         idx = nullptr;
     }
-};
+} ;
 
 /**
  * @brief Set the iterator to the last element. \see LastElement.hpp
@@ -270,7 +270,7 @@ struct LastElement<
 
 
     }
-};
+} ;
 
 /**
  * @brief Implementation to get the next element. For futher details \see 
@@ -310,7 +310,7 @@ struct PreviousElement<
 
         return jumpsize - i;
     }
-};
+} ;
 
 /**
  * @brief Implementation to check whether the iterator is before the fist 
@@ -354,7 +354,7 @@ struct BeforeFirstElement<
     {
         idx = nullptr;
     }
-};
+} ;
 }
     
 } // namespace traits

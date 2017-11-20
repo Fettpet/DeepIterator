@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     
     
     
-    auto && concept = hzdr::makeIteratorConcept(
+    auto && concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0),
@@ -501,17 +501,17 @@ BOOST_AUTO_TEST_CASE(ComplexTest)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto && concept = hzdr::makeIteratorConcept(
+    auto && concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
             Jumpsize(1u)),
-        hzdr::makeIteratorConcept(
+        hzdr::makeIteratorPrescription(
             hzdr::makeAccessor(),
             hzdr::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u)),
-            hzdr::makeIteratorConcept(
+            hzdr::makeIteratorPrescription(
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
                     Offset(0u),

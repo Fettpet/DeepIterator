@@ -39,12 +39,12 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto concept = hzdr::makeIteratorConcept(
+    auto concept = hzdr::makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator(
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorConcept(
+                            hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0u),
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
     // all first elements need to have the same number of elements
     SupercellContainer supercellContainer(*super, nbSupercells);  
     
-    auto concept = hzdr::makeIteratorConcept(
+    auto concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
 // 
 //     for(auto it=view.begin(); it!=view.end(); ++it)
 //     {
-//         auto conceptParticle = hzdr::makeIteratorConcept(
+//         auto conceptParticle = hzdr::makeIteratorPrescription(
 //             hzdr::makeAccessor(),
 //             hzdr::makeNavigator(
 //                 Offset(0u),
 //                 Jumpsize(1u)),
-//             hzdr::makeIteratorConcept(
+//             hzdr::makeIteratorPrescription(
 //                 hzdr::makeAccessor(),
 //                 hzdr::makeNavigator(
 //                     Offset(0u),

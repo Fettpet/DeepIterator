@@ -33,12 +33,12 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
  */
     auto && view = hzdr::makeView(
                         *(supercell.firstFrame), 
-                        hzdr::makeIteratorConcept(
+                        hzdr::makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator( 
                                 Offset(0),
                                 Jumpsize(1)),
-                            hzdr::makeIteratorConcept(
+                            hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0),
@@ -98,12 +98,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     
     auto && view = hzdr::makeView( 
                                supercell,
-                               hzdr::makeIteratorConcept(
+                               hzdr::makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
                                         Offset(0),
                                         Jumpsize(1)),
-                                    hzdr::makeIteratorConcept(
+                                    hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(0),
@@ -165,17 +165,17 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
     
     auto && view = hzdr::makeView(
         supercell, 
-        makeIteratorConcept(
+        makeIteratorPrescription(
             hzdr::makeAccessor(),
             hzdr::makeNavigator(
                 Offset(0),
                 Jumpsize(1)),
-            hzdr::makeIteratorConcept(
+            hzdr::makeIteratorPrescription(
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
                     Offset(0),
                     Jumpsize(1)),
-                hzdr::makeIteratorConcept(
+                hzdr::makeIteratorPrescription(
                     hzdr::makeAccessor(),
                     hzdr::makeNavigator(
                         Offset(0),

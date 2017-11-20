@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Frames)
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     std::array<Particle, 10u> buffer;
     // 0. We create a concept
-    auto && concept = hzdr::makeIteratorConcept(
+    auto && concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             std::cout << "Offset " << off << " Jumpsize " << jump << std::endl;
             Frame testFrame;
             // 0. We create a concept
-            auto && concept = hzdr::makeIteratorConcept(
+            auto && concept = hzdr::makeIteratorPrescription(
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
                     Offset(off),
@@ -178,12 +178,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
     
-    auto && concept = makeIteratorConcept(
+    auto && concept = makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator(
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorConcept(
+                            hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0u),
@@ -228,29 +228,30 @@ BOOST_AUTO_TEST_CASE(Borders)
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
-    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u});
+    std::vector<uint_fast32_t> offsetsInner({0u, 1u});
     std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
     
-    for(jump: jumpsizesInner)
-        for(off: offsetsInner)
+    for(auto jump: jumpsizesInner)
+        for(auto off: offsetsInner)
         {
+            std::cout << "(" << jump << ", " << off << ")" << std::endl;
             auto && view = hzdr::makeView(
                         supercell, 
-                        hzdr::makeIteratorConcept(
+                        hzdr::makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator( 
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorConcept(
+                            hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(3u),
                                     Jumpsize(1u)),
-                                hzdr::makeIteratorConcept(
+                                hzdr::makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
-                                        Offset(0u),
-                                        Jumpsize(2u))))));
+                                        Offset(off),
+                                        Jumpsize(jump))))));
 
             auto sumForward = 0u;
             for(auto && it = view.begin(); it != view.end(); ++it)
@@ -261,7 +262,6 @@ BOOST_AUTO_TEST_CASE(Borders)
             auto sumBackward = 0u;
             for(auto && it = view.rbegin(); it != view.rend(); --it)
             {
-                std::cout << *it << std::endl;
                 sumBackward += *it;
             }
             BOOST_TEST(sumForward == sumBackward);
@@ -286,12 +286,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
     for(auto off: offsetsInner)
         for(auto jump: jumpsizesInner)
         {
-            auto && concept = makeIteratorConcept(
+            auto && concept = makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
                                         Offset(off),
                                         Jumpsize(jump)),
-                                    hzdr::makeIteratorConcept(
+                                    hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(0u),
@@ -334,12 +334,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
              * Second test: We test the inner jumpsize and offset
              * 
              * *****************/
-            auto && conceptInner = makeIteratorConcept(
+            auto && conceptInner = makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
                                         Offset(0u),
                                         Jumpsize(1u)),
-                                    hzdr::makeIteratorConcept(
+                                    hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(off),

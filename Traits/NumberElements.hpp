@@ -9,7 +9,6 @@
 
 #pragma once
 #include <limits>
-#include <PIC/Frame.hpp>
 #include <PIC/Particle.hpp>
 #include <PIC/SupercellContainer.hpp>
 
@@ -22,8 +21,12 @@ struct NumberElements;
 
 template<typename TFrame>
 struct NumberElements<Supercell<TFrame> >
-{
+{  
     typedef Supercell<TFrame> Container;
+    
+    NumberElements() = default;
+    NumberElements(NumberElements const &) = default;
+    NumberElements(NumberElements &&) = default;
     
     HDINLINE
     int_fast32_t 
@@ -40,7 +43,7 @@ struct NumberElements<Supercell<TFrame> >
         return result;
     }
     
-}; // NumberElements
+} ; // NumberElements
   
 template<typename Supercell>
 struct NumberElements<hzdr::SupercellContainer<Supercell> >
@@ -54,24 +57,8 @@ struct NumberElements<hzdr::SupercellContainer<Supercell> >
     {
         return element->getNbSupercells();
     }
-};
-
-
-template<typename TParticle, int_fast32_t nb>
-struct NumberElements<hzdr::Frame<TParticle, nb> >
-{
-    typedef hzdr::Frame<TParticle, nb> Frame;
     
-
-    
-    HDINLINE
-    int_fast32_t 
-    operator()( Frame const * const f)
-    const
-    {
-        return f->nbParticlesInFrame;    
-    }
-}; // struct NumberElements
+} ;
 
 template<typename TPos, int_fast32_t nb>
 struct NumberElements<hzdr::Particle<TPos, nb> >
@@ -86,7 +73,8 @@ struct NumberElements<hzdr::Particle<TPos, nb> >
     {
         return nb;    
     }
-}; // struct NumberElements
+    
+} ; // struct NumberElements
 
     
 } // namespace traits

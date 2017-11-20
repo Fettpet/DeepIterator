@@ -35,7 +35,7 @@ struct IsBidirectional<
     hzdr::container::categorie::ArrayLike>
 {
     static const bool value = true;
-};    
+} ;    
 
 template<typename TContainer>
 struct IsRandomAccessable<
@@ -43,7 +43,7 @@ struct IsRandomAccessable<
     hzdr::container::categorie::ArrayLike>
 {
     static const bool value = true;
-};
+} ;
 
 namespace accessor 
 {
@@ -69,7 +69,8 @@ struct Get<
         // is not implemented. Specify the trait
         return (*con)[idx];
     }
-};
+    
+} ;
 
 /**
  * @brief check whether to iterators are at the same position. \see Equal.hpp
@@ -96,7 +97,8 @@ struct Equal<
         // is not implemented. Specify the trait
         return con1 == con2 && idx1 == idx2;
     }
-};
+    
+} ;
 
 /**
  * @brief check whether the first iterator is ahead the second one. 
@@ -123,7 +125,8 @@ struct Ahead<
         // is not implemented. Specify the trait
         return idx1 > idx2 && con1 == con2;
     }
-};
+    
+} ;
 
 /**
  * @brief check whether the first iterator is behind the first one. 
@@ -150,7 +153,8 @@ struct Behind<
         // is not implemented. Specify the trait
         return idx1 < idx2;
     }
-};
+    
+} ;
     
 } // namespace accessor
     
@@ -177,7 +181,8 @@ struct FirstElement<
     {
         idx = static_cast<TIndex>(0);
     }
-};
+    
+} ;
 
 /**
  * @brief Implementation to get the next element. For futher details \see 
@@ -206,7 +211,8 @@ struct NextElement<
         idx += range;
         return (idx >= size(container)) * (idx - (size(container)-1) );
     }
-};
+    
+} ;
 
 /**
  * @brief Implementation to check whether the end is reached. For further 
@@ -238,7 +244,7 @@ struct AfterLastElement<
         idx = size(conPtr);
     }
     
-};
+} ;
 
 /**
  * @brief Implementation of the array like last element trait. For further details
@@ -261,7 +267,8 @@ struct LastElement<
     {
         index = size(conPtr) - 1;
     }
-};
+    
+} ;
 
 /**
  * @brief The implementation to get the last element in a array like data
@@ -292,7 +299,8 @@ struct PreviousElement<
         // only return if idx < offset
         return (static_cast<int>(idx) < static_cast<int>(offset)) * (static_cast<int>(offset) - static_cast<int>(idx));
     }
-};
+    
+} ;
 
 /**
  * @brief Implmentation to get check whether the iterator is on the element 
@@ -325,7 +333,8 @@ struct BeforeFirstElement<
     {
         idx = static_cast<TIndex>(-1);
     }
-};
+    
+} ;
 
     
 }// namespace navigator

@@ -1,6 +1,6 @@
 #pragma once
 #include "Definitions/forward.hpp"
-
+#include "Iterator/Navigator.hpp"
 /**
  * @author Sebastian Hahn t.hahn <at> hzdr.de
  * @brief A concept consists of an accessor, a navigator and a child. A concept
@@ -11,24 +11,33 @@
 
 namespace hzdr 
 {
-struct NoChild;
+
 namespace details 
 {
 template<
     typename TAccessor,
     typename TNavigator,
     typename TChild>
-struct IteratorConcept
+struct IteratorPrescription
 {
     typedef TNavigator NavigatorType;
     typedef TAccessor AccessorType;
     typedef TChild ChildType;
     
+    HDINLINE 
+    IteratorPrescription() = delete;
+    
+    HDINLINE 
+    IteratorPrescription(IteratorPrescription const &) = default;
+    
+    HDINLINE 
+    IteratorPrescription(IteratorPrescription &&) = default;
+    
     template<
         typename TNavigator_,
         typename TAccessor_>
     HDINLINE
-    IteratorConcept(TAccessor_ && acc,
+    IteratorPrescription(TAccessor_ && acc,
                     TNavigator_ && navi):
         child(hzdr::NoChild()),
         navigator(hzdr::forward<TNavigator_>(navi)),
@@ -40,7 +49,7 @@ struct IteratorConcept
         typename TAccessor_,
         typename TChild_>
     HDINLINE
-    IteratorConcept(TAccessor_ && acc,
+    IteratorPrescription(TAccessor_ && acc,
                     TNavigator_ && navi,
                     TChild_ && child
                    ):
@@ -52,15 +61,15 @@ struct IteratorConcept
     ChildType child;
     NavigatorType navigator;
     AccessorType accessor;
-    
-};
+    const bool valgrind_debug = true;
+} ;
 
-template<typename Concept>
-struct ConceptTypes
+template<typename Prescription>
+struct PrescriptionTypes
 {
-    typedef typename Concept::AccessorType AccessorType;
-    typedef typename Concept::NavigatorType NavigatorType;
-    typedef typename Concept::AccessorType ChildType;
+    typedef typename Prescription::AccessorType AccessorType;
+    typedef typename Prescription::NavigatorType NavigatorType;
+    typedef typename Prescription::AccessorType ChildType;
 };
 
 } // namespace details
@@ -77,15 +86,15 @@ template<
     typename TNavigator>
 HDINLINE
 auto
-makeIteratorConcept(TAccessor&& accessor,
+makeIteratorPrescription(TAccessor&& accessor,
              TNavigator&& navigator)
--> hzdr::details::IteratorConcept<
+-> hzdr::details::IteratorPrescription<
     typename std::decay<TAccessor>::type,
     typename std::decay<TNavigator>::type,
     hzdr::NoChild>
 {
     
-    typedef hzdr::details::IteratorConcept< 
+    typedef hzdr::details::IteratorPrescription< 
         typename std::decay<TAccessor>::type,
         typename std::decay<TNavigator>::type,
         hzdr::NoChild> Iterator;
@@ -107,17 +116,17 @@ template<
     typename TChild>
 HDINLINE
 auto
-makeIteratorConcept(TAccessor && accessor,
+makeIteratorPrescription(TAccessor && accessor,
              TNavigator && navigator,
              TChild && child
             )
--> hzdr::details::IteratorConcept<
+-> hzdr::details::IteratorPrescription<
     typename std::decay<TAccessor>::type,
     typename std::decay<TNavigator>::type,
     typename std::decay<TChild>::type>
 {
     
-    typedef hzdr::details::IteratorConcept< 
+    typedef hzdr::details::IteratorPrescription< 
         typename std::decay<TAccessor>::type,
         typename std::decay<TNavigator>::type,
         typename std::decay<TChild>::type> Iterator;
@@ -129,3 +138,15 @@ makeIteratorConcept(TAccessor && accessor,
 }
 
 } // namespace hzdr
+
+template<
+    typename TAccessor,
+    typename TNavigator,
+    typename TChild
+>
+std::ostream& operator<<( std::ostream& out, hzdr::details::IteratorPrescription<TAccessor, TNavigator, TChild>  const & prescription) 
+{
+//      out << "Navigator: " << prescription.navigator << std::endl;
+//     out << "Child: " << prescription.child << std::endl;
+    return out;
+}

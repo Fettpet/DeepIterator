@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     // over each element                          
     auto view = hzdr::makeView(particle1, 
-                               hzdr::makeIteratorConcept(   
+                               hzdr::makeIteratorPrescription(   
                                     hzdr::makeAccessor(), 
                                     hzdr::makeNavigator(
                                         Offset(0u),
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
 
     // the 2 is the number of elements in Last Frame
     auto && view = hzdr::makeView(*(supercell.firstFrame), 
-                                  hzdr::makeIteratorConcept(
+                                  hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(0u),
@@ -125,7 +125,7 @@ We implement a own collectivity class
     }
     
     auto && viewJump3 = hzdr::makeView(*(supercell.firstFrame), 
-                                hzdr::makeIteratorConcept(
+                                hzdr::makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
                                         Offset(0u),
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     
     auto && view = hzdr::makeView(
         supercell,
-        hzdr::makeIteratorConcept(
+        hzdr::makeIteratorPrescription(
             hzdr::makeAccessor(),
             hzdr::makeNavigator(
                 Offset(0u),
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     
     auto && viewJump2 = hzdr::makeView(
         supercell,
-        hzdr::makeIteratorConcept(
+        hzdr::makeIteratorPrescription(
             hzdr::makeAccessor(),
             hzdr::makeNavigator(
                 Offset(0u),

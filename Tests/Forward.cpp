@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(Frames)
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     std::array<Particle, 10u> buffer;
     // 0. We create a concept
-    auto && concept = hzdr::makeIteratorConcept(
+    auto && concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
@@ -89,12 +89,12 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     auto && view = hzdr::makeView(
                         supercell, 
-                        makeIteratorConcept(
+                        makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator(
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorConcept(
+                            hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0u),

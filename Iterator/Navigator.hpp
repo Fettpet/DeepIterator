@@ -65,7 +65,7 @@
 #include "Traits/Navigator/PreviousElement.hpp"
 #include "Traits/Navigator/FirstElement.hpp"
 #include "Iterator/Categorie.hpp"
-
+#include <cassert>
 
 namespace hzdr 
 {
@@ -149,7 +149,14 @@ public:
             OffsetType && offset, 
             JumpsizeType && jumpsize):
         offset(hzdr::forward<OffsetType>(offset)),
-        jumpsize(hzdr::forward<JumpsizeType>(jumpsize))
+        jumpsize(hzdr::forward<JumpsizeType>(jumpsize)),
+        containerSize(),
+        firstElement(),
+        nextElement(),
+        afterLastElement(),
+        lastElement(),
+        previousElement(),
+        beforeFirstElement()
     {}
     
     
@@ -168,16 +175,16 @@ public:
         RangeType distance)
     {
         // test if the iterator is before the first element
-        if(beforeFirstElement.test(containerPtr, index, offset(), containerSize))
-        {
-            firstElement(containerPtr, index);
-            nextElement(
-                containerPtr, 
-                index,  
-                static_cast<RangeType>(offset()),
-                containerSize);
-            --distance;
-        }
+//         if(beforeFirstElement.test(containerPtr, index, offset(), containerSize))
+//         {
+//             firstElement(containerPtr, index);
+//             nextElement(
+//                 containerPtr, 
+//                 index,  
+//                 static_cast<RangeType>(offset()),
+//                 containerSize);
+//             --distance;
+//         }
         // We jump over distance * jumpsize elements
         auto remainingJumpsize = nextElement(
             containerPtr, 
@@ -206,26 +213,6 @@ public:
         RangeType distance)
     {
 
-        // test if the iterator is after the last element
-        if(afterLastElement.test(containerPtr, index, containerSize))
-        {
-            // set the index to the last element
-            auto nbElementsVar = nbElements(containerPtr);
-            // -1 since we dont like to jump outside
-            auto nbJumps = (nbElementsVar - offset() - 1) / jumpsize();
-            auto lastPosition = nbJumps * jumpsize() + offset();
-            // -1 since we need the last position
-            auto neededJumps = (nbElementsVar - 1) - lastPosition;
-
-            lastElement(containerPtr, index, containerSize);
-            previousElement(
-                containerPtr, 
-                index,
-                offset(),
-                static_cast<RangeType>(neededJumps),
-                containerSize);
-            --distance;
-        }
         // We jump over distance * jumpsize elements
         auto remainingJumpsize = previousElement(
             containerPtr, 
@@ -241,9 +228,7 @@ public:
     
     /**
      * @brief set the iterator to the first element
-     * 
      */
-
     HDINLINE 
     void 
     begin(
@@ -317,7 +302,6 @@ public:
         IndexType const & index)
     const
     {
-//         std::cout << "IsAfterLast: " << std::boolalpha <<  afterLastElement.test(containerPtr, index, containerSize) << "index " << index << " container " << containerSize(containerPtr) << std::endl;
         return afterLastElement.test(containerPtr, index, containerSize);
     }
     
@@ -345,7 +329,17 @@ public:
     size(ContainerPtr containerPtr)
     const 
     {
+        int nbElem = nbElements(containerPtr);
+        int off = offset();
+        assert(nbElem >= off /* The offset need to be smaller or equal than the container size */);
         return (nbElements(containerPtr) - offset() + jumpsize() - static_cast<RangeType>(1)) / jumpsize();
+    }
+    
+    HDINLINE
+    bool 
+    debug_Test()
+    {
+        return true;
     }
     
 //variables
@@ -359,7 +353,7 @@ protected:
     LastElement lastElement;
     PreviousElement previousElement;
     BeforeFirstElement beforeFirstElement;
-};
+} ;
 
 
 /**
@@ -426,7 +420,7 @@ struct Navigator<
     
     OffsetType offset;
     JumpsizeType jumpsize;
-};
+} ;
 
 
 /**
@@ -478,10 +472,10 @@ makeNavigator(
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         false> ResultType;
-    
-    return ResultType(
+    auto && result = ResultType(
         hzdr::forward<TOffset>(offset),
         hzdr::forward<TJumpsize>(jumpsize));
+    return result;
 }
 
 
@@ -565,7 +559,11 @@ hzdr::Navigator<
         TPreviousElement,
         TBeforeFirstElement,
         isBidirectional> ResultType;
-    return ResultType(hzdr::forward<TOffset>(navi.offset), hzdr::forward<TJumpsize>(navi.jumpsize));
+        
+
+    auto && result = ResultType(hzdr::forward<TOffset>(navi.offset), hzdr::forward<TJumpsize>(navi.jumpsize));
+
+    return result;
 }
 
 
@@ -635,11 +633,48 @@ makeNavigator(
         TPreviousElement,
         TBeforeFirstElement,
         isBidirectional> ResultType;
-    
-    return ResultType(
+    auto && result = ResultType(
         hzdr::forward<TOffset>(offset),
         hzdr::forward<TJumpsize>(jumpsize));
+    
+    return result;
 }
 
 }// namespace hzdr
 
+// template<
+//         typename TContainerNoRef,
+//         typename TComponent,
+//         typename TOffset,
+//         typename TJumpsize,
+//         typename TIndex,
+//         typename TContainerSize,
+//         typename TRange,
+//         typename TFirstElement,
+//         typename TNextElement,
+//         typename TAfterLastElement,
+//         typename TLastElement,
+//         typename TPreviousElement,
+//         typename TBeforeFirstElement,
+//         bool isBidirectional
+// >
+// std::ostream& operator<<(std::ostream& out, hzdr::Navigator<
+//             TContainerNoRef,
+//             TComponent,
+//             TOffset,
+//             TJumpsize,
+//             TIndex,
+//             TContainerSize,
+//             TRange,
+//             TFirstElement,
+//             TNextElement,
+//             TAfterLastElement,
+//             TLastElement,
+//             TPreviousElement,
+//             TBeforeFirstElement,
+//             isBidirectional> const & navi)
+// {
+//     out << navi.offset();
+// //     out << "(" << navi.offset() << ", " << navi.jumpsize() << ")";
+//     return out;
+// }

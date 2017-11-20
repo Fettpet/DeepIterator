@@ -6,6 +6,7 @@
 #pragma once
 #include <array>
 #include <iostream>
+#include "Iterator/Categorie.hpp"
 #include "Iterator/Categorie/ArrayLike.hpp"
 #include "Definitions/hdinline.hpp"
 namespace hzdr 
@@ -63,7 +64,7 @@ struct Particle<TPosition, 1>
     }
     
     TPosition data[1];
-}; // struct Particle<TPosition, 1>
+} ; // struct Particle<TPosition, 1>
 
 
 template<typename TPosition>
@@ -136,7 +137,7 @@ struct Particle<TPosition, 2>
     
     TPosition data[2];
 
-}; // struct Particle<TPosition, 2>
+} ; // struct Particle<TPosition, 2>
 
 // traits
 namespace traits 
@@ -150,7 +151,7 @@ template<
 struct HasConstantSize<Particle<TProperty, maxParticles> >
 {
     static const bool value = true;
-};
+} ;
 
 
 template<
@@ -159,14 +160,14 @@ template<
 struct ComponentType<Particle<TProperty, maxParticles> >
 {
     typedef TProperty type;
-};
+} ;
 
 
 template<typename TProperty, int_fast32_t nb>
 struct ContainerCategory<Particle<TProperty, nb> >
 {
     typedef hzdr::container::categorie::ArrayLike type;
-};
+} ;
 
 } // namespace traits
 

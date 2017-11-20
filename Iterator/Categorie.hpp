@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Traits/Componenttype.hpp"
+#include "Traits/ContainerCategory.hpp"
 #include "Traits/HasConstantSize.hpp"
 #include "Traits/IsBidirectional.hpp"
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/IndexType.hpp"
 #include "Traits/RangeType.hpp"
+#include "Traits/NumberElements.hpp"
 
 #include "Traits/Navigator/AfterLastElement.hpp"
 #include "Traits/Navigator/BeforeFirstElement.hpp"

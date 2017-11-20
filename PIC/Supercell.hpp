@@ -111,7 +111,7 @@ struct Supercell
     TFrame *firstFrame = nullptr;
     TFrame *lastFrame = nullptr;
  //   uint32_t nbParticlesInLastFrame;
-}; // struct Supercell
+} ; // struct Supercell
 
 // traits
 namespace traits 
@@ -121,7 +121,7 @@ template<typename TFrame>
 struct IndexType<hzdr::Supercell<TFrame> >
 {
     typedef TFrame* type; 
-};
+} ;
 
     
 
@@ -131,7 +131,7 @@ template<
 struct HasConstantSize<Supercell<TFrame> >
 {
     static const bool value = false;
-};
+} ;
 
 
 template<
@@ -139,7 +139,7 @@ template<
 struct ComponentType<Supercell<TFrame> >
 {
     typedef TFrame type;
-};
+} ;
 
 } // namespace traits
 

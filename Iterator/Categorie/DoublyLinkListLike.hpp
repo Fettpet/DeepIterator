@@ -35,7 +35,7 @@ struct IsBidirectional<
     hzdr::container::categorie::DoublyLinkListLike>
 {
     static const bool value = true;
-};    
+bool debugging = false;} ;       
 
 template<typename TContainer>
 struct IsRandomAccessable<
@@ -43,7 +43,7 @@ struct IsRandomAccessable<
     hzdr::container::categorie::DoublyLinkListLike>
 {
     static const bool value = true;
-};
+bool debugging = false;} ;   
 
 namespace accessor
 {
@@ -68,7 +68,8 @@ struct Get<
     {
         return *idx;
     }
-};    
+    
+bool debugging = false;} ;       
 
 /**
  * @brief check if both iterators are at the same element. \see Equal.hpp
@@ -90,7 +91,7 @@ struct Equal<
     {
         return con1 == con2 && idx1 == idx2;
     }
-};
+bool debugging = false;} ;   
 
  /**
  * @brief Check if the iterator one is ahead the second one. \see Ahead.hpp
@@ -121,7 +122,7 @@ struct Ahead<
         }
         return false;
     }
-};
+bool debugging = false;} ;   
 
 
 
@@ -152,7 +153,7 @@ struct Behind<
         }
         return false;
     }
-};
+bool debugging = false;} ;   
 
 } // namespace accessor
     
@@ -178,7 +179,7 @@ struct FirstElement<
         idx = container->first;
 
     }
-};
+bool debugging = false;} ;   
 /**
  * @brief Implementation to get the next element. For futher details \see 
  * NExtElement.hpp
@@ -212,7 +213,7 @@ struct NextElement<
         }
         return range - i;
     }
-};
+bool debugging = false;} ;   
 /**
  * @brief Implementation to check whether the iterator is after the last element.
  * \see AfterLastElement.hpp
@@ -242,7 +243,7 @@ struct AfterLastElement<
     {
         idx = nullptr;
     }
-};
+bool debugging = false;} ;   
 
 /**
  * @brief Set the iterator to the last element. \see LastElement.hpp
@@ -266,7 +267,7 @@ struct LastElement<
         index = containerPtr->last;
 
     }
-};
+bool debugging = false;} ;   
 
 /**
  * @brief Implementation to get the next element. For futher details \see 
@@ -301,7 +302,7 @@ struct PreviousElement<
         }
         return range - i;
     }
-};
+bool debugging = false;} ;   
 
 /**
  * @brief Implementation to check whether the iterator is before the fist 
@@ -341,7 +342,7 @@ struct BeforeFirstElement<
     {
         idx = nullptr;
     }
-};
+bool debugging = false;} ;   
 }
     
 } // namespace traits

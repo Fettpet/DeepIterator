@@ -43,7 +43,7 @@
 #include "Traits/Accessor/Behind.hpp"
 #include "Traits/Accessor/Equal.hpp"
 #include "Traits/Accessor/Get.hpp"
-
+#include "Definitions/forward.hpp"
 namespace hzdr
 {
 namespace details
@@ -82,12 +82,23 @@ struct Accessor
     typedef TContainerCategory                                      ContainerCategory;
     typedef TIndex                                                  IndexType;
     
+    HDINLINE Accessor() = default;
+    HDINLINE Accessor(Accessor const &) = default;
+    HDINLINE Accessor(Accessor &&) = default;
+    
     HDINLINE 
     ComponentRef
     get(ContainerPtr containerPtr,
         IndexType & idx)
     {
         return _get(containerPtr, idx);
+    }
+    
+    HDINLINE
+    bool 
+    debug_Test()
+    {
+        return true;
     }
     
     
@@ -129,11 +140,11 @@ struct Accessor
     
     
     
-    TGet _get;
-    TAhead _ahead;
-    TEqual _equal;
-    TBehind _behind;
-};
+     TGet _get;
+     TAhead _ahead;
+     TEqual _equal;
+     TBehind _behind;
+} ;
 
 /**
  * @brief the accessor concept.
@@ -151,10 +162,15 @@ struct Accessor<
 {
     typedef details::UndefinedType ContainerType;
     
-    Accessor() = default;
-    Accessor(Accessor const &) = default;
-    Accessor(Accessor &&) = default;
-};
+    HDINLINE Accessor() = default;
+    HDINLINE Accessor(Accessor const &) = default;
+    HDINLINE Accessor(Accessor &&) = default;
+    
+    void testAcc(){}
+ 
+    // for debugging with valgrind needed
+    const bool value = false;
+} ;
 
 namespace details 
 {
@@ -191,8 +207,8 @@ makeAccessor(TAccessor&&)
         TComponent,
         TIndex,
         TContainerCategory> AccessorType;
-    
-    return AccessorType();
+    auto && accessor = AccessorType();
+    return accessor;
 }
 
 template<
@@ -306,4 +322,16 @@ makeAccessor()
         hzdr::details::UndefinedType>                           ResultType;
     return ResultType();
 }
+
+template<
+    typename TAccessor>
+HDINLINE
+auto
+makeAccessor(TAccessor && accessor)
+->
+decltype(hzdr::forward<TAccessor>(accessor))
+{
+    return hzdr::forward<TAccessor>(accessor);
+}
+
 }// namespace hzdr

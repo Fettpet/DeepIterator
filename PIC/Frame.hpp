@@ -18,6 +18,8 @@
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/IsBidirectional.hpp"
 #include "Traits/HasConstantSize.hpp"
+#include "Traits/NumberElements.hpp"
+
 namespace hzdr
 {
 template<
@@ -118,7 +120,7 @@ struct Frame
 
     FrameType *nextFrame, *previousFrame;
     uint_fast32_t nbParticlesInFrame;
-}; // struct Frame
+} ; // struct Frame
 
 
 template<
@@ -146,7 +148,7 @@ template<
 struct IsBidirectional<Frame<TParticle, maxParticles> >
 {
     static const bool value = true;
-};
+} ;
 
 
 
@@ -156,7 +158,7 @@ template<
 struct IsRandomAccessable<Frame<TParticle, maxParticles> >
 {
     static const bool value = true;
-};
+} ;
 
 
 template<
@@ -165,7 +167,7 @@ template<
 struct HasConstantSize<Frame<TParticle, maxParticles> >
 {
     static const bool value = false;
-};
+} ;
 
 
 
@@ -175,7 +177,7 @@ template<
 struct ComponentType<Frame<TParticle, maxParticles> >
 {
     typedef TParticle type;
-};
+} ;
 
 
 template<typename TParticle, int_fast32_t nb>
@@ -183,6 +185,21 @@ struct ContainerCategory<hzdr::Frame<TParticle, nb> >
 {
     typedef hzdr::container::categorie::ArrayLike type;
 };
+
+template<typename TParticle, int_fast32_t nb>
+struct NumberElements<hzdr::Frame<TParticle, nb> >
+{
+    typedef hzdr::Frame<TParticle, nb> Frame;
+    
+
+    HDINLINE
+    int_fast32_t 
+    operator()( Frame const * const f)
+    const
+    {
+        return f->nbParticlesInFrame;    
+    }
+} ;// struct NumberElements
 
 } // namespace traits
 

@@ -34,7 +34,7 @@ struct SelfValue
     {
         return value;
     }
-};
+} ;
 
 
 template<typename T>
@@ -67,12 +67,21 @@ struct SelfValue<T, 0>
     }
 protected:
     T value;
-};
+} ;
 
 /**
  * @brief The NoChild is used to define the last layer in a nested Iterator
  */
-struct NoChild {};
+struct NoChild {
+        HDINLINE
+    bool 
+    debug_Test()
+    {
+        return true;
+    }
+    
+    const bool test = true;
+} ;
     
 }
 

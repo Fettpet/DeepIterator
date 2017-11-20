@@ -1,4 +1,5 @@
 
+
 /**
  * \class DeepIterator
  * @author Sebastian Hahn (t.hahn@hzdr.de )
@@ -8,97 +9,65 @@
  * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
  * within the structure. 
  * 
- * Inside the deepiterator are three variables. These are
- * importent for the templates. These Variables are:
- * 1. componentPtr: represent is a pointer to the current component
- * 2. containerPtr: is the pointer to the container, given by the constructor
- * 3. index: the current element index within the container
+ * Inside the deepiterator are two variables. These are importent for the 
+ * templates. These Variables are:
+ * 1. containerPtr: is the pointer to the container, given by the constructor
+ * 2. index: the current element index within the container.
  * 
  * 
- * @tparam TContainer : This one describes the container, over whose elements you 
- * would like to iterate. This templeate has some conditions: I. The trait 
- * IsIndexable need a specialication for TContainer. This traits, says wheter 
- * TContainer is array like (has []-operator overloaded) or list like; II. The
- * trait ComponentType has a specialication for TContainer. This trait gives the type
- * of the components of TContainer; III. The function \b NeedRuntimeSize<TContainer>
- * need to be specified. For more details see NeedRuntimeSize.hpp ComponentType.hpp IsIndexable.hpp
- * @tparam TAccessor The accessor descripe the access to the components of TContainer.
- * The Accessor need a get Function: 
- * static TComponent* accessor.get(TContainer* , 
-                                    TComponent*, 
-                                    const TIndex&,
-                                    const RuntimeVariables&)
- * The function get returns a pointer to the current component. We have 
- * implementeted an Accessor.
-   @tparam TNavigator The navigator describe the way to walk through the data. This
- * policy need three functions specified. The first function gives an entry
-   point in the container:
- * static void first(TContainer* conPtrIn, 
-                     TContainer*& conPtrOut, 
-                     TComponent*& compontPtrOut,
-                     TIndex& indexOut, 
-                     const TOffset& offset)
- * The function has two input parameter (conPtrIn and offset), the first is a pointer 
- * to the container given by the constructor and the second is the number of elements
- which are overjump by the navigator.
- * The other three paramter are output parameter. They are not given to the 
- * Accessor, so be sure, there are no conflict. 
- * The second function is the next function. These function goes to the next element
- * within the container:
-   static void next(TContainer*, 
-                    TComponent* elem, 
-                    TIndex& index,  
-                    const TRuntimeVariables& run);
- * The parameters are described above.
- * The third function decided, whether the end is reached. This function results
- * in true if the element is invalid and there are no reasons, that other threads
- in the same warp have valid elements. In other cases this function returns false.
- The structure of this function is:
-    static
-    bool 
-    isEnd(TContainer const * const containerPtr,
-          TComponent const * const compontPtr,
-          const TIndex& index, 
-          const TRuntimeVariables& run);
- We have implemented a navigator. For more details Navigator
+ * @tparam TContainer : This one describes the container, over whose elements 
+ * you would like to iterate. This template need the trait \b ComponentType has 
+ * a specialication for TContainer. This trait gives the type of the components 
+ * of TContainer; \see Componenttype.hpp 
+ * @tparam TAccessor The accessor descripe the access to and position of the 
+ * components of TContainer. \see Accessor.hpp
+   @tparam TNavigator The navigator describe the way to walk through the data. 
+   It describe the first element, the next element and the after last element.
+   \see Navigator.hpp
  
- @tparam TChild The child is the template parameter to realize nested structures. 
- This template has several requirements: 
+   @tparam TChild The child is the template parameter to realize nested 
+   structures.  This template has several 
+   requirements: 
     1. it need to spezify an Iterator type. These type need operator++,  operator*,
-        operator=, operator!= and a default constructor.
-    2. it need an WrapperType type
-    3. it need a begin and a end function. The result of the begin function must
-       have the same type as the operator= of the iterator. The result of the 
-       end function must have the same type as the operator!= of the iterator.
-    4. default constructor
-    5. copy constructor
-    6. constructor with childtype and containertype as variables
-    7. refresh(componentType*): for nested datastructures we start to iterate in
-    deeper layers. After the end is reached, in this layers, we need to go to the
-    next element in the current layer. Therefore we had an new component. This 
-    component is given to the child.
- To use the Child we recommed the View.
- # Usage {#sectionD2}
- The first step to use the iterator is to define it. The template parameter are
- described above. After that you construct an instant of the iterator. To do this
- there are two constructors, one if you had a child and the second if you doesn't 
- have:
-     DeepIterator(ContainerType* _ptr, 
-                 const TRuntimeVariables& runtimeVariables); // no child
-     DeepIterator(ContainerType* _ptr, 
-                 const TRuntimeVariables& runtimeVariables,
-                 TChild child); // with child
- To walk through the data the iterator has the ++ operator overload. It use the 
- next function from the navigator.
- The deepIterator serves two ways to check whether the end is reached or not:
- 1. operator!=(nullptr_t): if you compare your iterator with a nullptr, the iterator
- use the isEnd function of the navigator, to decide, whether the end is reached,
- or not.
- 2. operator!=(const deepIterator&): we compare the values of the variables 
- componenttype, index and containertype. If all of these are equal to the other
- instance of the iterator, the end is reached.
- \see Wrapper \see View \see Navigator \see Accessor \see Collectivity 
- \see IsIndexable \see NumberElements \see MaxElements
+        operator=, operator== and a default constructor.
+    2. gotoNext(), nbElements(), setToBegin(), isAfterLast()
+    3. gotoPrevious(), setToRbegin(), isBeforeFirst()
+    3. TChild::ReturnType must be specified. This is the componenttype of the 
+    innerst container.
+    4. TChild::IsRandomAccessable The child is random accessable
+    5. TChild::IsBidirectional The child is bidirectional
+    6. TChild::hasConstantSize The container of the child has constant size
+    7. default constructor
+    8. copy constructor
+    9. constructor with childtype && containertype as variables
+   It it is recommended to use DeepIterator as TChild.
+   @tparam TIndexType Type of the index. The index is used to access the component 
+   within the container. The index must support a cast from int especially from
+   0.
+   @tparam hasConstantSizeSelf This flag is used to decide whether the container
+   has a fixed number of elements. It is not needed that this count is known at 
+   compiletime, but recommended. This trait is used to optimize the iteration to
+   the next element. At default, a container hasnt a fixed size. An example 
+   for a container with fixed size is std::array<T, 10>. 
+   @tparam isBidirectionalSelf This flag is used to decide wheter the container
+   is bidirectional. If this flag is set to true, it enables backward iteration
+   i. e. operator--. The navigator need the bidirectional functions
+   @tparam isRandomAccessableSelf This flag is used to decide whether the 
+   container is random accessable. If this flag is set to true, it enables the 
+   following operations: +, +=, -, -=, <,>,>=,<=. The accessor need the functions
+   lesser, greater, if this flag is set to true.
+ # Implementation details{#sectionD2}
+The DeepIterator supports up to four constructors: begin, end, rbegin, rend. To 
+get the right one, we had four classes in details::constructorType. The 
+constructors has five parameters: 
+    ContainerPtr container, 
+    TAccessor && accessor, 
+    TNavigator && navigator,
+    TChild && child,
+    details::constructorType::__
+If your container has no interleaved layer, you can use \b hzdr::NoChild as child.
+A DeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
+and all childs are bidirectional. The same applies to random accessablity.
  */
 #include <sstream>
 #pragma once
@@ -106,7 +75,7 @@
 #include "PIC/Particle.hpp"
 #include "PIC/Supercell.hpp"
 
-#include "Iterator/Concept.hpp"
+#include "Iterator/Prescription.hpp"
 #include "Iterator/Policies.hpp"
 #include "Iterator/Accessor.hpp"
 #include "Iterator/Navigator.hpp"
@@ -135,10 +104,6 @@ struct rend{};
 }
 }
 
-/**
- * @tparam TContainer is the type of the container 
- * @tparam TChild ist ein virtueller Container oder NoChild
- */
 template<
     typename TContainer, 
     typename TAccessor, 
@@ -167,6 +132,7 @@ public:
 // container stuff
     typedef TIndexType   IndexType;
     
+    // decide wheter the iterator is bidirectional.
     static const bool isBidirectional = ChildIterator::isBidirectional && isBidirectionalSelf;
     static const bool isRandomAccessable = ChildIterator::isRandomAccessable && isRandomAccessableSelf;
     
@@ -178,14 +144,18 @@ public:
     
 public:
 
-/**
- * @brief creates an virtual iterator. This one is used to specify a last element
- * @param nbElems number of elements within the datastructure
- */
+// The default constructors
     HDINLINE DeepIterator() = default;
     HDINLINE DeepIterator(DeepIterator const &) = default;
     HDINLINE DeepIterator(DeepIterator &&) = default;
     
+    /**
+     * @brief This constructor is used to create a iterator in a middle layer. 
+     * The container must be set with setToBegin or setToRbegin.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child iterator for the next layer
+     */
     template<
         typename TAccessor_, 
         typename TNavigator_,
@@ -195,12 +165,24 @@ public:
                  TNavigator_ && navigator,
                  TChild_ && child
                 ):
+        containerPtr(nullptr),
+        index(static_cast<IndexType>(0)),
         childIterator(hzdr::forward<TChild_>(child)),
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor))
         
     {}
     
+        /**
+     * @brief This constructor is used to create an iterator at the begin element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child iterator for the next layer
+     * @param details::constructorType::begin used to specify that the begin 
+     * element is needed. We recommend details::constructorType::begin() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -214,14 +196,25 @@ public:
                 details::constructorType::begin 
                 ):
         containerPtr(container),
+        index(static_cast<IndexType>(0)),
         childIterator(hzdr::forward<TChild_>(child)),
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
-        setToBegin(container);
+         setToBegin(container);
     }
     
+            /**
+     * @brief This constructor is used to create an iterator at the rbegin element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child iterator for the next layer
+     * @param details::constructorType::begin used to specify that the begin 
+     * element is needed. We recommend details::constructorType::rbegin() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -235,6 +228,7 @@ public:
                 details::constructorType::rbegin
                 ):
         containerPtr(container),
+        index(static_cast<IndexType>(0)),
         childIterator(hzdr::forward<TChild_>(child)),
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor))
@@ -243,6 +237,16 @@ public:
         setToRbegin(container);
     }
     
+    /**
+     * @brief This constructor is used to create an iterator at the end element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child iterator for the next layer
+     * @param details::constructorType::end used to specify that the end
+     * element is needed. We recommend details::constructorType::end() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -256,6 +260,7 @@ public:
                 details::constructorType::end
                 ):
         containerPtr(container),
+        index(static_cast<IndexType>(0)),
         childIterator(hzdr::forward<TChild_>(child)),
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor))
@@ -264,6 +269,16 @@ public:
         setToEnd(container);
     }
     
+        /**
+     * @brief This constructor is used to create an iterator at the rend element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child iterator for the next layer
+     * @param details::constructorType::rend used to specify that the end
+     * element is needed. We recommend details::constructorType::rend() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -277,6 +292,7 @@ public:
                 details::constructorType::rend
                 ):
         containerPtr(container),
+        index(static_cast<IndexType>(0)),
         childIterator(hzdr::forward<TChild_>(child)),
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor))
@@ -284,24 +300,14 @@ public:
     {
         setToRend(container);
     }
-    
-    
-    HDINLINE 
-    DeepIterator(
-        ContainerPtr containerPtr,
-        IndexType && index,
-        Accessor&& accessor, 
-        Navigator&& navigator,
-        ChildIterator&& child):
-            containerPtr(containerPtr),
-            index(hzdr::forward<IndexType>(index)),
-            childIterator(hzdr::forward<ChildIterator>(child)),
-            navigator(hzdr::forward<Navigator>(navigator)),
-            accessor(hzdr::forward<Accessor>(accessor))
-    {}
 
     
-    
+    /**
+     * @brief grants access to the current elment. This function calls the * 
+     * operator of the child iterator. The behavior is undefined, if the iterator 
+     * would access an element out of the container.
+     * @return the current element.
+     */
     HDINLINE
     auto
     operator*()
@@ -312,15 +318,25 @@ public:
     }
     
     
+    /**
+     * @brief compares the DeepIterator with an other DeepIterator.
+     * @return true: if the iterators are at different positions, false
+     * if they are at the same position
+     */
     HDINLINE
     bool
     operator!=(const DeepIterator& other)
     const
     {
-        
         return not (*this == other);
     }
     
+    /**
+     * @brief grants access to the current elment. This function calls the * 
+     * operator of the child iterator. The behavior is undefined, if the iterator 
+     * would access an element out of the container.
+     * @return the current element.
+     */
     HDINLINE 
     ReturnType
     operator->()
@@ -328,6 +344,11 @@ public:
         return *childIterator;
     }
 
+    /**
+     * @brief compares the DeepIterator with an other DeepIterator.
+     * @return false: if the iterators are at different positions, true
+     * if they are at the same position
+     */
     HDINLINE
     bool
     operator==(const DeepIterator& other)
@@ -341,7 +362,9 @@ public:
     }
     
     /**
-     * @brief goto the next element
+     * @brief goto the next element. If the iterator is at the before-first-element
+     * it is set to the begin element.
+     * @return reference to the next element
      */
     HDINLINE
     DeepIterator&
@@ -356,6 +379,11 @@ public:
         return *this;
     }
     
+    /**
+     * @brief goto the next element. If the iterator is at the before-first-element
+     * it is set to the begin element.
+     * @return reference to the current element
+     */
     HDINLINE
     DeepIterator
     operator++(int)
@@ -371,7 +399,12 @@ public:
     }
     
 
-        
+    /**
+     * @brief goto the previous element. If the iterator is at after-first-element,
+     * it is set to the rbegin element. The iterator need to be bidirectional to
+     * support this function.
+     * @return reference to the previous element
+     */
     template<
         bool T = isBidirectional>
     HDINLINE
@@ -387,6 +420,12 @@ public:
         return *this;
     }
     
+    /**
+     * @brief goto the previous element. If the iterator is at after-first-element,
+     * it is set to the rbegin element. The iterator need to be bidirectional to
+     * support this function.
+     * @return reference to the current element
+     */
     template<
         bool T = isBidirectional>
     HDINLINE
@@ -399,20 +438,32 @@ public:
         return tmp;
     }
 
+    /**
+     * @brief creates an iterator which is jumpsize elements ahead. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     * @return iterator which is jumpsize elements ahead
+     */
     template<
         bool T = isRandomAccessable>    
     HDINLINE 
-    DeepIterator
-    operator+(typename std::enable_if<T == true, int>::type jumpsize)
+    typename std::enable_if<T == true, DeepIterator>::type
+    operator+(uint const & jumpsize)
     {
         DeepIterator tmp(*this);
         tmp += jumpsize;
         return tmp;
     }
     
-
+        /**
+     * @brief set the iterator jumpsize elements ahead. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     */
+    template<
+        bool T = isRandomAccessable>    
     HDINLINE 
-    DeepIterator&
+    typename std::enable_if<T == true, DeepIterator&>::type
     operator+=(uint const & jumpsize)
     {
         auto tmpJump = jumpsize;
@@ -426,6 +477,17 @@ public:
 
     }
     
+    /**
+     * @brief the gotoNext function has two implementations. The first one is used
+     * if the container of the child has a constant size. This is implemented 
+     * here. The second one is used if the container of the child hasnt a 
+     * constant size. The cost of this function is O(1).
+     * @param jumpsize Distance to the next element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
     template< 
         bool T = hasConstantSizeChild> 
     HDINLINE 
@@ -433,30 +495,26 @@ public:
     gotoNext(uint const & jumpsize)
     {
         /**
-         * The variable jumpsize is component from three other variables:
+         * The variable jumpsize is compond from three other variables:
          * 1. The distance of the child to these end
          * 2. the number of childs we can overjump
          * 3. the remaining jumpsize for the new child
          */
         
         auto && remaining = childIterator.gotoNext(jumpsize);
-        if(childIterator.isAfterLast() and remaining == 0)
-        {
-                remaining = jumpsize;
-        }
         
         auto && childNbElements = childIterator.nbElements();
-        auto && overjump = (remaining + childNbElements - 1) / childNbElements;
+        // the -1 is used, since we jump from an end to the begining of the next cell
+        auto && overjump = (remaining - 1 + childNbElements) / childNbElements;
         int childJumps = ((remaining - 1) % childNbElements);
         
         int && result = navigator.next(containerPtr, index, overjump);
+        // result == 0 means the point lays within this data structure
+        // overjump > 0 means we change the datastructure
         if((result == 0) && (overjump > 0) && not isAfterLast())
         {
-            while(childIterator.isAfterLast() && not isAfterLast())
-            {
-                childIterator.setToBegin(accessor.get(containerPtr, index));
-                childIterator += childJumps;
-            }
+            childIterator.setToBegin(accessor.get(containerPtr, index));
+            childIterator += childJumps;
         }
         // we only need to return something, if we are at the end
         uint const condition = (result > 0);
@@ -468,11 +526,17 @@ public:
     }
     
     /**
-     * This is the case where the child hasn't a constant size. This means we
-     * can not calculate the number of childjumps
-     * 1. We move the child iterator as wide as possible
-     * 2. we move this iterator one element
-     * 3.
+     * @brief the gotoNext function has two implementations. The first one is used
+     * if the container of the child has a constant size. The second one is used
+     * if the container of the child hasnt a constant size. This is implemented 
+     * here. The function, we go in the child to the end, go to the next element
+     * and repeat this procedure until we had enough jumps. This is an expensive
+     * procedure.
+     * @param jumpsize Distance to the next element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
      */
     template< 
         bool T = hasConstantSizeChild> 
@@ -480,16 +544,21 @@ public:
     typename std::enable_if<T == false, uint>::type 
     gotoNext(uint const & jumpsize)
     {
+        // we need to go over all elements
         auto remaining = jumpsize;
-        while(remaining > 0u and not isAfterLast())
+        while(remaining > 0u && not isAfterLast())
         {
+            // we go to the right element, or the end of this container
             remaining = childIterator.gotoNext(remaining);
+            // we have found the right element
             if(remaining == 0u)
                 break;
+            // we go to the next container
             --remaining;
             while(childIterator.isAfterLast() && not isAfterLast())
             {
                 navigator.next(containerPtr, index, 1u);
+                // only valid, if it contains enough elements
                 if(not isAfterLast())
                     childIterator.setToBegin(accessor.get(containerPtr, index));
             }
@@ -497,9 +566,30 @@ public:
         return remaining;
     }
 
-
+        /**
+     * @brief creates an iterator which is jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the previous element
+     * @return iterator which is jumpsize elements behind
+     */
+    template<
+        bool T = isRandomAccessable>    
     HDINLINE 
-    DeepIterator&
+    typename std::enable_if<T == true, DeepIterator>::type
+    operator-(uint const & jumpsize)
+    {
+        DeepIterator tmp(*this);
+        tmp -= jumpsize;
+        return tmp;
+    }
+    /**
+     * @brief set the iterator jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     */
+    template<bool T = isRandomAccessable>
+    HDINLINE 
+    typename std::enable_if<T == true, DeepIterator&>::type
     operator-=(const uint & jumpsize)
     {
         auto tmpJump = jumpsize;
@@ -512,30 +602,42 @@ public:
         return *this;
     }
     
+    /**
+     * @brief the gotoPrevious function has two implementations. The first one 
+     * is used if the container of the child has a constant size. This is 
+     * implemented here. The second one is used if the container of the child 
+     * hasnt a constant size. The cost of this function is O(1).
+     * @param jumpsize Distance to the previous element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
     template< 
         bool T = hasConstantSizeChild> 
     HDINLINE 
     uint
     gotoPrevious(uint const & jumpsize, typename std::enable_if<T == true>::type* = nullptr)
     {
+        /** 
+         * For implementation details see gotoNext
+         */
         int && remaining = childIterator.gotoPrevious(jumpsize);
-        if(childIterator.isBeforeFirst() and remaining == 0)
-        {
-                remaining = jumpsize;
-        }
         
-        auto && childNbElements = childIterator.nbElements();
-        auto && overjump = (remaining + childNbElements - 1) / childNbElements;
-        auto && childJumps = ((remaining - 1) % childNbElements);
-        
-        auto && result = navigator.previous(containerPtr, index, overjump);
-        if((result == 0) && (overjump > 0) && not isBeforeFirst())
+        auto && childNbElements{childIterator.nbElements()};
+        auto && overjump{(remaining + childNbElements - 1) / childNbElements};
+        auto && childJumps{((remaining - 1) % childNbElements)};
+
+        auto && result{navigator.previous(containerPtr, index, overjump)};
+
+        bool isBefore = not isBeforeFirst();
+        if((result == 0) && (overjump > 0) && isBefore)
         {
-            while(childIterator.isBeforeFirst() && not isBeforeFirst())
-            {
+//             while(childIterator.isBeforeFirst() && not isBeforeFirst())
+//             {
                 childIterator.setToRbegin(accessor.get(containerPtr, index));
                 childIterator -= childJumps;
-            }
+//             }
         }
         // we only need to return something, if we are at the end
         uint const condition = (result > 0u);
@@ -546,14 +648,27 @@ public:
         return condition * (notOverjumpedElements + childJumps + 1u);
     }
     
+    /**
+     * @brief the gotoPrevious function has two implementations. The first one 
+     * is used if the container of the child has a constant size. The second one 
+     * is used if the container of the child hasnt a constant size. This is 
+     * implemented here. The function, we go in the child to the end, go to the 
+     * previos element and repeat this procedure until we had enough jumps. This 
+     * is an expensive procedure.
+     * @param jumpsize Distance to the next element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
     template< 
         bool T = hasConstantSizeChild> 
     HDINLINE 
-    uint 
-    gotoPrevious(uint const & jumpsize, typename std::enable_if<T == false>::type* = nullptr)
+    typename std::enable_if<T == false, uint>::type 
+    gotoPrevious(uint const & jumpsize)
     {
         auto remaining = jumpsize;
-        while(remaining > 0u and not isBeforeFirst())
+        while(remaining > 0u && not isBeforeFirst())
         {
             remaining = childIterator.gotoPrevious(remaining);
             if(remaining == 0u)
@@ -569,24 +684,124 @@ public:
         return remaining;
     }
     
+    /**
+     * @brief check whether the iterator is behind a second one.
+     * @return true if the iterator is behind, false otherwise
+     */
+    template< bool T=isRandomAccessable>
+    HDINLINE
+    typename std::enable_if<T == true, bool>::type
+    operator<(DeepIterator const & other)
+    {
+        if(accessor.lesser(
+            containerPtr, 
+            index,
+            other.containerPtr,
+            other.index))
+           return true;
+        if(accessor.equal(containerPtr, 
+            index,
+            other.containerPtr,
+            other.index) &&
+           childIterator < other.childIterator)
+            return true;
+        return false;
+    }
+    
+    /**
+     * @brief check whether the iterator is ahead a second one.
+     * @return true if the iterator is ahead, false otherwise
+     */
+    template<bool T = isRandomAccessable>
+    HDINLINE
+    typename std::enable_if<T == true, bool>::type
+    operator>(DeepIterator const & other)
+    {
+        if(accessor.greater(
+            containerPtr, 
+            index,
+            other.containerPtr,
+            other.index))
+           return true;
+        if(accessor.equal(containerPtr, 
+            index,
+            other.containerPtr,
+            other.index) &&
+           childIterator > other.childIterator)
+            return true;
+        return false;
+    }
+    
+            /**
+     * @brief check whether the iterator is behind or equal a second one.
+     * @return true if the iterator is behind or equal, false otherwise
+     */
+    template< bool T=isRandomAccessable>
+    HDINLINE
+    typename std::enable_if<T == true, bool>::type
+    operator<=(DeepIterator const & other)
+    {
+        return *this < other || *this == other;
+    }
+    
+        /**
+     * @brief check whether the iterator is ahead or equal a second one.
+     * @return true if the iterator is ahead or equal, false otherwise
+     */
+    template<bool T = isRandomAccessable>
+    HDINLINE
+    typename std::enable_if<T == true, bool>::type
+    operator>=(DeepIterator const & other)
+    {
+        return *this > other || *this == other;
+    }
+    
+    /**
+     * @return get the element at the specified position.
+     */
+    template<bool T = isRandomAccessable>
+    HDINLINE
+    typename std::enable_if<T == true, ReturnType&>::type
+    operator[](IndexType const & index)
+    {
+        DeepIterator tmp(*this);
+        tmp.setToBegin();
+        tmp += index;
+        return *tmp;
+    }
+    
+    
+    /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     */
     HDINLINE
     void
     setToBegin()
     {
         navigator.begin(containerPtr, index);
-        if(not isBeforeFirst() and not isAfterLast())
+        if(not isBeforeFirst() && not isAfterLast())
         {
             childIterator.setToBegin((accessor.get(containerPtr, index)));
-            while(childIterator.isAfterLast() and not isAfterLast())
+            while(childIterator.isAfterLast() && not isAfterLast())
             {
-                ++(*this);
+                gotoNext(1u);
                 if(not isAfterLast())
                     childIterator.setToBegin((accessor.get(containerPtr, index)));
             }
                 
         }
     }
+    
 
+    /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void
     setToBegin(TContainer& con)
@@ -596,6 +811,13 @@ public:
 
     }
     
+    /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void
     setToBegin(TContainer* ptr)
@@ -605,38 +827,37 @@ public:
 
     }
     
-    HDINLINE
-    void
-    setToEnd()
-    {
-        navigator.end(containerPtr, index);
-        //childIterator.setToEnd((accessor.get(containerPtr, index)));
-    }
-
+    /**
+     * @brief This function set the iterator to the after-last-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     * */
     HDINLINE
     void
     setToEnd(TContainer* ptr)
     {
         containerPtr = ptr;
-        setToEnd();
+        navigator.end(containerPtr, index);
     }
     
-    HDINLINE
-    void
-    setToRend()
-    {
-        navigator.rend(containerPtr, index);
-        //childIterator.setToRend();
-    }
-
+    /**
+     * @brief This function set the iterator to the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     * */
     HDINLINE
     void
     setToRend(TContainer* ptr)
     {
         containerPtr = ptr;
-        setToRend();
+        navigator.rend(containerPtr, index);
     }
-    
+
+        /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to rbegin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     */
     HDINLINE
     void 
     setToRbegin()
@@ -645,15 +866,22 @@ public:
         if(not isBeforeFirst() && not isAfterLast())
         {
             childIterator.setToRbegin((accessor.get(containerPtr, index)));
-            while(childIterator.isBeforeFirst() and not isBeforeFirst())
+            while(childIterator.isBeforeFirst() && not isBeforeFirst())
             {
-                --(*this);
+                gotoPrevious(1u);
                 if(not isBeforeFirst())
                     childIterator.setToRbegin((accessor.get(containerPtr, index)));
             }
         }
     }
     
+    /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void 
     setToRbegin(ContainerRef con)
@@ -662,6 +890,13 @@ public:
         setToRbegin();
     }
     
+    /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void 
     setToRbegin(ContainerPtr ptr)
@@ -670,6 +905,10 @@ public:
         setToRbegin();
     }
 
+    /**
+     * @brief check whether the iterator is after the last element
+     * @return true, if it is, false if it is not after the last element
+     */
     HDINLINE 
     bool
     isAfterLast()
@@ -678,6 +917,10 @@ public:
         return navigator.isAfterLast(containerPtr, index);
     }
     
+    /**
+     * @brief check whether the iterator is before the first element
+     * @return true, if it is, false if it is not after the last element
+     */
     HDINLINE 
     bool
     isBeforeFirst()
@@ -686,6 +929,12 @@ public:
         return navigator.isBeforeFirst(containerPtr, index);
     }
     
+    /**
+     * @brief if the container has a constant size, this function can caluculate
+     * it.
+     * @return number of elements within the container. This include the child
+     * elements
+     */
     template<
         bool T = hasConstantSize>
     typename std::enable_if<T == true, int>::type
@@ -695,22 +944,30 @@ public:
         return childIterator.nbElements() * navigator.size(containerPtr);
     }
     
+    template<
+        bool T = hasConstantSize>
+    typename std::enable_if<T == false, int>::type
+    nbElements()
+    const
+    {
+        static_assert(true, "Something is wrong");
+        //return childIterator.nbElements() * navigator.size(containerPtr);
+    }
     
+protected:
     ContainerPtr containerPtr = nullptr;
     IndexType index;
     ChildIterator childIterator;
     Navigator navigator;
     Accessor accessor;
-private:
-
-}; // struct DeepIterator
+} ; // struct DeepIterator
 
 
 
 
 
 /** ************************************+
- * @brief The flat implementation 
+ * @brief The flat implementation. This deepiterator has no childs. 
  * ************************************/
 template<
     typename TContainer, 
@@ -758,6 +1015,16 @@ public:
     HDINLINE DeepIterator(const DeepIterator&) = default;
     HDINLINE DeepIterator(DeepIterator&&) = default;
 
+            /**
+     * @brief This constructor is used to create an iterator at the begin element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::begin used to specify that the begin
+     * element is needed. We recommend details::constructorType::begin() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -772,14 +1039,25 @@ public:
                 ):
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
-        containerPtr(container)
+        childIterator(),
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
 
         
     {
-
         setToBegin(container);
     }
     
+     /**
+     * @brief This constructor is used to create an iterator at the begin element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::begin used to specify that the begin
+     * element is needed. We recommend details::constructorType::begin() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -792,15 +1070,25 @@ public:
                  TChild_ const &,
                 details::constructorType::rbegin
                 ):
-        
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
-        containerPtr(container)
-        
+        childIterator(),
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
     {
         setToRbegin(container);
     }
     
+    /**
+     * @brief This constructor is used to create an iterator at the end element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::end used to specify that the end
+     * element is needed. We recommend details::constructorType::end() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -813,15 +1101,24 @@ public:
                  TChild_ const &,
                 details::constructorType::end
                 ):
-        
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
-        containerPtr(container)
-        
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
     {
         setToEnd(container);
     }
     
+    /**
+     * @brief This constructor is used to create an iterator at the rend element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::rend used to specify that the rend
+     * element is needed. We recommend details::constructorType::end() as 
+     * parameter.
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -837,25 +1134,20 @@ public:
         
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
-        containerPtr(container)
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
         
     {
         setToRend(container);
     }
     
     /**
-     * We need the template parameter for perfect forwarding
+     * @brief This constructor is used to create a iterator in a middle layer. 
+     * The container must be set with setToBegin or setToRbegin.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child use hzdr::NoChild()
      */
-    template<
-        typename TAccessor_, 
-        typename TNavigator_>
-    HDINLINE
-    DeepIterator(TAccessor_ && accessor, 
-                 TNavigator_ && navigator):
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
-    {}
-    
     template<
         typename TAccessor_, 
         typename TNavigator_>
@@ -864,16 +1156,18 @@ public:
                  TNavigator_ && navigator,
                  hzdr::NoChild const &
                 ):
+        
         navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
+        accessor(hzdr::forward<TAccessor_>(accessor)),
+        containerPtr(nullptr),
+        index(static_cast<IndexType>(0))
     {}
     
-    
-    
     /**
-     * @brief goto the next element
+     * @brief goto the next element. If the iterator is at the before-first-element
+     * it is set to the begin element.
+     * @return reference to the next element
      */
-
     HDINLINE
     DeepIterator&
     operator++()
@@ -889,9 +1183,118 @@ public:
         return *this;
     }
     
+    /**
+     * @brief goto the next element. If the iterator is at the before-first-element
+     * it is set to the begin element.
+     * @return reference to the current element
+     */
+    HDINLINE
+    DeepIterator
+    operator++(int)
+    {
+        DeepIterator tmp(*this);
+        navigator.next(containerPtr, index, 1);
+        return tmp;
+    }
+    
+    /**
+     * @brief grants access to the current elment. The behavior is undefined, if
+     * the iterator would access an element out of the container.
+     * @return the current element.
+     */
+    HDINLINE
+    auto 
+    operator*()
+    -> 
+    ComponentReference
+    {
+        return (accessor.get(containerPtr, index));
+    }
+    
+    /**
+     * @brief grants access to the current elment. The behavior is undefined, if
+     * the iterator would access an element out of the container.
+     * @return the current element.
+     */
+    HDINLINE
+    auto 
+    operator->()
+    -> 
+    ComponentReference
+    {
+        
+        return (accessor.get(containerPtr, index));
+    }
+    
+    
+    /**
+     * @brief compares the DeepIterator with an other DeepIterator.
+     * @return true: if the iterators are at different positions, false
+     * if they are at the same position
+     */
+    HDINLINE
+    bool
+    operator!=(const DeepIterator& other)
+    const
+    {
+        return (containerPtr != other.containerPtr
+            || index != other.index)
+            && (not isAfterLast() || not other.isAfterLast())
+            && (not isBeforeFirst() || not other.isBeforeFirst());
+    }
+    
+    /**
+     * @brief compares the DeepIterator with an other DeepIterator.
+     * @return false: if the iterators are at different positions, true
+     * if they are at the same position
+     */
+    HDINLINE
+    bool
+    operator==(const DeepIterator& other)
+    const
+    {
+        return not (*this != other);
+    }
+    
+    /**
+     * @brief goto the previous element. If the iterator is at after-first-element,
+     * it is set to the rbegin element. The iterator need to be bidirectional to
+     * support this function.
+     * @return reference to the previous element
+     */
+    template<bool T = isBidirectional>
+    HDINLINE 
+    typename std::enable_if<T, DeepIterator& >::type
+    operator--()
+    {
+        navigator.previous(containerPtr, index,1);
+        return *this;
+    }
+    
+    /**
+     * @brief goto the previous element. If the iterator is at after-first-element,
+     * it is set to the rbegin element. The iterator need to be bidirectional to
+     * support this function.
+     * @return reference to the current element
+     */
+    template<bool T = isBidirectional>
+    HDINLINE 
+    typename std::enable_if<T, DeepIterator >::type
+    operator--(int)
+    {
+        DeepIterator tmp(*this);
+        navigator.previous(containerPtr, index,1);
+        return tmp;
+    }
+    
+     /**
+     * @brief set the iterator jumpsize elements ahead. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     */
     template<typename TJump, bool T=isRandomAccessable>
     HDINLINE
-    typename std::enable_if<T, DeepIterator&>::type
+    typename std::enable_if<T == true, DeepIterator&>::type
     operator+=(TJump const & jump)
     {
         auto tmpJump = jump;
@@ -904,6 +1307,11 @@ public:
         return *this;
     }
     
+    /**
+     * @brief set the iterator jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     */
     template<typename TJump, bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator&>::type
@@ -919,6 +1327,12 @@ public:
         return *this;
     }
     
+    /**
+     * @brief creates an iterator which is jumpsize elements ahead. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     * @return iterator which is jumpsize elements ahead
+     */
     template<typename TJump, bool T=isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator>::type
@@ -929,6 +1343,12 @@ public:
         return tmp;
     }
     
+        /**
+     * @brief creates an iterator which is jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the previos element
+     * @return iterator which is jumpsize elements behind
+     */
     template<typename TJump, bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator>::type
@@ -939,12 +1359,15 @@ public:
         return tmp;
     }
     
+        /**
+     * @brief check whether the iterator is behind a second one.
+     * @return true if the iterator is behind, false otherwise
+     */
     template< bool T=isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, bool>::type
     operator<(DeepIterator const & other)
     {
-
         return accessor.lesser(
             containerPtr, 
             index,
@@ -952,6 +1375,10 @@ public:
             other.index);
     }
     
+        /**
+     * @brief check whether the iterator is ahead a second one.
+     * @return true if the iterator is ahead, false otherwise
+     */
     template<bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, bool>::type
@@ -964,6 +1391,10 @@ public:
             other.index);
     }
     
+                /**
+     * @brief check whether the iterator is behind or equal a second one.
+     * @return true if the iterator is behind or equal, false otherwise
+     */
     template< bool T=isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, bool>::type
@@ -973,6 +1404,10 @@ public:
         return *this < other || *this == other;
     }
     
+            /**
+     * @brief check whether the iterator is ahead or equal a second one.
+     * @return true if the iterator is ahead or equal, false otherwise
+     */
     template<bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, bool>::type
@@ -981,6 +1416,9 @@ public:
         return *this > other || *this == other;
     }
     
+    /**
+     * @return get the element at the specified position.
+     */
     template<bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, ComponentReference>::type
@@ -989,57 +1427,10 @@ public:
         return accessor.get(containerPtr, index);
     }
     
-    HDINLINE
-    DeepIterator
-    operator++(int)
-    {
-        DeepIterator tmp(*this);
-        navigator.next(containerPtr, index, 1);
-        return tmp;
-    }
-    
-    template<bool T = isBidirectional>
-    HDINLINE 
-    typename std::enable_if<T, DeepIterator& >::type
-    operator--()
-    {
-        navigator.previous(containerPtr, index,1);
-        return *this;
-    }
-    
-    template<bool T = isBidirectional>
-    HDINLINE 
-    typename std::enable_if<T, DeepIterator >::type
-    operator--(int)
-    {
-        DeepIterator tmp(*this);
-        navigator.previous(containerPtr, index,1);
-        return tmp;
-    }
-    
-    HDINLINE
-    auto 
-    operator*()
-    -> 
-    ComponentReference
-    {
-        
-        return (accessor.get(containerPtr, index));
-    }
-    
-    
-    
-    HDINLINE
-    bool
-    operator!=(const DeepIterator& other)
-    const
-    {
-        return (containerPtr != other.containerPtr
-            || index != other.index)
-            && (not isAfterLast() || not other.isAfterLast())
-            && (not isBeforeFirst() || not other.isBeforeFirst());
-    }
-    
+        /**
+     * @brief check whether the iterator is after the last element
+     * @return true, if it is, false if it is not after the last element
+     */
     HDINLINE 
     bool
     isAfterLast()
@@ -1048,6 +1439,10 @@ public:
         return navigator.isAfterLast(containerPtr, index);
     }
     
+    /**
+     * @brief check whether the iterator is before the first element
+     * @return true, if it is, false if it is not after the last element
+     */
     HDINLINE 
     bool
     isBeforeFirst()
@@ -1056,15 +1451,13 @@ public:
         return navigator.isBeforeFirst(containerPtr, index);
     }
     
-    HDINLINE
-    bool
-    operator==(const DeepIterator& other)
-    const
-    {
-        return not (*this != other);
-    }
 
 
+    /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     */
     HDINLINE 
     void 
     setToBegin()
@@ -1072,6 +1465,13 @@ public:
         navigator.begin(containerPtr, index);
     }
     
+        /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE 
     void 
     setToBegin(ContainerPtr con)
@@ -1080,6 +1480,13 @@ public:
         navigator.begin(containerPtr, index);
     }
     
+        /**
+     * @brief This function set the iterator to the first element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE 
     void 
     setToBegin(ContainerReference con)
@@ -1087,15 +1494,12 @@ public:
         containerPtr = &con;
         navigator.begin(containerPtr, index);
     }
-
-    HDINLINE
-    void 
-    setToEnd(ContainerReference con)
-    {
-        containerPtr = &con;
-        navigator.end(containerPtr, index);
-    }
     
+       /**
+     * @brief This function set the iterator to the after-last-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     * */
     HDINLINE
     void 
     setToEnd(ContainerPtr con)
@@ -1104,21 +1508,11 @@ public:
         navigator.end(containerPtr, index);
     }
     
-    HDINLINE
-    void 
-    setToEnd()
-    {
-        navigator.end(containerPtr, index);
-    }
-    
-    HDINLINE
-    void 
-    setToRend(ContainerReference con)
-    {
-        containerPtr = &con;
-        navigator.rend(containerPtr, index);
-    }
-    
+        /**
+     * @brief This function set the iterator to the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     * */
     HDINLINE
     void 
     setToRend(ContainerPtr con)
@@ -1127,13 +1521,13 @@ public:
         navigator.rend(containerPtr, index);
     }
     
-    HDINLINE
-    void 
-    setToRend()
-    {
-        navigator.rend(containerPtr, index);
-    }
-    
+        /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void 
     setToRbegin(ContainerReference con)
@@ -1142,6 +1536,13 @@ public:
         navigator.rbegin(containerPtr, index);
     }
     
+    /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to the begin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     * @param TContainer The container over which the iterator walks is changed 
+     * to TContainer.
+     */
     HDINLINE
     void 
     setToRbegin(ContainerPtr con)
@@ -1150,6 +1551,11 @@ public:
         navigator.rbegin(containerPtr, index);
     }
     
+    /**
+     * @brief This function set the iterator to the last element. This function
+     * set also all childs to rbegin. If the container hasnt enough elements
+     * it should be set to the after-last-element or the before-first-element. 
+     */
     HDINLINE
     void 
     setToRbegin()
@@ -1157,16 +1563,31 @@ public:
         navigator.rbegin(containerPtr, index);
     }
     
+           /**
+     * @brief goto a successor element
+     * @param jumpsize Distance to the successor element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
     HDINLINE 
     auto 
     gotoNext(uint const & steps)
     ->
     uint
     {
-        
         return navigator.next(containerPtr, index, steps);
     }
     
+        /**
+     * @brief goto a previos element
+     * @param jumpsize Distance to the previous element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
     HDINLINE
     auto 
     gotoPrevious(uint const & steps)
@@ -1178,7 +1599,12 @@ public:
         return result;
     }
     
-    
+        /**
+     * @brief if the container has a constant size, this function can caluculate
+     * it.
+     * @return number of elements within the container. This include the child
+     * elements
+     */
     template<
         bool T = hasConstantSize>
     typename std::enable_if<T, int>::type
@@ -1187,22 +1613,26 @@ public:
     {
         return navigator.size(containerPtr);
     }
-    
+
+protected:   
     Navigator navigator;
     Accessor accessor;
     hzdr::NoChild childIterator;
     
-protected:
+
     ContainerType* containerPtr = nullptr;
     IndexType index;
 
 private:
-}; // struct DeepIterator
-
+} ; // struct DeepIterator
 
 
 namespace details 
 {
+/**
+ * @brief This function is used in makeView. The function is a identity function
+ * for hzdr::NoChild
+ */
 template<
     typename TContainer,
     typename TChild,
@@ -1227,8 +1657,8 @@ hzdr::NoChild
  */
 template<
     typename TContainer,
-    typename TConcept,
-    typename TConceptNoRef =typename std::decay<TConcept>::type, 
+    typename TPrescription,
+    typename TPrescriptionNoRef =typename std::decay<TPrescription>::type, 
     typename TContainerNoRef = typename std::decay<TContainer>::type, 
     typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
     typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
@@ -1238,26 +1668,26 @@ template<
 HDINLINE
 auto 
 makeIterator (
-    TConcept && concept,
+    TPrescription && concept,
     typename std::enable_if<not std::is_same<TContainerNoRef, hzdr::NoChild>::value>::type* = nullptr)
 ->
 DeepIterator<
         TContainer,
-        decltype(makeAccessor<TContainer>(hzdr::forward<TConcept>(concept).accessor)),
-        decltype(makeNavigator<TContainer>(hzdr::forward<TConcept>(concept).navigator)),
+        decltype(makeAccessor<TContainer>(hzdr::forward<TPrescription>(concept).accessor)),
+        decltype(makeNavigator<TContainer>(hzdr::forward<TPrescription>(concept).navigator)),
         decltype(makeIterator<
-            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child)),
+            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TPrescription>(concept).child)),
         IndexType,
         hasConstantSize,
         isBidirectional,
-        isRandomAccessable>  
+        isRandomAccessable>
 {
     typedef TContainer                                          ContainerType;
 
-    typedef decltype(makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor))      AccessorType;
-    typedef decltype(makeNavigator<ContainerType>(hzdr::forward<TConcept>(concept).navigator))    NavigatorType;
+    typedef decltype(makeAccessor<ContainerType>(hzdr::forward<TPrescription>(concept).accessor))      AccessorType;
+    typedef decltype(makeNavigator<ContainerType>(hzdr::forward<TPrescription>(concept).navigator))    NavigatorType;
     typedef decltype(makeIterator<
-            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child)) ChildType;
+            typename traits::ComponentType<TContainer>::type>(hzdr::forward<TPrescription>(concept).child)) ChildType;
 
 
     typedef DeepIterator<
@@ -1269,11 +1699,11 @@ DeepIterator<
         hasConstantSize,
         isBidirectional,
         isRandomAccessable>         Iterator;
-        
+ 
     return Iterator(
-        makeAccessor<ContainerType>(hzdr::forward<TConcept>(concept).accessor),
-        makeNavigator<ContainerType>(hzdr::forward<TConcept>(concept).navigator),
-        makeIterator<typename traits::ComponentType<TContainer>::type>(hzdr::forward<TConcept>(concept).child));
+        makeAccessor<ContainerType>(hzdr::forward<TPrescription>(concept).accessor),
+        makeNavigator<ContainerType>(hzdr::forward<TPrescription>(concept).navigator),
+        makeIterator<typename traits::ComponentType<TContainer>::type>(hzdr::forward<TPrescription>(concept).child));;
 }
 
 } // namespace details
@@ -1282,7 +1712,7 @@ DeepIterator<
 /**
  * @brief Bind a container to a virtual iterator.  
  * @param con The container you like to inspect
- * @param iteratorConcept A virtual iterator, which describes the behavior of 
+ * @param iteratorPrescription A virtual iterator, which describes the behavior of 
  * the iterator
  * @return An Iterator. It is set to the first element.
  */
@@ -1301,7 +1731,7 @@ HDINLINE
 auto
 makeIterator(
     TContainer && container,
-    hzdr::details::IteratorConcept<
+    hzdr::details::IteratorPrescription<
         TAccessor,
         TNavigator,
         TChild> && concept)
