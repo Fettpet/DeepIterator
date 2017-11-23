@@ -24,8 +24,10 @@ struct Particle<TPosition, 1>
     static constexpr uint32_t Dim = 1;
     
     HDINLINE
-    Particle():
-        data(++currentValue){}
+    Particle()
+        {
+            data[0] = ++currentValue;
+        }
     
     HDINLINE
     Particle(const TPosition& x):

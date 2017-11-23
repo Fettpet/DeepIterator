@@ -7,11 +7,7 @@ namespace hzdr
  * @brief This class gets a value with the constructor. The value is returned 
  * with the operator ().
  */
-template<typename T, unsigned value = 0>
-struct SelfValue;
-
-
-template<typename T, unsigned value>
+template<typename T, unsigned value = 999999999u>
 struct SelfValue
 {
     HDINLINE
@@ -28,9 +24,11 @@ struct SelfValue
     SelfValue& operator=( SelfValue const &) = default;
     
     HDINLINE
+    constexpr
     T 
     operator() ()
-    const 
+    const
+    noexcept
     {
         return value;
     }
@@ -38,7 +36,7 @@ struct SelfValue
 
 
 template<typename T>
-struct SelfValue<T, 0>
+struct SelfValue<T, 999999999u>
 {
     
     HDINLINE

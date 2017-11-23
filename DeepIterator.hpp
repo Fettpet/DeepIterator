@@ -18,9 +18,9 @@
  * @tparam TContainer : This one describes the container, over whose elements 
  * you would like to iterate. This template need the trait \b ComponentType has 
  * a specialication for TContainer. This trait gives the type of the components 
- * of TContainer; \see Componenttype.hpp 
+ * of TContainer; 
  * @tparam TAccessor The accessor descripe the access to and position of the 
- * components of TContainer. \see Accessor.hpp
+ * components of TContainer. 
    @tparam TNavigator The navigator describe the way to walk through the data. 
    It describe the first element, the next element and the after last element.
    \see Navigator.hpp
@@ -56,6 +56,7 @@
    container is random accessable. If this flag is set to true, it enables the 
    following operations: +, +=, -, -=, <,>,>=,<=. The accessor need the functions
    lesser, greater, if this flag is set to true.
+   \see Componenttype.hpp Accessor.hpp
  # Implementation details{#sectionD2}
 The DeepIterator supports up to four constructors: begin, end, rbegin, rend. To 
 get the right one, we had four classes in details::constructorType. The 
@@ -68,6 +69,11 @@ constructors has five parameters:
 If your container has no interleaved layer, you can use \b hzdr::NoChild as child.
 A DeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
 and all childs are bidirectional. The same applies to random accessablity.
+We had two algorithms inside the DeepIterator. The first one is used to find the
+first element within a nested data structure. The second one is used to find the
+next element within the data structure. Lets start with the find the first 
+element procedure. 
+\image html images/setTobegin.png "Function to find the first element"
  */
 #include <sstream>
 #pragma once
@@ -90,6 +96,7 @@ and all childs are bidirectional. The same applies to random accessablity.
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/ContainerCategory.hpp"
 #include "Traits/HasConstantSize.hpp"
+
 namespace hzdr 
 {
 
@@ -511,7 +518,7 @@ public:
         int && result = navigator.next(containerPtr, index, overjump);
         // result == 0 means the point lays within this data structure
         // overjump > 0 means we change the datastructure
-        if((result == 0) && (overjump > 0) && not isAfterLast())
+        if((result == 0) && (overjump > 0))
         {
             childIterator.setToBegin(accessor.get(containerPtr, index));
             childIterator += childJumps;
@@ -630,8 +637,7 @@ public:
 
         auto && result{navigator.previous(containerPtr, index, overjump)};
 
-        bool isBefore = not isBeforeFirst();
-        if((result == 0) && (overjump > 0) && isBefore)
+        if((result == 0) && (overjump > 0))
         {
 //             while(childIterator.isBeforeFirst() && not isBeforeFirst())
 //             {
@@ -774,23 +780,20 @@ public:
     /**
      * @brief This function set the iterator to the first element. This function
      * set also all childs to the begin. If the container hasnt enough elements
-     * it should be set to the after-last-element or the before-first-element. 
+     * it should be set to the after-last-element. 
      */
     HDINLINE
     void
     setToBegin()
     {
         navigator.begin(containerPtr, index);
-        if(not isBeforeFirst() && not isAfterLast())
+        // check whether the iterator is at a valid element
+        while(not isAfterLast())
         {
             childIterator.setToBegin((accessor.get(containerPtr, index)));
-            while(childIterator.isAfterLast() && not isAfterLast())
-            {
-                gotoNext(1u);
-                if(not isAfterLast())
-                    childIterator.setToBegin((accessor.get(containerPtr, index)));
-            }
-                
+            if(not childIterator.isAfterLast())
+                break;
+            gotoNext(1u);
         }
     }
     
@@ -863,15 +866,13 @@ public:
     setToRbegin()
     {
         navigator.rbegin(containerPtr, index);
-        if(not isBeforeFirst() && not isAfterLast())
+        // check whether the iterator is at a valid element
+        while(not isBeforeFirst())
         {
             childIterator.setToRbegin((accessor.get(containerPtr, index)));
-            while(childIterator.isBeforeFirst() && not isBeforeFirst())
-            {
-                gotoPrevious(1u);
-                if(not isBeforeFirst())
-                    childIterator.setToRbegin((accessor.get(containerPtr, index)));
-            }
+            if(not childIterator.isBeforeFirst())
+                break;
+            gotoPrevious(1u);
         }
     }
     
@@ -937,6 +938,7 @@ public:
      */
     template<
         bool T = hasConstantSize>
+    HDINLINE
     typename std::enable_if<T == true, int>::type
     nbElements()
     const
@@ -946,11 +948,12 @@ public:
     
     template<
         bool T = hasConstantSize>
+    HDINLINE
     typename std::enable_if<T == false, int>::type
     nbElements()
     const
     {
-        static_assert(true, "Something is wrong");
+        static_assert(true, "container has no constant size. nbELements() isnt enabled");
         //return childIterator.nbElements() * navigator.size(containerPtr);
     }
     
@@ -1193,7 +1196,7 @@ public:
     operator++(int)
     {
         DeepIterator tmp(*this);
-        navigator.next(containerPtr, index, 1);
+        navigator.next(containerPtr, index, 1u);
         return tmp;
     }
     
@@ -1267,7 +1270,7 @@ public:
     typename std::enable_if<T, DeepIterator& >::type
     operator--()
     {
-        navigator.previous(containerPtr, index,1);
+        navigator.previous(containerPtr, index, 1u);
         return *this;
     }
     
@@ -1283,7 +1286,7 @@ public:
     operator--(int)
     {
         DeepIterator tmp(*this);
-        navigator.previous(containerPtr, index,1);
+        navigator.previous(containerPtr, index, 1u);
         return tmp;
     }
     
@@ -1298,7 +1301,7 @@ public:
     operator+=(TJump const & jump)
     {
         auto tmpJump = jump;
-        if(jump != 0 && isBeforeFirst())
+        if(jump != static_cast<TJump>(0) && isBeforeFirst())
         {
             --tmpJump;
             setToBegin();
@@ -1318,7 +1321,7 @@ public:
     operator-=(TJump const & jump)
     {
         auto tmpJump = jump;
-        if(jump != 0 && isAfterLast())
+        if(jump != static_cast<TJump>(0) && isAfterLast())
         {
             --tmpJump;
             setToRbegin();
@@ -1607,6 +1610,7 @@ public:
      */
     template<
         bool T = hasConstantSize>
+    HDINLINE
     typename std::enable_if<T, int>::type
     nbElements()
     const
@@ -1620,7 +1624,7 @@ protected:
     hzdr::NoChild childIterator;
     
 
-    ContainerType* containerPtr = nullptr;
+    ContainerType* containerPtr;
     IndexType index;
 
 private:

@@ -4,47 +4,56 @@
  * \struct View
  * @author Sebastian Hahn (t.hahn@hzdr.de )
  * 
- * @brief The View provides functionality for the DeepIterator. The first 
- * functionality is the construction of the DeepIterator type. The second part
- * of the functionality is providing the begin and end functions. Last but not 
- * least the view connects more than one layer.
+ * @brief The View is a composition of a Prescription and a datastructure. It is
+ * used to generate the DeepIterator. The View has four ways to create a Deep -
+ * Iterator:
+ * 1. begin()
+ * 2. end()
+ * 3. rbegin()
+ * 4. rend()
  * 
- * 
- * We start with the first functionality, the construction of the DeepIterator.
- * The DeepIterator has several template parameter. For the most of that we had
- * written some instances. Most of these require template Parameter to work. The 
- * View build the types for navigator, accesssor and so on.
- * One design goal is a easy to use interface. From the container of the stl you 
- * known that all of them has the functions begin and end. The View gives you 
- * these two functions, I.e. you can use it, like a stl container.
- * The last functionality is, the view provides a parameter to picture nested
- * datastructres. This is down with the child template.
- * @tparam TContainer  This one describes the container, over wich elements you 
- * would like to iterate. This Templeate need has some Conditions: I. The Trait 
- * \b IsIndexable need a shape for TContainer. This traits, says wheter 
- * TContainer is array like (has []-operator overloaded) or list like; II. The
- * trait \b ComponentType has a specialication for TContainer. This trait gives the type
- * of the components of TContainer; III. The Funktion \b NeedRuntimeSize<TContainer>
- * need to be specified. For more details see NeedRuntimeSize.hpp ComponentType.hpp IsIndexable.hpp
- * @tparam TDirection The direction of the iteration. There are to posibilities
- * Forward and Backward. For more details see Direction.
- * @tparam TCollective is used to determine the collective properties of your 
- * iterator.
- * @tparam TChild The child is used to describe nested structures.
- This template has several requirements: 
+ * @tparam TContainer : This one describes the container, over whose elements 
+ * you would like to iterate. This template need the trait \b ComponentType has 
+ * a specialication for TContainer. This trait gives the type of the components 
+ * of TContainer; \see Componenttype.hpp 
+ * @tparam TComponent Component type of the container.
+ * @tparam TAccessor The accessor descripe the access to and position of the 
+ * components of TContainer. \see Accessor.hpp
+   @tparam TNavigator The navigator describe the way to walk through the data. 
+   It describe the first element, the next element and the after last element.
+   \see Navigator.hpp
+ 
+   @tparam TChild The child is the template parameter to realize nested 
+   structures.  This template has several 
+   requirements: 
     1. it need to spezify an Iterator type. These type need operator++,  operator*,
-        operator=, operator!= and a default constructor.
-    2. it need an WrapperType type
-    3. it need a begin and a end function. The result of the begin function must
-       have the same type as the operator= of the iterator. The result of the 
-       end function must have the same type as the operator!= of the iterator.
-    4. default constructor
-    5. copy constructor
-    6. constructor with childtype and containertype as variables
-    7. refresh(componentType*): for nested datastructures we start to iterate in
-    deeper layers. After the end is reached, in this layers, we need to go to the
-    next element in the current layer. Therefore we had an new component. This 
-    component is given to the child.
+        operator=, operator== and a default constructor.
+    2. gotoNext(), nbElements(), setToBegin(), isAfterLast()
+    3. gotoPrevious(), setToRbegin(), isBeforeFirst()
+    3. TChild::ReturnType must be specified. This is the componenttype of the 
+    innerst container.
+    4. TChild::IsRandomAccessable The child is random accessable
+    5. TChild::IsBidirectional The child is bidirectional
+    6. TChild::hasConstantSize The container of the child has constant size
+    7. default constructor
+    8. copy constructor
+    9. constructor with childtype && containertype as variables
+   It it is recommended to use DeepIterator as TChild.
+      @tparam TIndexType Type of the index. The index is used to access the component 
+   within the container. The index must support a cast from int especially from
+   0.
+   @tparam hasConstantSizeSelf This flag is used to decide whether the container
+   has a fixed number of elements. It is not needed that this count is known at 
+   compiletime, but recommended. This trait is used to optimize the iteration to
+   the next element. At default, a container hasnt a fixed size. An example 
+   for a container with fixed size is std::array<T, 10>. 
+   @tparam isBidirectionalSelf This flag is used to decide wheter the container
+   is bidirectional. If this flag is set to true, it enables backward iteration
+   i. e. operator--. The navigator need the bidirectional functions
+   @tparam isRandomAccessableSelf This flag is used to decide whether the 
+   container is random accessable. If this flag is set to true, it enables the 
+   following operations: +, +=, -, -=, <,>,>=,<=. The accessor need the functions
+   lesser, greater, if this flag is set to true.
  */
 
 #pragma once
@@ -157,6 +166,12 @@ public:
     ChildType child;
 } ;
 
+/**
+ * @brief Use a container and a prescription to create a view.
+ * @param TContainer the container, over which you like to iterate
+ * @param TPrescription the prescription of the layers
+ * @return a view
+ */
 template<
     typename TContainer,
     typename TPrescription,

@@ -1,13 +1,32 @@
 
 /**
  * \struct Navigator
- @brief This is the default implementation of the navigator. This navigator has
- only functionality for forward iteration. Your implementation has two special 
- parameters: The offset and the jumpsize. This parameters are used to implement 
- a parallel iterator. The offset is the distance from the beginning of the 
- container to the first element of the iterator, i.e. the process id. 
- The jumpsize is the distance between two iterator positions, i.e. the number of
- processes. All traits are instantiated as class members. 
+ @brief This is the default implementation of the navigator. The task of the 
+ navigator is to define the first element, the next element and an after last 
+ element. If the navigator is bidirectional it need also a last element, a previous
+ element and a before first element. 
+ 
+ The navigator has two traits for parallel 
+ walking through the container. The first one is TOffset. This is used to get the 
+ distance from the first element of the container to the first element which will
+ be accessed. This trait can be used to map the thread ID (for example offset 
+ = threadIdx.x). The second trait is the jumpsize. The jumpsize is the distance
+ between two iterator elements. The number of threads can be mapped on the jump-
+ size. With this two traits you can go parallel over all elements and touch each
+ element only one times. 
+ 
+ We had three/six traits for the behaviour of the container. The first three traits
+ are 
+ 1. define the first element of the container,
+ 2. define a next element of the container,
+ 3. define a after last element of the container.
+ If the navigator is bidirectional three additional traits are needed
+ 4. define the last element within the container
+ 5. define a previous element of the container
+ 6. define a before first element of the container.
+ The navigator use this 8 traits to define methodes for parallel iteration though
+ the container.
+ 
  @tparam TContainer Type of the container,
  @tparam TComponent Type of the component of the container.
  @tparam TOffset Policy to get the offset. You need to specify the () operator.
@@ -164,6 +183,8 @@ public:
      * @brief The function moves the iterator forward to the next element. 
      * @param index in: current position of iterator; out: position of the 
      * iterator after the move.
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param distance number of elements you like to overjump.
      * @result the distance from the end element to the hypothetical position
      * given by the distance parameter
      */
@@ -174,17 +195,7 @@ public:
         IndexType & index,
         RangeType distance)
     {
-        // test if the iterator is before the first element
-//         if(beforeFirstElement.test(containerPtr, index, offset(), containerSize))
-//         {
-//             firstElement(containerPtr, index);
-//             nextElement(
-//                 containerPtr, 
-//                 index,  
-//                 static_cast<RangeType>(offset()),
-//                 containerSize);
-//             --distance;
-//         }
+        assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         auto remainingJumpsize = nextElement(
             containerPtr, 
@@ -192,27 +203,31 @@ public:
             static_cast<RangeType>(jumpsize() * distance),
             containerSize);
         
-        /// @todo Test ob es aufgerundet werden muss
         // we need the distance from the last element to the current index position
+        // this is a round up
         return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
     }
     
     
     /**
-     * @brief The function moves the iterator backward to the next element. 
+     * @brief The function moves the iterator backward to the previous element. 
+     * This function is only enabled, if the navigator is bidirectional.
+     * @param containerPtr pointer to the container, over which we iterate
      * @param index in: current position of iterator; out: position of the 
      * iterator after the move.
+     * @param distance number of elements you like to overjump.
      * @result the distance from the end element to the hypothetical position
      * given by the distance parameter
      */
+    template< bool T=isBidirectional>
     HDINLINE
-    RangeType
+    typename std::enable_if<T==true, RangeType>::type
     previous(
         ContainerPtr containerPtr,  
         IndexType & index,
         RangeType distance)
     {
-
+        assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         auto remainingJumpsize = previousElement(
             containerPtr, 
@@ -228,6 +243,8 @@ public:
     
     /**
      * @brief set the iterator to the first element
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index out: first element of the iterator.
      */
     HDINLINE 
     void 
@@ -235,6 +252,7 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index)
     {
+        assert(containerPtr != nullptr); // containerptr should be valid
         firstElement(containerPtr, index);
         nextElement(
             containerPtr, 
@@ -244,16 +262,19 @@ public:
     }
     
     /**
-     * @brief set the iterator to the last element. It is possible that two iterators,
-     * the first start with begin, the second with last, never meet.
+     * @brief set the iterator to the last element. 
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index out: last element of the iterator.
      */
 
+    template< bool T=isBidirectional>
     HDINLINE 
-    void 
+    typename std::enable_if<T==true>::type
     rbegin(
         ContainerPtr containerPtr,  
         IndexType & index)
     {
+        assert(containerPtr != nullptr); // containerptr should be valid
         auto nbElementsVar = nbElements(containerPtr);
         // -1 since we dont like to jump outside
         auto nbJumps = (nbElementsVar - offset() - 1) / jumpsize();
@@ -272,6 +293,11 @@ public:
         
     }
     
+    /**
+     * @brief set the iterator to the after last element
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index out: index of the after last element
+     */
     HDINLINE 
     void 
     end(
@@ -284,10 +310,13 @@ public:
     /**
      * @brief set the iterator to the last element. It is possible that two iterators,
      * the first start with begin, the second with last, never meet.
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index out: index of the before first element
      */
 
+    template< bool T=isBidirectional>
     HDINLINE 
-    void 
+    typename std::enable_if<T==true>::type
     rend(
         ContainerPtr containerPtr,  
         IndexType & index)
@@ -295,6 +324,12 @@ public:
         beforeFirstElement.set(containerPtr, index, offset(), containerSize);
     }
     
+    /**
+     * @brief check wheter the index is after the last element
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index in: current index position
+     * @return true, if the index is after the last element; false otherwise
+     */
     HDINLINE 
     bool
     isAfterLast(
@@ -305,8 +340,15 @@ public:
         return afterLastElement.test(containerPtr, index, containerSize);
     }
     
+    /**
+     * @brief check wheter the index is before the first element
+     * @param containerPtr pointer to the container, over which we iterate
+     * @param index in: current index position
+     * @return true, if the index is before the first element; false otherwise
+     */
+    template< bool T=isBidirectional>
     HDINLINE 
-    bool
+    typename std::enable_if<T==true, bool>::type
     isBeforeFirst(
         ContainerPtr containerPtr,   
         IndexType const & index)
@@ -315,31 +357,38 @@ public:
         return beforeFirstElement.test(containerPtr, index, offset(), containerSize);
     }
     
-    
+    /**
+     * @brief this function determine the number of elements within the container
+     * @param containerPtr pointer to the container, you like to know the number
+     * of elements
+     * @return number of elements within the container
+     */
     HDINLINE
     RangeType 
     nbElements(ContainerPtr containerPtr)
     const
     {
+        assert(containerPtr != nullptr); // containerptr should be valid
         return containerSize(containerPtr);
     }
     
+    /**
+     * @brief this function determine the number of elements over which the navigator
+     * goes. I.e sizeContainer / jumpsize
+     * @param containerPtr pointer to the container, you like to know the number
+     * of elements
+     * @return number of elements the navigator can access
+     */
     HDINLINE
     RangeType
     size(ContainerPtr containerPtr)
     const 
     {
-        int nbElem = nbElements(containerPtr);
-        int off = offset();
+        assert(containerPtr != nullptr); // containerptr should be valid
+        auto const nbElem = nbElements(containerPtr);
+        auto const off = offset();
         assert(nbElem >= off /* The offset need to be smaller or equal than the container size */);
-        return (nbElements(containerPtr) - offset() + jumpsize() - static_cast<RangeType>(1)) / jumpsize();
-    }
-    
-    HDINLINE
-    bool 
-    debug_Test()
-    {
-        return true;
+        return (nbElem - off + jumpsize() - static_cast<RangeType>(1)) / jumpsize();
     }
     
 //variables
@@ -642,39 +691,3 @@ makeNavigator(
 
 }// namespace hzdr
 
-// template<
-//         typename TContainerNoRef,
-//         typename TComponent,
-//         typename TOffset,
-//         typename TJumpsize,
-//         typename TIndex,
-//         typename TContainerSize,
-//         typename TRange,
-//         typename TFirstElement,
-//         typename TNextElement,
-//         typename TAfterLastElement,
-//         typename TLastElement,
-//         typename TPreviousElement,
-//         typename TBeforeFirstElement,
-//         bool isBidirectional
-// >
-// std::ostream& operator<<(std::ostream& out, hzdr::Navigator<
-//             TContainerNoRef,
-//             TComponent,
-//             TOffset,
-//             TJumpsize,
-//             TIndex,
-//             TContainerSize,
-//             TRange,
-//             TFirstElement,
-//             TNextElement,
-//             TAfterLastElement,
-//             TLastElement,
-//             TPreviousElement,
-//             TBeforeFirstElement,
-//             isBidirectional> const & navi)
-// {
-//     out << navi.offset();
-// //     out << "(" << navi.offset() << ", " << navi.jumpsize() << ")";
-//     return out;
-// }

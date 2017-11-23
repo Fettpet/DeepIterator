@@ -1,11 +1,13 @@
-#include <map>
+#include <boost/container/vector.hpp>
+
 /**
  * @brief We use this test to give you an advice how you can create an own 
  * categorie. We like to use the map out of the std library as a categorie. The 
  * namespacing is like the namespacing in the iterator package. The first thing 
  * you need to do, give the categorie a name. 
  */
-
+// this contains all includes for all classes we need.
+#include "Iterator/Categorie.hpp"
 namespace hzdr 
 {
 namespace container
@@ -18,9 +20,11 @@ struct MapLike;
 
 } // namespace Categorie
 
+
 /**
  * The next thing you need to do, specify the needed traits for accessor and 
  * navigator and the other needed:
+ * 1. ComponentType
  * 1. IndexType,
  * 2. RangeType,
  * Four for the accessor Behaviour
@@ -38,19 +42,59 @@ struct MapLike;
  * We use the std iterator to iterate over the data struc
  */
 
-template<
-    typename Key, 
-    typename T>
-struct IndexType<std::map<key, T> > 
+namespace traits 
 {
-    typedef std::map<key,T>::iterator type; 
-};
 
 template<
     typename T>
 struct RangeType<boost::container::vector<T>, void> 
 {
     typedef int_fast32_t type; 
+};
+
+template<
+    typename T>
+struct ComponentType<boost::container::vector<T> > 
+{
+    typedef T type; 
+};
+
+template<
+    typename T, 
+    typename ContainerCategorie>
+struct IsBidirectional<boost::container::vector<T>, ContainerCategorie> 
+{
+    static const bool value = true;
+};
+
+template<
+    typename T,
+    typename ContainerCategorie>
+struct IsRandomAccessable<boost::container::vector<T>, ContainerCategorie > 
+{
+    static const bool value = true;
+};
+
+template<
+    typename T>
+struct HasConstantSize<boost::container::vector<T> > 
+{
+    static const bool value = false;
+};
+
+template< 
+    typename T>
+struct NumberElements<boost::container::vector<T>>
+{
+    typedef boost::container::vector<T> Container;
+    
+    HDINLINE
+    int_fast32_t 
+    operator()(Container* container)
+    const
+    { 
+        return container->size();
+    }
 };
 
 namespace accessor 
@@ -359,5 +403,64 @@ struct BeforeFirstElement<
         idx = static_cast<TIndex>(-1);
     }
 };
-
+}// namespace navigator
+} // namespace traits
 } // namespace hzdr
+
+/**
+ * @brief Now we test the boost vector
+ */
+#define BOOST_TEST_MODULE OwnCategorieBoostVector
+#include <boost/test/included/unit_test.hpp>
+
+#include "PIC/Supercell.hpp"
+#include "PIC/Frame.hpp"
+#include "PIC/Particle.hpp"
+#include "View.hpp"
+#include "DeepIterator.hpp"
+#include "View.hpp"
+#include "Definitions/hdinline.hpp"
+
+using namespace boost::unit_test;
+
+typedef hzdr::Particle<int_fast32_t, 2u> Particle;
+typedef hzdr::Frame<Particle, 10u> Frame;
+typedef hzdr::Supercell<Frame> Supercell;
+typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+
+BOOST_AUTO_TEST_CASE(Frames)
+{
+    boost::container::vector<Frame> data(10);
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    
+    auto && prescription = hzdr::makeIteratorPrescription(
+        hzdr::makeAccessor(),
+        hzdr::makeNavigator(
+            Offset(0),
+            Jumpsize(1)),
+        hzdr::makeIteratorPrescription(
+            hzdr::makeAccessor(),
+            hzdr::makeNavigator(
+                Offset(0),
+                Jumpsize(1)),
+            hzdr::makeIteratorPrescription(
+                hzdr::makeAccessor(),
+                hzdr::makeNavigator(
+                    Offset(0),
+                    Jumpsize(1)))));
+                                                           
+    auto && view = hzdr::makeView(data, prescription);
+    uint sum = 0;
+    for(auto && it = view.begin(); it != view.end(); ++it)
+    {
+        sum += *it;
+    }
+    
+    uint sum_check = 0;
+    for(auto i=0u; i<200u; ++i)
+    {
+        sum_check += i;
+    }
+    BOOST_TEST(sum == sum_check);
+}

@@ -10,28 +10,33 @@
  * 2. bool equal(TContainer*, TIndex&, TContainer*, TIndex&): returns true,
  * if the iterator is at the same position
  * 3. bool ahead(TContainer*, TIndex&, TContainer*, TIndex&): returns true,
- * if the first iterator is ahead the second one
+ * if the first iterator is ahead the second one. 
  * 4. bool behind(TContainer* , TIndex&, TContainer*, TIndex&): returns true,
- * if the first iterator is behind the second one
- * The functions ahead and behind are only needed, if the iterator is random 
+ * if the first iterator is behind the second one.
+ * The functions ahead and behind are only avail, if the iterator is random 
  * accessable. 
  * To use the default Accessor you need to spezify one trait for each function:
  * 1. get: hzdr::traits::accessor::Get<TContainer, TComponent, TIndex>
  * 2. ahead: hzdr::traits::accessor::Ahead<TContainer, TComponent, TIndex>
  * 3. equal: hzdr::traits::accessor::Equal<TContainer, TComponent, TIndex>
  * 4. behind: hzdr::traits::accessor::Behind<TContainer, TComponent, TIndex>
- * We had implemented two defaults Accessor. The first is used for arraylike 
- * data structures, the second use doubly link list like datastructures.
  * @tparam TContainer The container over which you like to iterate. 
  * @tparam TComponent The type of the container component. 
  * @tparam TIndex Type of the index to get access to the value of the iterator 
  * position.
  * @tparam TContainerCategory Type of default access parameter
+ * @tparam TGet Trait to define, how to get the first element 
+ * @tparam TEqual Trait to define, when two iterators are at the same position
+ * @tparam TAhead Trait to define, when the first iterator is ahead the second 
+ * one. Only needed if the iterator is random accessable.
+ * @tparam TBehind Trait to define, when the first iterator is behind the second
+ * one. Only needed if the iteartor is random accessable.
+ * @tparam isRandomAccessable true, if the container is random accessable, false
+ * otherwise
  */
 
 #pragma once
 #include "PIC/Frame.hpp"
-#pragma once
 #include "PIC/Supercell.hpp"
 #include <iostream>
 #include "Traits/Componenttype.hpp"
@@ -44,6 +49,7 @@
 #include "Traits/Accessor/Equal.hpp"
 #include "Traits/Accessor/Get.hpp"
 #include "Definitions/forward.hpp"
+
 namespace hzdr
 {
 namespace details
@@ -86,22 +92,31 @@ struct Accessor
     HDINLINE Accessor(Accessor const &) = default;
     HDINLINE Accessor(Accessor &&) = default;
     
+    /**
+     * @brief this function dereference a container and a index to get the 
+     * component
+     * @param containerPtr pointer to a container
+     * @param idx current position of the iterator
+     * @return component at the idx position
+     */
     HDINLINE 
     ComponentRef
     get(ContainerPtr containerPtr,
         IndexType & idx)
     {
+        assert(containerPtr != nullptr);
         return _get(containerPtr, idx);
     }
     
-    HDINLINE
-    bool 
-    debug_Test()
-    {
-        return true;
-    }
     
-    
+        /**
+     * @brief this function compares two iterator positions. 
+     * @param containerPtr1 pointer to the container of the first iterator
+     * @param idx1 current position of the first iterator 
+     * @param containerPtr2 pointer to the container of the second iterator
+     * @param idx2 current position of the second iterator
+     * @return true if both iterators are at the same position, false otherwise
+     */
     HDINLINE
     bool
     equal(ContainerPtr const containerPtr1,
@@ -109,32 +124,52 @@ struct Accessor
           ContainerPtr const containerPtr2,
           IndexType const & index2)
     {
+        assert(containerPtr1 != nullptr);
+        assert(containerPtr2 != nullptr);
         return _equal(containerPtr1, index1, containerPtr2, index2);
     }
     
-    
+    /**
+     * @brief this function compares two iterator positions. 
+     * @param containerPtr1 pointer to the container of the first iterator
+     * @param idx1 current position of the first iterator 
+     * @param containerPtr2 pointer to the container of the second iterator
+     * @param idx2 current position of the second iterator
+     * @return true if both iterators are on the same container and the first 
+     * index is ahead the second one.
+     */
     template<bool T = isRandomAccessable>
     HDINLINE 
-    bool
+    typename std::enable_if<T == true, bool>::type
     greater(ContainerPtr const containerPtr1,
           IndexType const & index1,
           ContainerPtr const containerPtr2,
-          IndexType const & index2,
-          std::enable_if<T == true>* = nullptr)
+          IndexType const & index2)
     {
+        assert(containerPtr1 != nullptr);
+        assert(containerPtr2 != nullptr);
         return _ahead(containerPtr1, index1, containerPtr2, index2);
     }
     
+    /**
+     * @brief this function compares two iterator positions. 
+     * @param containerPtr1 pointer to the container of the first iterator
+     * @param idx1 current position of the first iterator 
+     * @param containerPtr2 pointer to the container of the second iterator
+     * @param idx2 current position of the second iterator
+     * @return true if both iterators are on the same container and the first 
+     * index is behind the second one.
+     */
     template<bool T = isRandomAccessable>
     HDINLINE 
-    bool
-    lesser(ContainerPtr const 
-    containerPtr1,
+    typename std::enable_if<T == true, bool>::type
+    lesser(ContainerPtr const containerPtr1,
           IndexType const & index1,
           ContainerPtr const containerPtr2,
-          IndexType const & index2,
-          std::enable_if<T == true>* = nullptr)
+          IndexType const & index2)
     {
+        assert(containerPtr1 != nullptr);
+        assert(containerPtr2 != nullptr);
         return _behind(containerPtr1, index1, containerPtr2, index2);
     }
     
@@ -147,7 +182,7 @@ struct Accessor
 } ;
 
 /**
- * @brief the accessor concept.
+ * @brief the accessor prescription.
  */
 template<>
 struct Accessor<
@@ -165,11 +200,6 @@ struct Accessor<
     HDINLINE Accessor() = default;
     HDINLINE Accessor(Accessor const &) = default;
     HDINLINE Accessor(Accessor &&) = default;
-    
-    void testAcc(){}
- 
-    // for debugging with valgrind needed
-    const bool value = false;
 } ;
 
 namespace details 
@@ -177,7 +207,20 @@ namespace details
 
 
 
-
+/**
+ * @brief This function use an accessor prescription and container template to
+ * create a accessor. To use this function several traits must be defined.
+ * 1. IndexType
+ * 2. ContainerCategory
+ * 3. ComponentType
+ * 4. Get
+ * 5. Ahead
+ * 6. Equal
+ * 7. Behind
+ * @param TAccessor The accessor prescription. It is only virtual and not needed
+ * @tparam TContainer. Type of the container.
+ * @return An accessor with the functionallity given by the traits.
+ */
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
@@ -211,6 +254,19 @@ makeAccessor(TAccessor&&)
     return accessor;
 }
 
+/**
+ * @brief This function use a container template to
+ * create a accessor. To use this function several traits must be defined.
+ * 1. IndexType
+ * 2. ContainerCategory
+ * 3. ComponentType
+ * 4. Get
+ * 5. Ahead
+ * 6. Equal
+ * 7. Behind
+ * @tparam TContainer. Type of the container.
+ * @return An accessor with the functionallity given by the traits.
+ */
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
@@ -251,7 +307,17 @@ makeAccessor()
 
 
 /**
- * @brief creates an accessor
+ * @brief This function use a container template to
+ * create a accessor. To use this function several traits must be defined.
+ * 1. IndexType
+ * 2. ContainerCategory
+ * 3. ComponentType
+ * 4. Get
+ * 5. Ahead
+ * 6. Equal
+ * 7. Behind
+ * @param TContainer. The container
+ * @return An accessor with the functionallity given by the traits.
  */
 template<
     typename TContainer,
@@ -296,7 +362,7 @@ makeAccessor(TContainer&&)
 
 
 /**
- * @brief creates an accessor concept
+ * @brief creates an accessor prescription.
  */
 auto 
 HDINLINE
@@ -323,6 +389,11 @@ makeAccessor()
     return ResultType();
 }
 
+/**
+ * @brief This function forwards an own accessor. This is a identity function
+ * @param Accessor The accessor you like to forward
+ * @return the accessor given by as parameter.
+ */
 template<
     typename TAccessor>
 HDINLINE
