@@ -110,6 +110,13 @@ public:
     HDINLINE View(View const &) = default;
     HDINLINE View(View &&) = default;
     
+    /**
+     * @brief This is the constructor to create a useable view.
+     * @param container The container over which you like to iterate
+     * @param accessor Define the way how we access the data within the container
+     * @param navigator define the way how the iterator goes through the container
+     * @param child other iterator to handle nested datastructures
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
@@ -126,9 +133,19 @@ public:
         navigator(hzdr::forward<TNavigator_>(navigator)),
         child(hzdr::forward<TChild_>(child))
     {
-
+        static_assert(std::is_same<
+            typename std::decay<TAccessor_>::type,
+            typename std::decay<TAccessor>::type>::value,
+            "The type of the accessor given by the template and the accessor given as parameter are not the same");
+        static_assert(std::is_same<
+            typename std::decay<TNavigator_>::type,
+            typename std::decay<TNavigator>::type>::value,
+            "The type of the accessor given by the template and the accessor given as parameter are not the same");
     }
-        
+
+    /**
+    * @brief This function creates an iterator, which is at the after-last-element
+    */
     HDINLINE
     IteratorType
     end()
@@ -136,20 +153,31 @@ public:
         return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::end());
     }
     
+    /**
+    * @brief This function creates an iterator, which is at the last element
+    */
+    template<bool T = isBidirectional>
     HDINLINE
-    IteratorType 
+    typename std::enable_if<T == true, IteratorType>::type
     rbegin()
     {
         return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::rbegin());
     }
     
+        /**
+    * @brief This function creates an iterator, which is at the before-first-element
+    */
+    template<bool T = isBidirectional>
     HDINLINE
-    IteratorType 
+    typename std::enable_if<T == true, IteratorType>::type
     rend()
     {
         return IteratorType(containerPtr, accessor, navigator, child, details::constructorType::rend());
     }
-        
+    
+    /**
+    * @brief This function creates an iterator, which is at the first element
+    */
     HDINLINE
     IteratorType
     begin()
@@ -159,7 +187,7 @@ public:
 
 
 
-// protected:
+protected:
     ContainerPtr containerPtr;
     AccessorType accessor;
     NavigatorType navigator;

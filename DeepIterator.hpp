@@ -69,11 +69,31 @@ constructors has five parameters:
 If your container has no interleaved layer, you can use \b hzdr::NoChild as child.
 A DeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
 and all childs are bidirectional. The same applies to random accessablity.
+
 We had two algorithms inside the DeepIterator. The first one is used to find the
 first element within a nested data structure. The second one is used to find the
 next element within the data structure. Lets start with the find the first 
-element procedure. 
+element procedure. The setToBegin function has an optional parameter, this is 
+the container over which the iterator walks. The first decision "Has Childs" is
+done by the compiler. We had two different DeepIterators. One for the has childs
+case, and one for the has no childs case. The case where the iterator has childs
+search now an element, where all childs are valid. It pass the current element
+to the child. The child go also the the beginning. If the current element hasnt
+enough elements, we iterate one element forward and check again.
 \image html images/setTobegin.png "Function to find the first element"
+The second algorithm is used to find the previous element. We show this at the
+operator--. The operator- calls also the gotoPrevious function, with an other 
+value rather than 1. First we check whether they are childs. If not, we call the
+navigator. If there are childs, we call gotoPrevious. The gotoPrevious function 
+first check whether the iterator has childs, i.e. has an interleaved datastructure.
+If it has childs there are two different approches. The first one assumes that 
+each element of the container has the same size. The spit the jumpsize in 3 values
+1. the rest in this element,
+2. the number of elements, which are overjumped,
+3. the remainder of the resulting element
+In the second case, where each element can have a different number of elements, 
+the deepiterator doesnt overjump elements. It walks step by step.
+\image html images/setTobegin.png
  */
 #include <sstream>
 #pragma once
