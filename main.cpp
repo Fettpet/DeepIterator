@@ -9,36 +9,35 @@
  * supercell, except the last one, has the maximum number of particles. A supercell
  * is devided in several cells. The affiliation of a particle to a cell is a 
  * property of the particle.
- * The goal of this project is an iterator that can go through the data structes.
- * It should be possible to go over nested datastructers. For example over all
- * particles within a supercell. We would use the iterator on GPU and CPU. So it 
- * should be possible to overjump some elements, such that no element is used more
- * than ones, in a parallel application.
+ * The goal of this project is to write an iterator that can go through the data 
+ * structes. It should be possible to go over nested datastructers. For example 
+ * over all particles within a supercell. We would use the iterator on GPU and 
+ * CPU. So it should be possible to overjump some elements, such that no element 
+ * is used more than ones, in a parallel application.
  * 
  * # The DeepIterator {#section2}
  * The DeepIterator class is used to iterator over interleaved data 
  * structures. The simplest example is for an interleaved data structure is 
  * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
  * within the structure. For more details see DeepIterator and View. 
+ * \see DeepIterator.hpp \see View.hpp
  * 
  * # Changes in the datastructure {#section3}
  * The number of elements in the last frame was a property of the supercell. This
- * is a big problem. To illustrate this, we give an example. We like to iterate 
+ * is a problem. To illustrate this, we give an example. We like to iterate 
  * over all particles in all Supercells. Your first attempt was a runtime variable.
  * The user gives the size of the last frame explicitly when the view is created.
  * This also requires a function which decide wheter the last frame is reached.
  * The problem is, if we go over more than on supercell the number of particles 
- *within the last frame changed with each supercell. Our first approach cann't 
- *handle this case. To overcame this, we would need a function that gives the 
- *size of the last frame. But this information is hidden two layers above. This
- *doesnt see like a good design. 
+ * within the last frame changed with each supercell. Our first approach cann't 
+ * handle this case. To overcame this, we would need a function that gives the 
+ * size of the last frame. But this information is hidden two layers above. This
+ * doesnt see like a good design. 
  * 
  * So we decide to change the datastructres of PIConGPU. Each frame has a fixed 
  * size, i.e. how many particle are at most in the frame. We give the frame a 
  * variable numberParticles. This is the number of particles within the frame.
  * The number must be smaller than the maximum number of particles.
- * 
- * \see DeepIterator \see View
  */
 
 #include <iostream>
@@ -55,7 +54,7 @@
 #include "View.hpp"
 #include <omp.h>
 #include "Definitions/hdinline.hpp"
-#include "Iterator/Collective.hpp"
+
 
 #include "Tests/Cuda/cuda.hpp"
 #include "DeepIterator.hpp"
@@ -64,86 +63,106 @@
 #include "Iterator/Accessor.hpp"
 #include "Iterator/Navigator.hpp"
 #include "Iterator/Policies.hpp"
-#include "Iterator/Collective.hpp"
+#include "Iterator/Prescription.hpp"
+
 #include "Traits/NumberElements.hpp"
 #include "Definitions/hdinline.hpp"
-
+#include <boost/timer.hpp>
 
 
 
 
 int main(int , char **) {
-
-    std::vector<int> nbFrames{2,3,4};
-    std::vector<int> nbParticles{100,200,150};
-    
-    typedef hzdr::Particle<int32_t, 2> Particle;
-    typedef hzdr::Frame<Particle, 10> Frame;
-    typedef hzdr::SuperCell<Frame> Supercell;
-
+    typedef hzdr::Particle<int32_t, 1u> Particle;
+    typedef hzdr::Frame<Particle, 10u> Frame;
+    typedef hzdr::Supercell<Frame> Supercell;
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-        
+    typedef hzdr::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
+    std::cout << std::endl << " Test with runtime jumpsize and offset. We use list<vector<int> >" << std::endl;
     
-    Supercell test(5, 5);
+    auto nbFrames = 2u;
+    auto nbParticleInLastFrame = 5u;
     
+    Supercell supercell(nbFrames, nbParticleInLastFrame);
     
-    auto  childConceptJump1 = hzdr::makeIteratorConcept(
-                                hzdr::makeAccessor(),
-                                hzdr::makeNavigator(
-                                    Offset(0),
-                                    Jumpsize(1)),
-                                hzdr::makeIteratorConcept(
-                                    hzdr::makeAccessor(),
-                                    hzdr::makeNavigator(
-                                        Offset(0),
-                                        Jumpsize(1))));
-                            
+    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
+    std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
+    std::vector<uint> ns{1u, 2u, 3u, 4u};
+    std::cout << supercell << std::endl;
     
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(0),
+                                            Jumpsize(1)),
+                                            hzdr::makeIteratorPrescription(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(3),
+                                                    Jumpsize(1))));
+                
+                // We calc the number of elements, which would be the result
+                auto nbParticlesPerFrame = (10u - 3 + 1 - 1u) / 1;
+                auto nbParticles = (nbFrames - 1u) * nbParticlesPerFrame;
+                
+                // calculate the first index in the last frame
+                
+                
+                for(uint i=3; i<nbParticleInLastFrame; i+= 1)
+                {
+                    nbParticles++;
+                }
+                nbParticles = (nbParticles + 3 - 1u) / 3;
+                
+                auto view = makeView(supercell,childPrescriptionJump1);
+                uint counter = 0u;
+                for(auto it=view.begin(); it!=view.end(); it+=3)
+                {
+                    std::cout << *it << std::endl;
+                    ++counter;
+                }
+                std::cout << counter << ", " << nbParticles << std::endl;
+                
+                counter = 0u;
+                for(auto it=view.rbegin(); it!=view.rend(); it-=3)
+                {
 
-    auto view = makeView(test,
-                         childConceptJump1);
+                    ++counter;
+                }
+                std::cout << counter << ", " << nbParticles << std::endl;
+/*    std::cout << testFrame << std::endl;
+    std::cout << "Last Element:" ;
+    std::cout << *(view.rbegin()) << std::endl;;
+    std::cout <<  *(--(++(view.rbegin()))) << std::endl; 
     
-    std::cout << test << std::endl;
-    auto it = view.begin();
-    std::cout << std::boolalpha << "Constant Size: " << it.hasConstantSize << std::endl;
-    std::cout << "RandomAccessable: " << it.isRandomAccessable << std::endl;
-    std::cout << "hasConstantSizeChild " << it.hasConstantSizeChild << std::endl;
-    std::cout << "selfCompileTimeSize " << it.selfCompileTimeSize << std::endl;
-    int counter = 0;
-    
-//     for(auto && it=view.begin(); it!= view.end(); it += 3)
-//     {
-//         if(++counter > 60) 
-//             break;
-//         std::cout << *it << std::endl;
-//     }
-//     
+    std::cout << "First:" ;
+    std::cout << *(view.begin()) << std::endl;;
+    std::cout <<  (--(view.begin()) == view.rend()) << std::endl; 
+    // 1. Test we iterate over the frame and read all particles 
+    auto counter = 0u*/;
+ 
+   
 //     for(auto && it=view.begin(); it!= view.end(); it += 3)
 //     {
 //         if(++counter > 50) 
 //             break;
 //         std::cout << *it << std::endl;
 //     }
-    
-    auto  childConceptOffset2 = hzdr::makeIteratorConcept(
+    /*
+    auto  childPrescriptionOffset2 = hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0),
                                     Jumpsize(1)),
-                                hzdr::makeIteratorConcept(
+                                hzdr::makeIteratorPrescription(
                                     hzdr::makeAccessor(),
                                     hzdr::makeNavigator(
                                         Offset(1),
-                                        Jumpsize(1)),
-                                    hzdr::makeIteratorConcept(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
-                                            Offset(0),
-                                            Jumpsize(2)))));
+                                        Jumpsize(1))));
     
     auto view2 = makeView(test,
-                         childConceptOffset2);
+                         childPrescriptionOffset2);
     for(auto && it=view2.begin(); it!= view2.end(); it += 3)
     {
         if(++counter > 50) 
@@ -221,7 +240,7 @@ int main(int , char **) {
 */
 //     typedef hzdr::Particle<int32_t, 2> Particle;
 //     typedef hzdr::Frame<Particle, 256> Frame;
-//     typedef hzdr::SuperCell<Frame> Supercell;
+//     typedef hzdr::Supercell<Frame> Supercell;
 //     
 //     SupercellHandle<Supercell> supercellHandler(1, 100);
 //     std::cout << "Supercell before calcluation" << std::endl;
@@ -235,7 +254,7 @@ int main(int , char **) {
     
      
 //     Supercell cell(5, 2), cell2(4, 4);
-//     const int nbSuperCells = 5;
+//     const int nbSupercells = 5;
 //     const int nbFramesInSupercell = 2;
 // 
 //     
@@ -254,7 +273,7 @@ int main(int , char **) {
 //     
 //     const RuntimeTuple runtimeVarParticle1(offsetParticle1, nbElementsParticle1, jumpsizeParticle1);
 //     
-//   //  hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell1(cell, 
+//   //  hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSupercell1(cell, 
 //   //                                                                                                                          runtimeSupercell1,
 //   //                                                                                                                          ParticleInFrame(nullptr, runtimeVarParticle1)); 
 //     
@@ -294,12 +313,12 @@ int main(int , char **) {
 //         
 //         const RuntimeTuple runtimeVarParticle2(offsetParticle2, nbElementsParticle2, jumpsizeParticle2);
 //         
-//         hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSuperCell(cell, 
+//         hzdr::View<Supercell, hzdr::Direction::Forward,  hzdr::Collectivity::None, RuntimeTuple,ParticleInFrame> iterSupercell(cell, 
 //                                                                                                                                 runtimeSupercell2,
 //                                                                                                                                 ParticleInFrame(nullptr, runtimeVarParticle2)); 
 //         
 //         /// @todo doesnt work
-//         for(auto it=iterSuperCell.begin(); it != iterSuperCell.end(); ++it)
+//         for(auto it=iterSupercell.begin(); it != iterSupercell.end(); ++it)
 //         {
 //             if(*it)
 //             {
@@ -331,7 +350,7 @@ int main(int , char **) {
     
     gpuErrchk(cudaMalloc(&array_d, sizeof(int) * dim * 256));
     gpuErrchk(cudaMemcpy(array_d, array_h, sizeof(int) * dim * 256, cudaMemcpyHostToDevice));
-    createSuperCell<<<1, 1>>>();
+    createSupercell<<<1, 1>>>();
     myKernel<<<1, 256>>>();
     
     std::cout << "It works" << std::endl;

@@ -13,7 +13,7 @@
 
 #define BOOST_TEST_MODULE Bidirectional
 #include <boost/test/included/unit_test.hpp>
-
+#include "PIC/SupercellContainer.hpp"
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"

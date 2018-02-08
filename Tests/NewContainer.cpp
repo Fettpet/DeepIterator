@@ -30,7 +30,7 @@
 
 #include "View.hpp"
 #include "DeepIterator.hpp"
-
+#include "PIC/SupercellContainer.hpp"
 /**
  * Each new Container need to specify the following traits:
  * 1. Componenttype

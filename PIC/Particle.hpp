@@ -6,6 +6,7 @@
 #pragma once
 #include <array>
 #include <iostream>
+#include "Traits/NumberElements.hpp"
 #include "Iterator/Categorie.hpp"
 #include "Iterator/Categorie/ArrayLike.hpp"
 #include "Definitions/hdinline.hpp"
@@ -25,9 +26,9 @@ struct Particle<TPosition, 1>
     
     HDINLINE
     Particle()
-        {
-            data[0] = ++currentValue;
-        }
+    {
+        data[0] = ++currentValue;
+    }
     
     HDINLINE
     Particle(const TPosition& x):
@@ -169,7 +170,23 @@ template<typename TProperty, int_fast32_t nb>
 struct ContainerCategory<Particle<TProperty, nb> >
 {
     typedef hzdr::container::categorie::ArrayLike type;
-} ;
+};
+
+template<typename TPos, int_fast32_t nb>
+struct NumberElements<hzdr::Particle<TPos, nb> >
+{
+    typedef hzdr::Particle<TPos, nb> Particle;
+    
+    HDINLINE
+    int_fast32_t 
+    constexpr
+    operator()(Particle* )
+    const
+    {
+        return nb;    
+    }
+    
+}; 
 
 } // namespace traits
 

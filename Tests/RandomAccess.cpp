@@ -14,7 +14,7 @@
 
 #define BOOST_TEST_MODULE RandomAccessIterator
 #include <boost/test/included/unit_test.hpp>
-
+#include "PIC/SupercellContainer.hpp"
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
@@ -230,6 +230,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
         for(auto off : offsets)
             for(auto  n : ns)
             {
+//                 std::cout << "Offset " << off << " Jumpsize " << jump << " n " << n << std::endl;
                 auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
@@ -274,7 +275,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
 
 }
 
-BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
+BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
 {
 
     /** We like to test the following things
@@ -298,7 +299,7 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
         for(auto off : offsets)
             for(auto  n : ns)
             {
-                std::cout << "jump " << jump << " off " << off << " n " << n << std::endl;
+                
                 auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
@@ -347,6 +348,72 @@ BOOST_AUTO_TEST_CASE(ParticleAttrubutesInSupercell)
                 }
                 BOOST_TEST(counter == nbParticles);
             }
-
 }
 
+BOOST_AUTO_TEST_CASE(CompareOperators)
+{
+    typedef hzdr::SelfValue<uint_fast32_t> Offset;
+    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    
+    auto nbFrames = 5u;
+    auto nbParticleInLastFrame = 5u;
+    
+    Supercell supercell(nbFrames, nbParticleInLastFrame);
+    
+    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
+    std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
+    std::vector<uint> ns{1u, 2u, 3u};
+    
+    for(auto jump : jumpsizes)
+        for(auto off : offsets)
+            for(auto  n : ns)
+            {
+                std::cout << "jump " << jump << " off " << off << " n " << n << std::endl;
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
+                                        hzdr::makeAccessor(),
+                                        hzdr::makeNavigator(
+                                            Offset(off),
+                                            Jumpsize(jump)),
+                                            hzdr::makeIteratorPrescription(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(0),
+                                                    Jumpsize(1)),
+                                            hzdr::makeIteratorPrescription(
+                                                hzdr::makeAccessor(),
+                                                hzdr::makeNavigator(
+                                                    Offset(0),
+                                                    Jumpsize(1)))));
+                auto && view = hzdr::makeView(supercell, childPrescriptionJump1);
+                
+                auto && it1 = view.begin();
+                
+                auto && it2 = view.begin();
+                
+                
+                BOOST_TEST((it1 <= it2));
+                BOOST_TEST((it1 >= it2));
+                BOOST_TEST(not (it1 < it2));
+                BOOST_TEST(not (it1 > it2));
+                
+                // second test test ++
+                ++it2;
+                BOOST_TEST((it1 < it2));
+                BOOST_TEST((it2 > it1));
+                
+                BOOST_TEST(not (it2 < it1));
+                BOOST_TEST(not (it1 > it2));
+                
+                // third test += n
+                --it2;
+                it2 += n;
+
+                BOOST_TEST((it1 < it2));
+                BOOST_TEST((it2 > it1));
+                
+                BOOST_TEST(not (it2 < it1));
+                BOOST_TEST(not (it1 > it2));
+                
+            }
+    
+}

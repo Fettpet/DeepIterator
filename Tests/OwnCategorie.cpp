@@ -1,5 +1,5 @@
 #include <boost/container/vector.hpp>
-
+#include "PIC/SupercellContainer.hpp"
 /**
  * @brief We use this test to give you an advice how you can create an own 
  * categorie. We like to use the map out of the std library as a categorie. The 

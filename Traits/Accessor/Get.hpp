@@ -30,8 +30,6 @@ struct Get
     HDINLINE
     TComponent& 
     operator() (TContainer*, TIndex&);
-    
-    bool Debugging = false;
 } ;
 
 

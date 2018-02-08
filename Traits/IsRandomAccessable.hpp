@@ -12,10 +12,7 @@ namespace hzdr
 namespace traits
 {
 template<typename TContainerCategorie, typename SFIANE = void>
-struct IsRandomAccessable
-{
-    static const bool value = true;    
-};
+struct IsRandomAccessable;
 
 
 }// namespace traits

@@ -86,7 +86,22 @@ protected:
 // traits
 namespace traits 
 {
+template<typename Supercell>
+struct NumberElements<hzdr::SupercellContainer<Supercell> >
+{
+    typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
     
+    HDINLINE
+    int_fast32_t
+    operator()( SupercellContainer* element)
+    const
+    {
+        return element->getNbSupercells();
+    }
+    
+} ;
+
+
 template<
     typename TSupercell>
 struct IsBidirectional<SupercellContainer<TSupercell> >

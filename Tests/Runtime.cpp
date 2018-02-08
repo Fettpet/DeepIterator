@@ -12,7 +12,7 @@
 
 #define BOOST_TEST_MODULE ForwardIterator
 #include <boost/test/included/unit_test.hpp>
-
+#include "PIC/SupercellContainer.hpp"
 #include "PIC/Supercell.hpp"
 #include "PIC/Frame.hpp"
 #include "PIC/Particle.hpp"
@@ -21,7 +21,8 @@
 #include "View.hpp"
 #include "Definitions/hdinline.hpp"
 #include <boost/timer.hpp>
-uint const nbTries = 5u;
+
+uint const nbTries = 25u;
 using namespace boost::unit_test;
 typedef hzdr::Particle<int_fast32_t, 1u> Particle;
 typedef hzdr::Frame<Particle, 100u> Frame;
@@ -42,7 +43,7 @@ BOOST_AUTO_TEST_CASE(Test1B)
     
     for(auto const nbElem: sizes)
     {
-        double time1Layer(0), timetrival(0), time3Layer(0);
+        double time1Layer(0), timetrival(0);
         for(auto i=0u; i<nbTries; ++i)
         {
             auto && data = SupercellSingle(nbElem, 1u);
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_CASE(Test2A)
     
     for(auto const nbElem: sizes)
     {
-        double time1Layer(0), timetrival(0), time3Layer(0);
+        double time1Layer(0), timetrival(0);
         for(auto i=0u; i<nbTries; ++i)
         {
             auto && data = Supercell(nbElem, 100u);
@@ -162,6 +163,7 @@ BOOST_AUTO_TEST_CASE(Test2A)
             auto buffer = data.firstFrame;
             while(buffer != nullptr)
             {
+                
                 for(int i=0;i <100; ++i)
                 {
                     sum += buffer->operator[](i).data[0];
@@ -214,7 +216,7 @@ BOOST_AUTO_TEST_CASE(Test1A)
     
     for(auto const nbElem: sizes)
     {
-        double time1Layer(0), timetrival(0), time3Layer(0);
+        double time1Layer(0), timetrival(0);
         for(auto i=0u; i<nbTries; ++i)
         {
             auto && data = Supercell(nbElem, 100u);

@@ -77,7 +77,7 @@ struct Equal<
     typedef hzdr::Supercell<TFrame> TContainer;
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator() (TContainer* con1, TIndex const & idx1, TContainer* con2, TIndex const & idx2)
     {
         return con1 == con2 && idx1 == idx2;
     }
@@ -100,7 +100,7 @@ struct Ahead<
     typedef hzdr::Supercell<TFrame> TContainer;
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator() (TContainer* con1, TIndex const & idx1, TContainer* con2, TIndex const & idx2)
     {
         if(con1 != con2)
             return false;
@@ -108,9 +108,10 @@ struct Ahead<
         TIndex tmp = idx1;
         while(tmp != nullptr)
         {
+            tmp = tmp->previousFrame;
             if(tmp == idx2) 
                 return true;
-            tmp = tmp->previousFrame;
+           
         }
         return false;
     }
@@ -136,14 +137,15 @@ struct Behind<
     typedef hzdr::Supercell<TFrame> TContainer;
     HDINLINE
     bool
-    operator() (TContainer*, TIndex& idx1, TContainer*, TIndex& idx2)
+    operator() (TContainer*, TIndex const & idx1, TContainer*, TIndex const & idx2)
     {
         TIndex tmp = idx1;
         while(tmp != nullptr)
         {
+            tmp = tmp->nextFrame;
             if(tmp == idx2) 
                 return true;
-            tmp = tmp->nextFrame;
+            
         }
         return false;
     }

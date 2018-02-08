@@ -14,6 +14,7 @@
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/IsBidirectional.hpp"
 #include "Traits/HasConstantSize.hpp"
+#include "Traits/NumberElements.hpp"
 
 namespace hzdr
 {
@@ -141,6 +142,31 @@ struct ComponentType<Supercell<TFrame> >
     typedef TFrame type;
 } ;
 
+template<typename TFrame>
+struct NumberElements<Supercell<TFrame> >
+{  
+    typedef Supercell<TFrame> Container;
+    
+    NumberElements() = default;
+    NumberElements(NumberElements const &) = default;
+    NumberElements(NumberElements &&) = default;
+    
+    HDINLINE
+    int_fast32_t 
+    operator()(Container* container)
+    const
+    {
+        auto result = 0;
+        auto tmp = container->firstFrame;
+        while(tmp != nullptr)
+        {
+            tmp =tmp->nextFrame;
+            ++result;
+        }
+        return result;
+    }
+    
+} ; // NumberElements
 } // namespace traits
 
 
