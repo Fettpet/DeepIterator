@@ -105,6 +105,7 @@ the deepiterator doesnt overjump elements. It walks step by step.
 #include "Iterator/Policies.hpp"
 #include "Iterator/Accessor.hpp"
 #include "Iterator/Navigator.hpp"
+#include "Iterator/SliceNavigator.hpp"
 #include <limits>
 #include <cassert>
 #include <type_traits>
@@ -381,6 +382,7 @@ public:
     operator==(const DeepIterator& other)
     const
     {
+
         return (isAfterLast() && other.isAfterLast())
             || (isBeforeFirst() && other.isBeforeFirst())
             ||(containerPtr == other.containerPtr
@@ -438,6 +440,8 @@ public:
     typename std::enable_if<T == true, DeepIterator>::type
     operator--()
     {
+        // if the iterator is after the last element, we set it to the last 
+        // element
         if(isAfterLast())
         {
             setToRbegin();
@@ -494,6 +498,7 @@ public:
     operator+=(uint const & jumpsize)
     {
         auto tmpJump = jumpsize;
+        // if the iterator is before the first element, be set it to the first
         if(isBeforeFirst())
         {
             --tmpJump;
@@ -528,9 +533,18 @@ public:
          * 3. the remaining jumpsize for the new child
          */
         
+        // get the number of elements and overjump, if it has not enough 
+        // elements
+        auto && childNbElements = childIterator.nbElements();        
+        
+        if(childNbElements == 0)
+        {
+            setToEnd(containerPtr);
+            return 0;
+        }
+        
         auto && remaining = childIterator.gotoNext(jumpsize);
         
-        auto && childNbElements = childIterator.nbElements();
         // the -1 is used, since we jump from an end to the begining of the next cell
         auto && overjump = (remaining - 1 + childNbElements) / childNbElements;
         int childJumps = ((remaining - 1) % childNbElements);
@@ -649,14 +663,17 @@ public:
         /** 
          * For implementation details see gotoNext
          */
-        int && remaining = childIterator.gotoPrevious(jumpsize);
+        auto && childNbElements = childIterator.nbElements();        
+        if(childNbElements == 0)
+        {
+            setToRend(containerPtr);
+            return 0;
+        }
         
-        auto && childNbElements{childIterator.nbElements()};
+        int && remaining = childIterator.gotoPrevious(jumpsize);
         auto && overjump{(remaining + childNbElements - 1) / childNbElements};
         auto && childJumps{((remaining - 1) % childNbElements)};
-
         auto && result{navigator.previous(containerPtr, index, overjump)};
-
         if((result == 0) && (overjump > 0))
         {
 //             while(childIterator.isBeforeFirst() && not isBeforeFirst())
@@ -847,7 +864,6 @@ public:
     {
         containerPtr = ptr;
         setToBegin();
-
     }
     
     /**
@@ -966,16 +982,6 @@ public:
         return childIterator.nbElements() * navigator.size(containerPtr);
     }
     
-    template<
-        bool T = hasConstantSize>
-    HDINLINE
-    typename std::enable_if<T == false, int>::type
-    nbElements()
-    const
-    {
-        static_assert(true, "container has no constant size. nbELements() isnt enabled");
-        //return childIterator.nbElements() * navigator.size(containerPtr);
-    }
     
 protected:
     ContainerPtr containerPtr = nullptr;

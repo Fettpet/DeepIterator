@@ -1,4 +1,3 @@
-
 /**
  * \struct Navigator
  @brief This is the default implementation of the navigator. The task of the 
@@ -88,41 +87,89 @@
 
 namespace hzdr 
 {
-namespace details
+namespace slice
 {
-template <typename T>
-class UndefinedLastElement
+    struct NumberElements;
+    struct IgnoreLastElements;
+}
+    
+template<
+    typename _start_begin,
+    int_fast32_t _distance
+>
+struct Slice;
+
+template<
+    int_fast32_t _distance
+>
+struct Slice<
+    hzdr::slice::NumberElements,
+    _distance
+>
 {
-    typedef char one;
-    typedef long two;
-
-    template <typename C> static one test( typeof(&C::UNDEFINED) ) ;
-    template <typename C> static two test(...);    
-
 public:
-    enum { value = sizeof(test<T>(0)) == sizeof(char) };
-}; // class UndefinedAhead
-
-template<typename T>    
-struct OffsetRangeType
-{
-    T v;
-    typedef decltype(v()) type;
+    
+    constexpr
+    auto 
+    distance()
+    const
+    ->
+    int_fast32_t
+    {
+        return _distance;
+    }
+    
+    constexpr 
+    auto 
+    from_start()
+    const
+    ->
+    bool
+    {
+        return true;
+    }
+    
 };
 
-template<>
-struct OffsetRangeType<hzdr::details::UndefinedType>
-{
-    using type = hzdr::details::UndefinedType;
-};
 
-} // namespace details
+template<
+    int_fast32_t _distance
+>
+struct Slice<
+    hzdr::slice::IgnoreLastElements,
+    _distance
+>
+{
+public:
+    
+    constexpr
+    auto 
+    distance()
+    const
+    ->
+    int_fast32_t
+    {
+        return _distance;
+    }
+    
+    constexpr 
+    auto 
+    from_start()
+    const
+    ->
+    bool
+    {
+        return false;
+    }
+    
+};
 
 template<
     typename TContainer,
     typename TComponent,
     typename TOffset,
     typename TJumpsize,
+    typename TSlice,
     typename TIndex,
     typename TContainerSize,
     typename TRange,
@@ -134,7 +181,7 @@ template<
     typename TBeforeFirstElement = hzdr::details::UndefinedType,
     bool isBidirectional = not details::UndefinedLastElement<TLastElement>::value
 >
-struct Navigator
+struct SlicedNavigator
 {
 // define the types 
     typedef typename std::decay<TContainer>::type                   ContainerType;
@@ -143,6 +190,7 @@ struct Navigator
     typedef TComponent                                              ComponentType;
     typedef ComponentType*                                          ComponentPtr;
     typedef TJumpsize                                               JumpsizeType;
+    typedef TSlice                                                  SliceType;
     typedef TOffset                                                 OffsetType;
     typedef TIndex                                                  IndexType;
     typedef TRange                                                  RangeType;
@@ -157,12 +205,12 @@ struct Navigator
     
 public:
 // the default constructors
-    HDINLINE Navigator() = default;
-    HDINLINE Navigator(Navigator const &) = default;
-    HDINLINE Navigator(Navigator &&) = default;
-    HDINLINE ~Navigator() = default;
-    HDINLINE Navigator& operator=(const Navigator&) = default;
-    HDINLINE Navigator& operator=(Navigator&&) = default;
+    HDINLINE SlicedNavigator() = default;
+    HDINLINE SlicedNavigator(SlicedNavigator const &) = default;
+    HDINLINE SlicedNavigator(SlicedNavigator &&) = default;
+    HDINLINE ~SlicedNavigator() = default;
+    HDINLINE SlicedNavigator& operator=(const SlicedNavigator&) = default;
+    HDINLINE SlicedNavigator& operator=(SlicedNavigator&&) = default;
 
     /**
      * @brief Set the offset and the jumpsize to the given values
@@ -170,11 +218,15 @@ public:
        @param jumpsize distance between two elements
     */
     HDINLINE
-    Navigator(
+    SlicedNavigator(
             OffsetType && offset, 
-            JumpsizeType && jumpsize):
+            JumpsizeType && jumpsize,
+            SliceType && slice
+    ):
+        cur_pos(0),
         offset(hzdr::forward<OffsetType>(offset)),
         jumpsize(hzdr::forward<JumpsizeType>(jumpsize)),
+        slice(hzdr::forward<SliceType>(slice)),
         containerSize(),
         firstElement(),
         nextElement(),
@@ -207,11 +259,30 @@ public:
             containerPtr, 
             index,  
             static_cast<RangeType>(jumpsize() * distance),
-            containerSize);
+            containerSize
+        );
         
+        cur_pos += distance;
+        auto nbElem = size(containerPtr);
         // we need the distance from the last element to the current index position
         // this is a round up
-        return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+       
+        // 1. We start counting from the begininng and the position is outside
+        // the slice.
+        if( slice.from_start() && (cur_pos > slice.distance()))
+        {
+            return cur_pos - slice.distance();
+        }
+        // 2. We ignore the last elements
+        else if(not slice.from_start() && (cur_pos > static_cast<int_fast32_t>(nbElem - slice.distance())))
+        {
+            return cur_pos + slice.distance() - nbElem;
+        }
+        // 3. if it is outside the container 
+        else 
+        {
+            return  static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+        }
     }
     
     
@@ -240,10 +311,31 @@ public:
             index,
             offset(),
             static_cast<RangeType>(jumpsize() * distance),
-            containerSize);
-
+            containerSize
+        );
+        
+        cur_pos -= distance;
+        auto nbElem = size(containerPtr);
         // we need the distance from the last element to the current index position
-        return static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+        // this is a round up
+       
+        // 1. We start counting from the begininng and the position is outside
+        // the slice.
+        if( slice.from_start() && (-1 * cur_pos > slice.distance()))
+        {
+            return -1 * cur_pos - slice.distance();
+        }
+        // 2. We ignore the last elements
+        // The cast is nessacary since the container could be empty
+        else if(not slice.from_start() && (static_cast<int_fast32_t>(-1 * cur_pos) > static_cast<int_fast32_t>(nbElem - slice.distance())))
+        {
+            return -1 * cur_pos + slice.distance() - nbElem;
+        }
+        // 3. if it is outside the container 
+        else 
+        {
+            return  static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+        }
     }
     
     /**
@@ -264,6 +356,7 @@ public:
             index,  
             static_cast<RangeType>(offset()),
             containerSize);
+        cur_pos = 0;
     }
     
     /**
@@ -294,7 +387,7 @@ public:
             offset(),
             static_cast<RangeType>(neededJumps),
             containerSize);
-
+        cur_pos = 0;
         
     }
     
@@ -326,7 +419,12 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index)
     {
-        beforeFirstElement.set(containerPtr, index, offset(), containerSize);
+        beforeFirstElement.set(
+            containerPtr, 
+            index, 
+            offset(), 
+            containerSize
+        );
     }
     
     /**
@@ -342,7 +440,17 @@ public:
         IndexType const & index)
     const
     {
-        return afterLastElement.test(containerPtr, index, containerSize);
+        
+        /*there are three cases: 
+         * 1. if the trait say it after the last element
+         * 2. if slice.from_start() and cur_pos > slice.distance()
+         * 3. not slice.from_start() and cur_pos > nbElements - offset - slice.distance()
+         */
+        return 
+             afterLastElement.test(containerPtr, index, containerSize)
+          || (slice.from_start() && (cur_pos >  ( slice.distance())))
+          || (not slice.from_start() && (cur_pos * jumpsize() + offset() >= 
+                nbElements(containerPtr) - slice.distance() ));
     }
     
     /**
@@ -359,7 +467,11 @@ public:
         IndexType const & index)
     const
     {
-        return beforeFirstElement.test(containerPtr, index, offset(), containerSize);
+        return 
+            beforeFirstElement.test(containerPtr, index, offset(), containerSize)
+            || (slice.from_start() && (cur_pos < -1 * slice.distance()))
+            || (not slice.from_start() && (static_cast<int_fast32_t>(cur_pos * jumpsize() - offset()) <= 
+                -1 * static_cast<int_fast32_t>(nbElements(containerPtr) - slice.distance() )));
     }
     
     /**
@@ -390,17 +502,57 @@ public:
     const 
     {
         assert(containerPtr != nullptr); // containerptr should be valid
-        assert(jumpsize() != 0);
         
         auto const nbElem = nbElements(containerPtr);
         auto const off = offset();
-        return (off < nbElem) * (nbElem - off + jumpsize() - static_cast<RangeType>(1)) / jumpsize();
+        
+        if(slice.from_start())
+        {
+            
+
+            
+            // 1. Case nbElem - off > slice.distance()
+            uint sizeFirstCase = (
+                    slice.distance()
+                    + jumpsize() )
+                / jumpsize();
+            // 2. Case nbElem - off < slice.distance()
+            uint sizeSecondCase = (
+                    nbElem 
+                    - off 
+                    + jumpsize() 
+                    - static_cast<RangeType>(1)) 
+                / jumpsize();
+
+            // check and give it back
+            return ((static_cast<int_fast32_t>(nbElem - off) >= slice.distance()) * sizeFirstCase 
+                + (static_cast<int_fast32_t>(nbElem) < slice.distance()) * sizeSecondCase);
+        }
+        // it ignores the last slice.distance() elements
+        else 
+        {
+            // 1. Case nbElem - off > slice.distance()
+            // I had nbElem - off - slice.distance() elements
+                uint sizeFirstCase = (
+                    nbElem - off - slice.distance()
+                    + jumpsize() 
+                    - static_cast<RangeType>(1))
+                / jumpsize();
+            // 2. Case nbElem - off < slice.distance()
+            // I had 0 elements inside
+            
+                
+            return (off < nbElem) * (static_cast<int_fast32_t>(nbElem - off) > slice.distance()) * sizeFirstCase;
+                
+        }
     }
     
 //variables
 protected:
+    int cur_pos;
     OffsetType offset;
     JumpsizeType jumpsize;
+    SliceType slice;
     NumberElements containerSize;
     FirstElement firstElement;
     NextElement nextElement;
@@ -417,12 +569,14 @@ protected:
 
 template<
     typename TOffset,
-    typename TJumpsize>
-struct Navigator<
+    typename TJumpsize,
+    typename TSlice>
+struct SlicedNavigator<
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
     TOffset,
     TJumpsize,
+    TSlice,
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
@@ -441,6 +595,7 @@ struct Navigator<
     typedef ComponentType*                                          ComponentPtr;
     typedef TJumpsize                                               JumpsizeType;
     typedef TOffset                                                 OffsetType;
+    typedef TSlice                                                  SliceType;
     typedef hzdr::details::UndefinedType                            IndexType;
     typedef hzdr::details::UndefinedType                            RangeType;
     typedef hzdr::details::UndefinedType                            NumberElements;
@@ -452,10 +607,10 @@ struct Navigator<
     typedef hzdr::details::UndefinedType                            BeforeFirstElement;
     
     // the default constructors
-    HDINLINE Navigator() = default;
-    HDINLINE Navigator(Navigator const &) = default;
-    HDINLINE Navigator(Navigator &&) = default;
-    HDINLINE ~Navigator() = default;
+    HDINLINE SlicedNavigator() = default;
+    HDINLINE SlicedNavigator(SlicedNavigator const &) = default;
+    HDINLINE SlicedNavigator(SlicedNavigator &&) = default;
+    HDINLINE ~SlicedNavigator() = default;
     
     /**
      * @brief Set the offset and the jumpsize to the given values
@@ -464,17 +619,23 @@ struct Navigator<
     */
     template<
         typename TOffset_,
-        typename TJumpsize_>
+        typename TJumpsize_,
+        typename TSlice_>
     HDINLINE
-    Navigator(
+    SlicedNavigator(
             TOffset_ && offset, 
-            TJumpsize_ && jumpsize):
+            TJumpsize_ && jumpsize,
+            TSlice_ && slice
+             ):
         offset(hzdr::forward<TOffset_>(offset)),
-        jumpsize(hzdr::forward<TJumpsize_>(jumpsize))
+        jumpsize(hzdr::forward<TJumpsize_>(jumpsize)),
+        slice(hzdr::forward<TSlice_>(slice))
     {}
     
     OffsetType offset;
     JumpsizeType jumpsize;
+    SliceType slice;
+    
 } ;
 
 
@@ -487,18 +648,22 @@ struct Navigator<
  */
 template<
     typename TOffset,
-    typename TJumpsize>
+    typename TJumpsize,
+    typename TSlice>
 HDINLINE
 auto 
 makeNavigator(
     TOffset && offset,
-    TJumpsize && jumpsize)
+    TJumpsize && jumpsize,
+    TSlice && slice
+             )
 -> 
-    hzdr::Navigator<
+    hzdr::SlicedNavigator<
         details::UndefinedType,
         details::UndefinedType,
         typename std::decay<TOffset>::type,
         typename std::decay<TJumpsize>::type,
+        typename std::decay<TSlice>::type,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
@@ -510,13 +675,15 @@ makeNavigator(
         hzdr::details::UndefinedType,
         false>
 {
-    typedef typename std::decay<TOffset>::type OffsetType;
-    typedef typename std::decay<TJumpsize>::type JumpsizeType;
-    typedef hzdr::Navigator<
+    using OffsetType = typename std::decay<TOffset>::type ;
+    using JumpsizeType = typename std::decay<TJumpsize>::type ;
+    using SliceType = typename std::decay<TSlice>::type;
+    using ResultType =  hzdr::SlicedNavigator<
         details::UndefinedType,
         details::UndefinedType,
         OffsetType,
         JumpsizeType,
+        SliceType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
@@ -526,10 +693,13 @@ makeNavigator(
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
-        false> ResultType;
+        false>;
+    
     auto && result = ResultType(
         hzdr::forward<TOffset>(offset),
-        hzdr::forward<TJumpsize>(jumpsize));
+        hzdr::forward<TJumpsize>(jumpsize),
+        hzdr::forward<TSlice>(slice)
+    );
     return result;
 }
 
@@ -538,53 +708,69 @@ makeNavigator(
 namespace details
 {
 
-
-
-    template<typename T>
-    struct NavigatorTemplates
+    template<
+        typename T,
+        typename _T = typename std::decay<T>::type,
+        typename TSliceType = typename _T::SliceType,
+        typename TContainerType = typename _T::ContainerType,
+        typename TOffset = typename _T::OffsetType,
+        typename TJumpsize = typename _T::JumpsizeType,
+        typename TIndex = typename _T::IndexType,
+        typename TRange = typename _T::RangeType,
+        typename TNumberElements = typename _T::NumberElements,
+        typename TFirstElement = typename _T::FirstElement,
+        typename TNextElement = typename _T::NextElement,
+        typename TAfterLastElement = typename _T::AfterLastElement,
+        typename TLast = typename _T::LastElement,
+        typename TPrevious = typename _T::PreviousElement,
+        typename TBeforeFirst = typename _T::BeforeFirstElement
+    >
+    struct SlicedNavigatorTemplates
     {
-        typedef typename std::decay<T>::type            _T;
-        typedef typename _T::ContainerType              ContainerType;
-        typedef typename _T::OffsetType                 OffsetType;
-        typedef typename _T::JumpsizeType               JumpsizeType;
-        typedef typename _T::IndexType                  IndexType;
-        typedef typename _T::RangeType                  RangeType;
-        typedef typename _T::NumberElements          NumberElements;
-        typedef typename _T::FirstElement               FirstElement;
-        typedef typename _T::NextElement                NextElement;
-        typedef typename _T::AfterLastElement           AfterLastElement;
-        typedef typename _T::LastElement                LastElement;
-        typedef typename _T::PreviousElement            PreviousElement;
-        typedef typename _T::BeforeFirstElement         BeforeFirstElement;
-        
+        using ContainerType = TContainerType;
+        using OffsetType = TContainerType;
+        using JumpsizeType = TJumpsize;
+        using SliceType = TSliceType;
+        using IndexType = TIndex;
+        using RangeType = TRange;
+        using NumberElements = TNumberElements;
+        using FirstElement = TFirstElement;
+        using NextElement = TNextElement;
+        using AfterLastElement = TAfterLastElement;
+        using LastElement = TLast;
+        using PreviousElement = TPrevious;
+        using BeforeFirstElement = TBeforeFirst;
     };
 
 
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TOffset,
-    typename TJumpsize,
+    typename OffsetType,
+    typename JumpsizeType,
+    typename SliceType,
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
     typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
-    typename TRange = typename std::decay<typename OffsetRangeType<TOffset>::type>::type,
+    typename TRange = typename std::decay<typename OffsetRangeType<typename std::decay<OffsetType>::type >::type>::type,
     typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
-    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
+    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value
+>
 auto
 HDINLINE
 makeNavigator(
-    hzdr::Navigator<
+    hzdr::SlicedNavigator<
         details::UndefinedType,
         details::UndefinedType,
-        TOffset,
-        TJumpsize,
+        OffsetType,
+        JumpsizeType,
+        SliceType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
@@ -596,12 +782,14 @@ makeNavigator(
         hzdr::details::UndefinedType,
         false
     > & navi
-)->
-hzdr::Navigator<
+)
+->
+hzdr::SlicedNavigator<
     TContainerNoRef,
     TComponent,
-    TOffset,
-    TJumpsize,
+    OffsetType,
+    JumpsizeType,
+    SliceType,
     TIndex,
     TContainerSize,
     TRange,
@@ -613,11 +801,12 @@ hzdr::Navigator<
     TBeforeFirstElement,
     isBidirectional>
 {
-    using ResultType = hzdr::Navigator<
+    using ResultType = hzdr::SlicedNavigator<
         TContainerNoRef,
         TComponent,
-        TOffset,
-        TJumpsize,
+        OffsetType,
+        JumpsizeType,
+        SliceType,
         TIndex,
         TContainerSize,
         TRange,
@@ -627,10 +816,14 @@ hzdr::Navigator<
         TLastElement,
         TPreviousElement,
         TBeforeFirstElement,
-        isBidirectional> ;
+        isBidirectional>;
         
 
-    auto && result = ResultType(hzdr::forward<TOffset>(navi.offset), hzdr::forward<TJumpsize>(navi.jumpsize));
+    auto && result = ResultType(
+        hzdr::forward<OffsetType>(navi.offset), 
+        hzdr::forward<JumpsizeType>(navi.jumpsize),
+        hzdr::forward<SliceType>(navi.slice)
+    );
 
     return result;
 }
@@ -652,6 +845,7 @@ template<
     typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename TOffset,
     typename TJumpsize,
+    typename TSlice,
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>::type,
@@ -668,13 +862,16 @@ auto
 HDINLINE
 makeNavigator(
     TOffset && offset,
-    TJumpsize && jumpsize)
+    TJumpsize && jumpsize,
+    TSlice && slice
+             )
 -> 
-    hzdr::Navigator<
+    hzdr::SlicedNavigator<
         TContainerNoRef,
         TComponent,
-        TOffset,
-        TJumpsize,
+        typename std::decay<TOffset>::type,
+        typename std::decay<TJumpsize>::type,
+        typename std::decay<TSlice>::type,
         TIndex,
         TContainerSize,
         TRange,
@@ -687,11 +884,12 @@ makeNavigator(
         isBidirectional>
 {
 
-    typedef hzdr::Navigator<
+    using ResultType = hzdr::SlicedNavigator<
         TContainerNoRef,
         TComponent,
-        TOffset,
-        TJumpsize,
+        typename std::decay<TOffset>::type,
+        typename std::decay<TJumpsize>::type,
+        typename std::decay<TSlice>::type,
         TIndex,
         TContainerSize,
         TRange,
@@ -701,10 +899,13 @@ makeNavigator(
         TLastElement,
         TPreviousElement,
         TBeforeFirstElement,
-        isBidirectional> ResultType;
+        isBidirectional>;
+        
     auto && result = ResultType(
         hzdr::forward<TOffset>(offset),
-        hzdr::forward<TJumpsize>(jumpsize));
+        hzdr::forward<TJumpsize>(jumpsize),
+        hzdr::forward<TSlice>(slice)
+    );
     
     return result;
 }
