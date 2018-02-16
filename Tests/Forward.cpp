@@ -111,3 +111,4 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     BOOST_TEST(counter == 42u);
 
 }
+

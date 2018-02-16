@@ -1,3 +1,4 @@
+
 /**
  * @brief Within this test we test the runtime of our iterator, compared with the
  * std iterator. We think that your approach is slower since the std iterator is
@@ -265,5 +266,3 @@ BOOST_AUTO_TEST_CASE(Test1A)
         std::cout << "Needed time for " << nbElem << " elements with one layer iterator access: " << (time1Layer / (double)nbTries) << std::endl;
     }
 }
-
-

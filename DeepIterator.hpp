@@ -657,8 +657,8 @@ public:
     template< 
         bool T = hasConstantSizeChild> 
     HDINLINE 
-    uint
-    gotoPrevious(uint const & jumpsize, typename std::enable_if<T == true>::type* = nullptr)
+    typename std::enable_if<T == true, uint>::type 
+    gotoPrevious(uint const & jumpsize)
     {
         /** 
          * For implementation details see gotoNext
@@ -830,7 +830,11 @@ public:
             childIterator.setToBegin((accessor.get(containerPtr, index)));
             if(not childIterator.isAfterLast())
                 break;
-            gotoNext(1u);
+            navigator.next(
+                containerPtr,
+                index,
+                1u
+            );
         }
     }
     
@@ -901,16 +905,26 @@ public:
     void 
     setToRbegin()
     {
+        
         navigator.rbegin(containerPtr, index);
         // check whether the iterator is at a valid element
         while(not isBeforeFirst())
         {
-            childIterator.setToRbegin((accessor.get(containerPtr, index)));
+            childIterator.setToRbegin((accessor.get(
+                containerPtr, 
+                index
+            )));
             if(not childIterator.isBeforeFirst())
                 break;
-            gotoPrevious(1u);
+            
+            navigator.previous(
+                containerPtr,
+                index,
+                1u
+            );
         }
     }
+    
     
     /**
      * @brief This function set the iterator to the last element. This function

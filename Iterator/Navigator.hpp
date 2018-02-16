@@ -389,7 +389,8 @@ public:
     size(ContainerPtr containerPtr)
     const 
     {
-        assert(containerPtr != nullptr); // containerptr should be valid
+        // containerptr should be valid
+        assert(containerPtr != nullptr);
         assert(jumpsize() != 0);
         
         auto const nbElem = nbElements(containerPtr);
@@ -540,31 +541,46 @@ namespace details
 
 
 
-    template<typename T>
+    template<
+        typename T,
+        typename _T= typename std::decay<T>::type,
+        typename TContainerType = typename _T::ContainerType,
+        typename TOffsetType = typename _T::OffsetType,
+        typename TJumpsizeType = typename _T::JumpsizeType,
+        typename TIndexType = typename _T::IndexType,
+        typename TRangeType= typename _T::RangeType,
+        typename TNumberElements= typename _T::NumberElements,
+        typename TFirstElement= typename _T::FirstElement,
+        typename TNextElement= typename _T::NextElement,
+        typename TAfterLastElement= typename _T::AfterLastElement,
+        typename TLastElement= typename _T::LastElement,
+        typename TPreviousElement= typename _T::PreviousElement,
+        typename TBeforeFirstElement= typename _T::BeforeFirstElement
+    >
     struct NavigatorTemplates
     {
-        typedef typename std::decay<T>::type            _T;
-        typedef typename _T::ContainerType              ContainerType;
-        typedef typename _T::OffsetType                 OffsetType;
-        typedef typename _T::JumpsizeType               JumpsizeType;
-        typedef typename _T::IndexType                  IndexType;
-        typedef typename _T::RangeType                  RangeType;
-        typedef typename _T::NumberElements          NumberElements;
-        typedef typename _T::FirstElement               FirstElement;
-        typedef typename _T::NextElement                NextElement;
-        typedef typename _T::AfterLastElement           AfterLastElement;
-        typedef typename _T::LastElement                LastElement;
-        typedef typename _T::PreviousElement            PreviousElement;
-        typedef typename _T::BeforeFirstElement         BeforeFirstElement;
-        
+        using ContainerType = TContainerType;
+        using OffsetType = TOffsetType;
+        using JumpsizeType = TJumpsizeType;
+        using IndexType = TIndexType ;
+        using RangeType = TRangeType;
+        using NumberElements = TNumberElements;
+        using FirstElement = TFirstElement;
+        using NextElement = TNextElement;
+        using AfterLastElement = TAfterLastElement;
+        using LastElement = TLastElement;
+        using PreviousElement = TPreviousElement;
+        using BeforeFirstElement = TBeforeFirstElement;
     };
 
 
 template<
+   
     typename TContainer,
+    typename TNavi,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TOffset,
-    typename TJumpsize,
+    typename TOffset = typename NavigatorTemplates<TNavi>::OffsetType,
+    typename TJumpsize = typename NavigatorTemplates<TNavi>::JumpsizeType,
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
@@ -576,26 +592,33 @@ template<
     typename TLastElement = typename hzdr::traits::navigator::LastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TPreviousElement = typename hzdr::traits::navigator::PreviousElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
     typename TBeforeFirstElement = typename hzdr::traits::navigator::BeforeFirstElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,
-    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value>
+    bool isBidirectional = not std::is_same<TLastElement, hzdr::details::UndefinedType>::value,
+    typename = typename std::enable_if< 
+        std::is_same<
+            hzdr::Navigator<
+                details::UndefinedType,
+                details::UndefinedType,
+                TOffset,
+                TJumpsize,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                hzdr::details::UndefinedType,
+                false
+            >,
+            typename std::decay<TNavi>::type
+        >::value
+    >::type
+>
 auto
 HDINLINE
 makeNavigator(
-    hzdr::Navigator<
-        details::UndefinedType,
-        details::UndefinedType,
-        TOffset,
-        TJumpsize,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        false
-    > & navi
+    TNavi && navi
 )->
 hzdr::Navigator<
     TContainerNoRef,
@@ -630,7 +653,10 @@ hzdr::Navigator<
         isBidirectional> ;
         
 
-    auto && result = ResultType(hzdr::forward<TOffset>(navi.offset), hzdr::forward<TJumpsize>(navi.jumpsize));
+    auto && result = ResultType(
+        hzdr::forward<TOffset>(navi.offset), 
+        hzdr::forward<TJumpsize>(navi.jumpsize)
+    );
 
     return result;
 }

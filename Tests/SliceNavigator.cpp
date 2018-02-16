@@ -1,3 +1,4 @@
+
 /**
  * @author Sebastian Hahn
  * @brief The Sliced Navigator is tested in this file. To do this I test the 
@@ -43,7 +44,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::NumberElements, 0>()));
             
             auto view = makeView(
                 container, 
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()));
             
             auto view = makeView(
                 container, 
@@ -102,7 +103,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
             
            
             auto view = makeView(
@@ -117,7 +118,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
             }
             auto pos = off;
             auto counter2 = 0;
-            while( pos < 10)
+            while( pos < 9)
             {
                 pos += jumpsize;
                 counter2++;
@@ -136,7 +137,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
             
             
             auto view = makeView(
@@ -172,7 +173,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::NumberElements, 0>()));
             
             
             auto view = makeView(
@@ -200,7 +201,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()));
             
             
             auto view = makeView(
@@ -237,7 +238,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()));
             
             
             auto view = makeView(
@@ -273,7 +274,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
             
             
             auto view = makeView(
@@ -318,7 +319,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -360,7 +361,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -402,7 +403,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -451,7 +452,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<0, hzdr::slice::NumberElements>()
+                                                hzdr::Slice<hzdr::slice::NumberElements, 0>()
                                             )
                                         )
             );
@@ -495,7 +496,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()
                                             )
                                         )
             );
@@ -534,7 +535,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -574,7 +575,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -600,7 +601,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 BOOST_TEST(checksum == sum);
         }
         
-        for(int off=0; off<9; ++off)
+    for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
             auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
@@ -641,5 +642,6 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                     checksum += container[i][idx];
                 }
             BOOST_TEST(checksum == sum);
+        }
 }
 
