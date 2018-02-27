@@ -1,2 +1,2 @@
 # DeepIterator
-This project implements a trait based iterator. 
+The DeepIterator class is used to iterator over interleaved data structures. The simplest example for an interleaved data structure is std::vector< std::vector< int > >. The deepiterator iterates over all ints within the structure. The iterator consits of an accessor, a navigator and a child. The accessor describes the way, a value is get out of the container. The navigator has functionality to go to move through the container and the child is used to describe the underlaying container.
