@@ -671,38 +671,59 @@ public:
     template< 
         bool T = hasConstantSizeChild> 
     HDINLINE 
-    uint
-    gotoPrevious(uint const & jumpsize, typename std::enable_if<T == true>::type* = nullptr)
+    auto
+    gotoPrevious(uint const & jumpsize)
+    ->
+    typename std::enable_if<T == true, uint>::type    
     {
+        using SizeChild_t = decltype(childIterator.nbElements());
+        using ResultType_t = decltype(navigator.previous(
+            containerPtr,
+            index, 
+            0u
+        ));
         /** 
          * For implementation details see gotoNext
          */
         auto && childNbElements = childIterator.nbElements();        
-        if(childNbElements == 0)
+        if(childNbElements == static_cast<SizeChild_t>(0))
         {
             setToRend(containerPtr);
-            return 0;
+            return 0u;
         }
         
         int && remaining = childIterator.gotoPrevious(jumpsize);
         auto && overjump{(remaining + childNbElements - 1) / childNbElements};
         auto && childJumps{((remaining - 1) % childNbElements)};
-        auto && result{navigator.previous(containerPtr, index, overjump)};
-        if((result == 0) && (overjump > 0))
+
+        
+        ResultType_t const result{navigator.previous(
+            containerPtr, 
+            index, 
+            overjump
+        )};
+        if((result == static_cast<ResultType_t>(0)) && (overjump > 0))
         {
-//             while(childIterator.isBeforeFirst() && not isBeforeFirst())
-//             {
-                childIterator.setToRbegin(accessor.get(containerPtr, index));
+
+                childIterator.setToRbegin(accessor.get(
+                    containerPtr, 
+                    index
+                ));
                 childIterator -= childJumps;
-//             }
+
         }
         // we only need to return something, if we are at the end
-        uint const condition = (result > 0u);
+        auto const condition = (result > static_cast<ResultType_t>(0u));
         // the size of the jumps
-        uint const notOverjumpedElements = (result-1u) * childNbElements;
+        uint const notOverjumpedElements = 
+                (result-static_cast<ResultType_t>(1u)) * childNbElements;
         
         // The 1 is to set to the first element
-        return condition * (notOverjumpedElements + childJumps + 1u);
+        return condition * (
+            notOverjumpedElements 
+          + childJumps 
+          + static_cast<ResultType_t>(1u)
+        );
     }
     
     /**
