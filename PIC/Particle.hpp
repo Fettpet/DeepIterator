@@ -95,6 +95,13 @@ struct Particle<TPosition, 2>
     }
     
     HDINLINE
+    Particle(const TPosition& x)
+    {
+        data[0] = x;
+        data[1] = x;
+    }
+    
+    HDINLINE
     Particle(const Particle& par)
     {
         data[0] = par.data[0];
@@ -138,6 +145,22 @@ struct Particle<TPosition, 2>
         return other.data[0] == data[0] and other.data[1] == data[1];
     }
     
+    HDINLINE 
+    Particle&
+    operator=(TPosition const & num)
+    {
+        data[0] = num;
+        data[1] = num;
+    }
+    
+    HDINLINE 
+    Particle&
+    operator++()
+    {
+        data[0]++;
+        data[1]++;
+        return *this;
+    }
     TPosition data[2];
 
 } ; // struct Particle<TPosition, 2>

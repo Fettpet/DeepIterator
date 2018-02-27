@@ -11,6 +11,7 @@
 #include "Traits/Navigator/NextElement.hpp"
 #include "Traits/Navigator/PreviousElement.hpp"
 #include "Traits/Navigator/FirstElement.hpp"
+#include "Traits/RangeType.hpp"
 
 namespace hzdr
 {
@@ -44,6 +45,14 @@ struct IsRandomAccessable<
 {
     static const bool value = true;
 } ;
+
+template<
+    typename TContainer
+>
+struct RangeType<TContainer, hzdr::container::categorie::ArrayLike>
+{
+    typedef int_fast32_t type;
+};
 
 namespace accessor 
 {

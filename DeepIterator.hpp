@@ -154,12 +154,26 @@ public:
     typedef TNavigator                                                  Navigator;
     
 // child things
+    typedef typename hzdr::traits::ComponentType<ContainerType>::type   ComponentType;
     typedef TChild                                                  ChildIterator;
     typedef typename ChildIterator::ReturnType                      ReturnType;
 
 // container stuff
     typedef TIndexType   IndexType;
     
+protected:
+    ContainerPtr containerPtr = nullptr;
+    IndexType index;
+    ChildIterator childIterator;
+    Navigator navigator;
+    Accessor accessor;
+    
+public:
+    using RangeType = decltype(((Navigator*)nullptr)->next(
+        nullptr,
+        index,
+        0
+    ));
     // decide wheter the iterator is bidirectional.
     static const bool isBidirectional = ChildIterator::isBidirectional && isBidirectionalSelf;
     static const bool isRandomAccessable = ChildIterator::isRandomAccessable && isRandomAccessableSelf;
@@ -827,7 +841,9 @@ public:
         // check whether the iterator is at a valid element
         while(not isAfterLast())
         {
-            childIterator.setToBegin((accessor.get(containerPtr, index)));
+            childIterator.setToBegin((accessor.get(
+                containerPtr, index
+            )));
             if(not childIterator.isAfterLast())
                 break;
             gotoNext(1u);
@@ -981,14 +997,6 @@ public:
     {
         return childIterator.nbElements() * navigator.size(containerPtr);
     }
-    
-    
-protected:
-    ContainerPtr containerPtr = nullptr;
-    IndexType index;
-    ChildIterator childIterator;
-    Navigator navigator;
-    Accessor accessor;
 } ; // struct DeepIterator
 
 
@@ -1028,8 +1036,26 @@ public:
     typedef ComponentReference                                          ReturnType;
     typedef TAccessor                                                   Accessor;
     typedef TNavigator                                                  Navigator;
+    
 
     typedef TIndexType   IndexType;
+
+// Variables    
+protected:   
+    Navigator navigator;
+    Accessor accessor;
+    hzdr::NoChild childIterator;
+    
+
+    ContainerType* containerPtr;
+    IndexType index;
+// another data types
+public:
+    using RangeType = decltype(((Navigator*)nullptr)->next(
+        nullptr,
+        index,
+        0
+    ));
 // container stuff
 
     
@@ -1070,7 +1096,7 @@ public:
         accessor(hzdr::forward<TAccessor_>(accessor)),
         childIterator(),
         containerPtr(container),
-        index(static_cast<IndexType>(0))
+        index(0)
 
         
     {
@@ -1103,7 +1129,7 @@ public:
         accessor(hzdr::forward<TAccessor_>(accessor)),
         childIterator(),
         containerPtr(container),
-        index(static_cast<IndexType>(0))
+        index(0)
     {
         setToRbegin(container);
     }
@@ -1133,7 +1159,7 @@ public:
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container),
-        index(static_cast<IndexType>(0))
+        index(0)
     {
         setToEnd(container);
     }
@@ -1164,7 +1190,7 @@ public:
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container),
-        index(static_cast<IndexType>(0))
+        index(0)
         
     {
         setToRend(container);
@@ -1189,7 +1215,7 @@ public:
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(nullptr),
-        index(static_cast<IndexType>(0))
+        index(0)
     {}
     
     /**
@@ -1207,7 +1233,11 @@ public:
         }
         else 
         {
-            navigator.next(containerPtr, index,1);
+            navigator.next(
+                containerPtr, 
+                index,
+                1u
+            );
         }
         return *this;
     }
@@ -1222,7 +1252,11 @@ public:
     operator++(int)
     {
         DeepIterator tmp(*this);
-        navigator.next(containerPtr, index, 1u);
+        navigator.next(
+            containerPtr, 
+            index, 
+            1u
+        );
         return tmp;
     }
     
@@ -1237,7 +1271,10 @@ public:
     -> 
     ComponentReference
     {
-        return (accessor.get(containerPtr, index));
+        return accessor.get(
+            containerPtr, 
+            index
+        );
     }
     
     /**
@@ -1251,8 +1288,10 @@ public:
     -> 
     ComponentReference
     {
-        
-        return (accessor.get(containerPtr, index));
+        return accessor.get(
+            containerPtr, 
+            index
+        );
     }
     
     
@@ -1266,10 +1305,11 @@ public:
     operator!=(const DeepIterator& other)
     const
     {
+        
         return (containerPtr != other.containerPtr
-            || index != other.index)
-            && (not isAfterLast() || not other.isAfterLast())
-            && (not isBeforeFirst() || not other.isBeforeFirst());
+             || index != other.index)
+             && (not isAfterLast() || not other.isAfterLast())
+             && (not isBeforeFirst() || not other.isBeforeFirst());
     }
     
     /**
@@ -1296,7 +1336,11 @@ public:
     typename std::enable_if<T, DeepIterator& >::type
     operator--()
     {
-        navigator.previous(containerPtr, index, 1u);
+        navigator.previous(
+            containerPtr, 
+            index, 
+            1u
+        );
         return *this;
     }
     
@@ -1312,7 +1356,11 @@ public:
     operator--(int)
     {
         DeepIterator tmp(*this);
-        navigator.previous(containerPtr, index, 1u);
+        navigator.previous(
+            containerPtr, 
+            index, 
+            1u
+        );
         return tmp;
     }
     
@@ -1321,18 +1369,22 @@ public:
      * need to be random access to support this function.
      * @param jumpsize distance to the next element
      */
-    template<typename TJump, bool T=isRandomAccessable>
+    template<bool T=isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator&>::type
-    operator+=(TJump const & jump)
+    operator+=(RangeType const & jump)
     {
         auto tmpJump = jump;
-        if(jump != static_cast<TJump>(0) && isBeforeFirst())
+        if(jump != static_cast<RangeType>(0) && isBeforeFirst())
         {
             --tmpJump;
             setToBegin();
         }
-        navigator.next(containerPtr, index, tmpJump);
+        navigator.next(
+            containerPtr, 
+            index, 
+            tmpJump
+        );
         return *this;
     }
     
@@ -1341,18 +1393,22 @@ public:
      * need to be random access to support this function.
      * @param jumpsize distance to the next element
      */
-    template<typename TJump, bool T = isRandomAccessable>
+    template<bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator&>::type
-    operator-=(TJump const & jump)
+    operator-=(RangeType const & jump)
     {
         auto tmpJump = jump;
-        if(jump != static_cast<TJump>(0) && isAfterLast())
+        if(jump != static_cast<RangeType>(0) && isAfterLast())
         {
             --tmpJump;
             setToRbegin();
         }
-        navigator.previous(containerPtr, index, tmpJump);
+        navigator.previous(
+            containerPtr,
+            index, 
+            tmpJump
+        );
         return *this;
     }
     
@@ -1362,10 +1418,10 @@ public:
      * @param jumpsize distance to the next element
      * @return iterator which is jumpsize elements ahead
      */
-    template<typename TJump, bool T=isRandomAccessable>
+    template<bool T=isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator>::type
-    operator+(TJump const & jump)
+    operator+(RangeType const & jump)
     {
         DeepIterator tmp = *this;
         tmp+=jump;
@@ -1378,10 +1434,10 @@ public:
      * @param jumpsize distance to the previos element
      * @return iterator which is jumpsize elements behind
      */
-    template<typename TJump, bool T = isRandomAccessable>
+    template<bool T = isRandomAccessable>
     HDINLINE
     typename std::enable_if<T == true, DeepIterator>::type
-    operator-(TJump const & jump)
+    operator-(RangeType const & jump)
     {
         DeepIterator tmp = *this;
         tmp-=jump;
@@ -1401,7 +1457,8 @@ public:
             containerPtr, 
             index,
             other.containerPtr,
-            other.index);
+            other.index
+        );
     }
     
         /**
@@ -1417,7 +1474,8 @@ public:
             containerPtr,  
             index,
             other.containerPtr,
-            other.index);
+            other.index
+        );
     }
     
                 /**
@@ -1453,7 +1511,10 @@ public:
     typename std::enable_if<T == true, ComponentReference>::type
     operator[](IndexType const & index)
     {
-        return accessor.get(containerPtr, index);
+        return accessor.get(
+            containerPtr, 
+            index
+        );
     }
     
         /**
@@ -1465,7 +1526,10 @@ public:
     isAfterLast()
     const
     {
-        return navigator.isAfterLast(containerPtr, index);
+        return navigator.isAfterLast(
+            containerPtr, 
+            index
+        );
     }
     
     /**
@@ -1477,7 +1541,10 @@ public:
     isBeforeFirst()
     const
     {
-        return navigator.isBeforeFirst(containerPtr, index);
+        return navigator.isBeforeFirst(
+            containerPtr, 
+            index
+        );
     }
     
 
@@ -1491,7 +1558,10 @@ public:
     void 
     setToBegin()
     {
-        navigator.begin(containerPtr, index);
+        navigator.begin(
+            containerPtr,
+            index
+        );
     }
     
         /**
@@ -1506,7 +1576,10 @@ public:
     setToBegin(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.begin(containerPtr, index);
+        navigator.begin(
+            containerPtr, 
+            index
+        );
     }
     
         /**
@@ -1521,7 +1594,10 @@ public:
     setToBegin(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.begin(containerPtr, index);
+        navigator.begin(
+            containerPtr, 
+            index
+        );
     }
     
        /**
@@ -1534,7 +1610,10 @@ public:
     setToEnd(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.end(containerPtr, index);
+        navigator.end(
+            containerPtr,
+            index
+        );
     }
     
         /**
@@ -1547,7 +1626,10 @@ public:
     setToRend(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.rend(containerPtr, index);
+        navigator.rend(
+            containerPtr,
+            index
+        );
     }
     
         /**
@@ -1562,7 +1644,10 @@ public:
     setToRbegin(ContainerReference con)
     {
         containerPtr = &con;
-        navigator.rbegin(containerPtr, index);
+        navigator.rbegin(
+            containerPtr, 
+            index
+        );
     }
     
     /**
@@ -1577,7 +1662,10 @@ public:
     setToRbegin(ContainerPtr con)
     {
         containerPtr = con;
-        navigator.rbegin(containerPtr, index);
+        navigator.rbegin(
+            containerPtr,
+            index
+        );
     }
     
     /**
@@ -1589,7 +1677,10 @@ public:
     void 
     setToRbegin()
     {
-        navigator.rbegin(containerPtr, index);
+        navigator.rbegin(
+            containerPtr, 
+            index
+        );
     }
     
            /**
@@ -1602,11 +1693,15 @@ public:
      */
     HDINLINE 
     auto 
-    gotoNext(uint const & steps)
+    gotoNext(RangeType const & steps)
     ->
-    uint
+    RangeType
     {
-        return navigator.next(containerPtr, index, steps);
+        return navigator.next(
+            containerPtr, 
+            index, 
+            steps
+        );
     }
     
         /**
@@ -1619,11 +1714,15 @@ public:
      */
     HDINLINE
     auto 
-    gotoPrevious(uint const & steps)
+    gotoPrevious(RangeType const & steps)
     ->
-    uint
+    RangeType
     {
-        auto result = navigator.previous(containerPtr, index, steps);
+        auto result = navigator.previous(
+            containerPtr, 
+            index, 
+            steps
+        );
 
         return result;
     }
@@ -1644,14 +1743,6 @@ public:
         return navigator.size(containerPtr);
     }
 
-protected:   
-    Navigator navigator;
-    Accessor accessor;
-    hzdr::NoChild childIterator;
-    
-
-    ContainerType* containerPtr;
-    IndexType index;
 
 private:
 } ; // struct DeepIterator
@@ -1663,18 +1754,22 @@ namespace details
  * @brief This function is used in makeView. The function is a identity function
  * for hzdr::NoChild
  */
+#include <typeinfo>
 template<
     typename TContainer,
     typename TChild,
 // SFIANE Part
-    typename TChildNoRef = typename std::decay<TChild>::type>
+    typename TChildNoRef = typename std::decay<TChild>::type,
+    typename = typename std::enable_if<std::is_same<TChildNoRef, hzdr::NoChild>::value>::type
+>
 HDINLINE
 auto
-makeIterator( TChild && child, typename std::enable_if<std::is_same<TChildNoRef, hzdr::NoChild>::value>::type* = nullptr)
+makeIterator( TChild &&)
 ->
 hzdr::NoChild
 {
-    return child;
+
+    return hzdr::NoChild();
 }
 
 
@@ -1694,12 +1789,14 @@ template<
     typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
     bool isBidirectional = hzdr::traits::IsBidirectional<TContainer, ContainerCategoryType>::value,
     bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainer, ContainerCategoryType>::value,
-    bool hasConstantSize = traits::HasConstantSize<TContainer>::value>
+    bool hasConstantSize = traits::HasConstantSize<TContainer>::value,
+    typename = typename std::enable_if<not std::is_same<TContainerNoRef, hzdr::NoChild>::value>::type
+>
 HDINLINE
 auto 
 makeIterator (
-    TPrescription && concept,
-    typename std::enable_if<not std::is_same<TContainerNoRef, hzdr::NoChild>::value>::type* = nullptr)
+    TPrescription && concept
+)
 ->
 DeepIterator<
         TContainer,

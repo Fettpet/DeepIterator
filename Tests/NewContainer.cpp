@@ -30,6 +30,7 @@
 
 #include "View.hpp"
 #include "DeepIterator.hpp"
+#include "PIC/Supercell.hpp"
 #include "PIC/SupercellContainer.hpp"
 /**
  * Each new Container need to specify the following traits:
@@ -118,8 +119,13 @@ struct IndexType<boost::container::vector<T>, void>
 };
 
 template<
-    typename T>
-struct RangeType<boost::container::vector<T>, void> 
+    typename T,
+    typename SFIANE
+>
+struct RangeType<
+    boost::container::vector<T>, 
+    SFIANE
+> 
 {
     typedef int_fast32_t type; 
 };

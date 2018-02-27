@@ -105,7 +105,10 @@ struct Accessor
         IndexType & idx)
     {
         assert(containerPtr != nullptr);
-        return _get(containerPtr, idx);
+        return _get(
+            containerPtr, 
+            idx
+        );
     }
     
     

@@ -753,7 +753,10 @@ template<
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
     typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
-    typename TRange = typename std::decay<typename OffsetRangeType<typename std::decay<OffsetType>::type >::type>::type,
+    typename TRange = typename hzdr::traits::RangeType<
+        TContainerNoRef,
+        TContainerCategorie
+    >::type,
     typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>,
     typename TNextElement = typename hzdr::traits::navigator::NextElement<TContainerNoRef, TIndex, TRange, TContainerCategorie>,

@@ -46,8 +46,9 @@ namespace traits
 {
 
 template<
-    typename T>
-struct RangeType<boost::container::vector<T>, void> 
+    typename T,
+    typename SFIANE>
+struct RangeType<boost::container::vector<T>, SFIANE> 
 {
     typedef int_fast32_t type; 
 };

@@ -13,6 +13,7 @@
 #include "Traits/IndexType.hpp"
 #include "Traits/IsRandomAccessable.hpp"
 #include "Traits/IsBidirectional.hpp"
+#include "Traits/RangeType.hpp"
 #include "Traits/HasConstantSize.hpp"
 #include "Traits/NumberElements.hpp"
 
@@ -124,6 +125,17 @@ struct IndexType<hzdr::Supercell<TFrame> >
     typedef TFrame* type; 
 } ;
 
+template<
+    typename TFrame, 
+    typename SFIANE
+>
+struct RangeType<
+    hzdr::Supercell<TFrame>, 
+    SFIANE 
+>
+{
+    typedef int type; 
+} ;
     
 
 
