@@ -1,3 +1,4 @@
+
 #include <boost/container/vector.hpp>
 #include "PIC/SupercellContainer.hpp"
 /**
@@ -464,4 +465,9 @@ BOOST_AUTO_TEST_CASE(Frames)
         sum_check += i;
     }
     BOOST_TEST(sum == sum_check);
+}
+
+
+BOOST_AUTO_TEST_CASE(Frames2)
+{
 }
