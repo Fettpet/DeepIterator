@@ -66,6 +66,7 @@
 #include "deepiterator/iterator/Prescription.hpp"
 #include "deepiterator/iterator/Accessor.hpp"
 #include "deepiterator/iterator/Navigator.hpp"
+#include "deepiterator/iterator/SliceNavigator.hpp"
 #include "deepiterator/traits/NumberElements.hpp"
 #include "deepiterator/traits/Traits.hpp"
 

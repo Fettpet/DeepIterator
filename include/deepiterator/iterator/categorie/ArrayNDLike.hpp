@@ -33,14 +33,15 @@ namespace detail
     template<
         uint_fast32_t Dim,
         typename TSize,
+        typename TIdx,
         typename = typename std::enable_if< 
-            not std::is_integral<TSize>::value 
+            not std::is_integral<TIdx>::value 
         >::type
     >
     auto 
     HDINLINE
     idxndToInt(
-        TSize const & idx,
+        TIdx const & idx,
         TSize const & containerSize 
     )
     -> int
@@ -398,7 +399,7 @@ struct AfterLastElement<
     const
     {
         using namespace hzdr::detail;
-
+//         std::cout << "After last element test " << conPtr->dim() << " size " << idx << std::endl;
         return idxndToInt<Dim>(
                 idx,
                 conPtr->dim()

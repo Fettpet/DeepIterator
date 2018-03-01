@@ -76,9 +76,7 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Set return values.
 SET(DeepIterator_INCLUDE_DIR ${_DEEPITERATOR_INCLUDE_DIRECTORY})
-
-include_directories(${_DEEPITERATOR_INCLUDE_DIRECTORY})
-
+include_directories(${DeepIterator_INCLUDE_DIR})
 
 
 ###############################################################################

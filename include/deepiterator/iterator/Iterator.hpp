@@ -153,7 +153,7 @@ public:
 // container stuff
     typedef TIndexType   IndexType;
     
-protected:
+// protected:
     ContainerPtr containerPtr = nullptr;
     IndexType index;
     ChildIterator childIterator;
@@ -595,13 +595,16 @@ public:
         auto remaining = jumpsize;
         while(remaining > 0u && not isAfterLast())
         {
-            // we go to the right element, or the end of this container
-            remaining = childIterator.gotoNext(remaining);
-            // we have found the right element
-            if(remaining == 0u)
-                break;
-            // we go to the next container
-            --remaining;
+            if(not childIterator.isAfterLast())
+            {
+                // we go to the right element, or the end of this container
+                remaining = childIterator.gotoNext(remaining);
+                // we have found the right element
+                if(remaining == 0u)
+                    break;
+                // we go to the next container
+                --remaining;
+            }
             while(childIterator.isAfterLast() && not isAfterLast())
             {
                 navigator.next(containerPtr, index, 1u);
@@ -740,10 +743,13 @@ public:
         auto remaining = jumpsize;
         while(remaining > 0u && not isBeforeFirst())
         {
-            remaining = childIterator.gotoPrevious(remaining);
-            if(remaining == 0u)
-                break;
-            --remaining;
+            if(not childIterator.isBeforeFirst())
+            {
+                remaining = childIterator.gotoPrevious(remaining);
+                if(remaining == 0u)
+                    break;
+                --remaining;
+            }
             while(childIterator.isBeforeFirst() && not isBeforeFirst())
             {
                 navigator.previous(containerPtr, index, 1u);
@@ -1054,7 +1060,7 @@ public:
     typedef TIndexType   IndexType;
 
 // Variables    
-protected:   
+// protected:   
     Navigator navigator;
     Accessor accessor;
     hzdr::NoChild childIterator;
@@ -1915,3 +1921,55 @@ DeepIterator<
 }
 
 } // namespace hzdr
+
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TChild,
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf>
+std::ostream& operator<<(
+    std::ostream& out, 
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf> const & iter
+)
+{
+    out << "conPtr " << iter.containerPtr << " index " << iter.index << "Child: " << std::endl << iter.childIterator;
+    return out;
+}
+
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf>
+std::ostream& operator<<(
+    std::ostream& out, 
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf> const & iter
+)
+{
+    out << "conPtr " << iter.containerPtr << " index " << iter.index;
+    return out;
+    
+}

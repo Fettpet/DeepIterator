@@ -272,7 +272,7 @@ struct AfterLastElement<
     )
     const
     {
-        return idx == nullptr;
+        return idx == nullptr || idx.ptr == nullptr;
     }
     
     template<typename TRangeFunction>
@@ -312,6 +312,7 @@ struct LastElement<
     )
     {
         index = containerPtr->lastFramePtr;
+        std::cout << "indexPtr " << index << std::endl;
     }
 } ;
 
@@ -388,9 +389,11 @@ struct BeforeFirstElement<
         { 
             if(tmp == nullptr)
                 return true;
+            if(tmp.ptr == nullptr)
+                return true;
             tmp = tmp->previousFrame.ptr;
         }
-        return tmp == nullptr;
+        return tmp == nullptr || tmp.ptr == nullptr;
     }
     
 

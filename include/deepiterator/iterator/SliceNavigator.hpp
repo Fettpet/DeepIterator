@@ -102,6 +102,7 @@ public:
     ->
     int_fast32_t
     {
+        static_assert(_distance != 0, "distance = 0 means no elements are inside the container.");
         return _distance;
     }
     
@@ -244,11 +245,11 @@ public:
         auto remainingJumpsize = nextElement(
             containerPtr, 
             index,  
-            static_cast<RangeType>(jumpsize() * distance),
+            static_cast<RangeType>(jumpsize()) * distance,
             containerSize
         );
         
-        cur_pos += distance;
+        cur_pos += static_cast<int>(distance);
         auto nbElem = size(containerPtr);
         // we need the distance from the last element to the current index position
         // this is a round up
@@ -267,7 +268,7 @@ public:
         // 3. if it is outside the container 
         else 
         {
-            return  static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1)) / static_cast<RangeType>(jumpsize());
         }
     }
     
@@ -296,7 +297,7 @@ public:
             containerPtr, 
             index,
             offset(),
-            static_cast<RangeType>(jumpsize() * distance),
+            static_cast<RangeType>(jumpsize()) * distance,
             containerSize
         );
         
@@ -320,7 +321,7 @@ public:
         // 3. if it is outside the container 
         else 
         {
-            return  static_cast<RangeType>(remainingJumpsize + jumpsize() - 1) / static_cast<RangeType>(jumpsize());
+            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) - 1) / static_cast<RangeType>(jumpsize());
         }
     }
     
@@ -340,7 +341,7 @@ public:
         nextElement(
             containerPtr, 
             index,  
-            static_cast<RangeType>(offset()),
+            offset(),
             containerSize);
         cur_pos = 0;
     }
@@ -490,7 +491,8 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         
         auto const nbElem = nbElements(containerPtr);
-        auto const off = offset();
+        RangeType const off = static_cast<RangeType>(offset());
+        RangeType const jump = static_cast<RangeType>(jumpsize());
         
         if(slice.from_start())
         {
@@ -500,19 +502,19 @@ public:
             // 1. Case nbElem - off > slice.distance()
             uint sizeFirstCase = (
                     slice.distance()
-                    + jumpsize() )
-                / jumpsize();
+                    + jump )
+                / jump;
             // 2. Case nbElem - off < slice.distance()
             uint sizeSecondCase = (
                     nbElem 
-                    - off 
-                    + jumpsize() 
+                    - off
+                    + jump
                     - static_cast<RangeType>(1)) 
-                / jumpsize();
+                / jump;
 
             // check and give it back
-            return ((static_cast<int_fast32_t>(nbElem - off) >= slice.distance()) * sizeFirstCase 
-                + (static_cast<int_fast32_t>(nbElem) < slice.distance()) * sizeSecondCase);
+            return ((static_cast<RangeType>(nbElem) - off >= slice.distance()) * sizeFirstCase 
+                + (static_cast<RangeType>(nbElem) < slice.distance()) * sizeSecondCase);
         }
         // it ignores the last slice.distance() elements
         else 
@@ -521,14 +523,14 @@ public:
             // I had nbElem - off - slice.distance() elements
                 uint sizeFirstCase = (
                     nbElem - off - slice.distance()
-                    + jumpsize() 
+                    + jump 
                     - static_cast<RangeType>(1))
-                / jumpsize();
+                / jump;
             // 2. Case nbElem - off < slice.distance()
             // I had 0 elements inside
             
                 
-            return (off < nbElem) * (static_cast<int_fast32_t>(nbElem - off) > slice.distance()) * sizeFirstCase;
+            return (off < nbElem) * (static_cast<int_fast32_t>(nbElem) - off > slice.distance()) * sizeFirstCase;
                 
         }
     }

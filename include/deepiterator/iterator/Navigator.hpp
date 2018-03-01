@@ -220,7 +220,7 @@ public:
         auto remainingJumpsize = nextElement(
             containerPtr, 
             index,  
-            static_cast<RangeType>(jumpsize() * distance),
+            static_cast<RangeType>(jumpsize()) * distance,
             containerSize
         );
         
@@ -256,19 +256,21 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
+        auto && off = offset();
+        auto && jump = jumpsize();
         auto remainingJumpsize = previousElement(
             containerPtr, 
             index,
-            offset(),
-            static_cast<RangeType>(jumpsize()) * distance,
+            off,
+            static_cast<RangeType>(jump) * distance,
             containerSize
         );
         
 
         // we need the distance from the last element to the current index 
         // position
-        return (remainingJumpsize + jumpsize() - static_cast<RangeType>(1)) 
-             / jumpsize();
+        return (remainingJumpsize + jump - static_cast<RangeType>(1)) 
+             / jump;
     }
     
     /**
