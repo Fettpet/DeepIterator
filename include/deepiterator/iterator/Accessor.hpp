@@ -122,7 +122,12 @@ struct Accessor
     {
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
-        return _equal(containerPtr1, index1, containerPtr2, index2);
+        return _equal(
+            containerPtr1,
+            index1, 
+            containerPtr2, 
+            index2
+        );
     }
     
     /**

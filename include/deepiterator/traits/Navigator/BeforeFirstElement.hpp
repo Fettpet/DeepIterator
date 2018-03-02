@@ -1,4 +1,31 @@
+/* Copyright 2018 Sebastian Hahn
+
+ * This file is part of DeepIterator.
+ *
+ * DeepIterator is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * DeepIterator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PIConGPU.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
+
+
+namespace hzdr
+{
+namespace traits
+{
+namespace navigator
+{
 
 /**
  * @author Sebastian Hahn t.hahn < at > hzdr.de
@@ -17,16 +44,11 @@
  * @tparam TContainer The container over which the iteartor walks.
  * @tparam TIndex The type of the index to get a component out of the container.
  * @tparam TContainerCategory An SFINAE type for categories.
+ * @tparam TOffset Type of the offset. This is a template of the function.
  * @tparam TSizeFunction This is used to give a function, which calculate the 
  * size of the container, to the trait. It is a template of the function, not of
  * the trait.
  */
-namespace hzdr
-{
-namespace traits
-{
-namespace navigator
-{
 template<
     typename TContainer,
     typename TIndex,
