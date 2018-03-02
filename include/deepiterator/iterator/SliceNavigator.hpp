@@ -337,11 +337,15 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         firstElement(containerPtr, index);
+        std::cout << "begin before next: " << index << std::endl;
+
         nextElement(
             containerPtr, 
             index,  
             offset(),
             containerSize);
+        std::cout << "begin after next: " << index << " " << offset() << std::endl;
+
         cur_pos = 0;
     }
     
@@ -351,33 +355,27 @@ public:
      * @param index out: last element of the iterator.
      */
 
-    template< bool T=isBidirectional>
-    HDINLINE 
-    typename std::enable_if<T==true>::type
+//     template< bool T=isBidirectional>
+//     HDINLINE 
+//     typename std::enable_if<T==true>::type
     rbegin(
         ContainerPtr containerPtr,  
         IndexType & index)
     {
         assert(containerPtr != nullptr); // containerptr should be valid
-        auto nbElementsVar = nbElements(containerPtr);
-        // -1 since we dont like to jump outside
-        auto nbJumps = (nbElementsVar - offset() - 1) / jumpsize();
-        auto lastPosition = nbJumps * jumpsize() + offset();
-        // -1 since we need the last position
-        auto neededJumps = (nbElementsVar - 1) - lastPosition;
-
         // set to the first element
         begin(
             containerPtr, 
             index
         );
+        std::cout << "rbegin before next: " << index << std::endl;
         // go to the last element
         next(
             containerPtr,  
             index,
             slice.distance()
         );
-
+        std::cout << "rbegin after next: " << index << std::endl;
         
         cur_pos = 0;
         
