@@ -8,3 +8,5 @@
 #include "deepiterator/iterator/SliceNavigator.hpp"
 #include "deepiterator/iterator/Prescription.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
+#include "deepiterator/definitions/SelfValue.hpp"
+

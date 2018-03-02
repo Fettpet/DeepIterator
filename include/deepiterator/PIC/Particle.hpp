@@ -7,7 +7,7 @@
 #include <array>
 #include <iomanip>
 #include <iostream>
-#include "deepiteratir/iterator/Categorie.hpp"
+#include "deepiterator/iterator/Categorie.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/traits/Traits.hpp"
 namespace hzdr 

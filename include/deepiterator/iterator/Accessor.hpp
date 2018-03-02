@@ -41,6 +41,7 @@
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/definitions/forward.hpp"
+#include <cassert>
 
 namespace hzdr
 {

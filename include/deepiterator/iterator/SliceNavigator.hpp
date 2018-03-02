@@ -75,7 +75,7 @@ namespace hzdr
 {
 namespace slice
 {
-    struct NumberElements;
+    struct Distance;
     struct IgnoreLastElements;
 }
     
@@ -89,7 +89,7 @@ template<
     int_fast32_t _distance
 >
 struct Slice<
-    hzdr::slice::NumberElements,
+    hzdr::slice::Distance,
     _distance
 >
 {
@@ -102,7 +102,6 @@ public:
     ->
     int_fast32_t
     {
-        static_assert(_distance != 0, "distance = 0 means no elements are inside the container.");
         return _distance;
     }
     
@@ -367,13 +366,19 @@ public:
         // -1 since we need the last position
         auto neededJumps = (nbElementsVar - 1) - lastPosition;
 
-        lastElement(containerPtr, index, containerSize);
-        previousElement(
+        // set to the first element
+        begin(
             containerPtr, 
+            index
+        );
+        // go to the last element
+        next(
+            containerPtr,  
             index,
-            offset(),
-            static_cast<RangeType>(neededJumps),
-            containerSize);
+            slice.distance()
+        );
+
+        
         cur_pos = 0;
         
     }
