@@ -13,14 +13,12 @@
  */
 #define BOOST_TEST_MODULE Bidirectional
 #include <boost/test/included/unit_test.hpp>
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include "View.hpp"
-#include "DeepIterator.hpp"
-#include "View.hpp"
-#include "Definitions/hdinline.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 
 using namespace boost::unit_test;
 

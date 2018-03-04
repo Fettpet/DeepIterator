@@ -4,15 +4,14 @@
 
 #define BOOST_TEST_MODULE ForwardIterator
 #include <boost/test/included/unit_test.hpp>
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include "DeepIterator.hpp"
-#include "Definitions/hdinline.hpp"
-#include "Iterator/Categorie/ArrayNDLike.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 
-
+const int numberElementsInTest = 15;
     
 template<
     typename T,
@@ -234,12 +233,15 @@ struct ContainerCategory<Container3d<
 
 template<
     typename T,
-    typename TIndex 
+    typename TIndex,
+    typename SFIANE
 >
 struct IndexType<Container3d<
-    T, 
-    TIndex
-> >
+        T, 
+        TIndex
+    >,
+    SFIANE
+>
 {
     typedef TIndex type;
 };
@@ -323,9 +325,9 @@ struct TIndex: public std::array<T, 3>
 BOOST_AUTO_TEST_CASE(Index3d)
 {
     // 3d
-    for(int a = 0; a< 10; ++a)
-        for(int b=0; b< 10; ++b)
-            for(int c=0; c< 10; ++c)
+    for(int a = 1; a< numberElementsInTest; ++a)
+        for(int b=1; b< numberElementsInTest; ++b)
+            for(int c=1; c< numberElementsInTest; ++c)
             {
                 std::array<int, 3> containerSize{a, b, c};
                 
@@ -335,7 +337,6 @@ BOOST_AUTO_TEST_CASE(Index3d)
                         for(int k=0; k<c; ++k)
                         {
                             std::array<int, 3> idx{i, j, k}; 
-                            
                             auto result = hzdr::detail::idxndToInt<3>(idx, containerSize);
                             auto idx2 = hzdr::detail::intToIdxnd<3>(result, containerSize);
                             auto result2 = hzdr::detail::idxndToInt<3>(idx2, containerSize);
@@ -349,10 +350,10 @@ BOOST_AUTO_TEST_CASE(Index3d)
 BOOST_AUTO_TEST_CASE(Index4d)
 {
     // 4d
-    for(int a = 0; a< 10; ++a)
-        for(int b=0; b< 10; ++b)
-            for(int c=0; c< 10; ++c)
-                for(int d=0; c< 10; ++c)
+    for(int a = 1; a< numberElementsInTest; ++a)
+        for(int b=1; b< numberElementsInTest; ++b)
+            for(int c=1; c< numberElementsInTest; ++c)
+                for(int d=1; c< numberElementsInTest; ++c)
                 {
                     std::array<int, 4> containerSize{a, b, c, d};
                     
@@ -378,13 +379,12 @@ BOOST_AUTO_TEST_CASE(Index4d)
  */
 BOOST_AUTO_TEST_CASE(UNNESTED_LAYER)
 {
-    for(int a=0; a<10; ++a)
-        for(int b=0; b<10; ++b)
-            for(int c=0; c<10; ++c)
+    for(int a=1; a<numberElementsInTest; ++a)
+        for(int b=1; b<numberElementsInTest; ++b)
+            for(int c=1; c<numberElementsInTest; ++c)
             {
                 Container3d<int, TIndex<int> > container(TIndex<int>{a,b,c});
                 
-                std::cout << container;
 
                 typedef hzdr::SelfValue<uint_fast32_t> Offset;
                 typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
@@ -424,9 +424,9 @@ BOOST_AUTO_TEST_CASE(UNNESTED_LAYER)
  */
 BOOST_AUTO_TEST_CASE(Nested_Layer_First)
 {
-    for(auto a=0; a < 10; ++a)
-        for(auto b=0; b< 10; ++b)
-            for(auto c=0; c < 10; ++c)
+    for(auto a=1; a < numberElementsInTest; ++a)
+        for(auto b=1; b< numberElementsInTest; ++b)
+            for(auto c=1; c < numberElementsInTest; ++c)
             {
                 Container3d<hzdr::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
                 
@@ -471,9 +471,9 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
             }
             
             
-    for(auto a=0; a < 10; ++a)
-        for(auto b=0; b< 10; ++b)
-            for(auto c=0; c < 10; ++c)
+    for(auto a=1; a < numberElementsInTest; ++a)
+        for(auto b=1; b< numberElementsInTest; ++b)
+            for(auto c=1; c < numberElementsInTest; ++c)
             {
                 Container3d<hzdr::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
                 
@@ -549,13 +549,14 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_Second)
         concept
     );
     int sum=0; 
-    auto n = 2*2*2;
+    auto n = 8;
     
     for(auto it=view.rbegin(); it!=view.rend(); --it)
     {
+        std::cout <<*it << std::endl;
        sum += *it;
     }
-    BOOST_TEST(sum == (n*(n-1)/2));
+    BOOST_TEST(sum == (n*(n+1)));
     
     sum=0; 
     
@@ -563,5 +564,5 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_Second)
     {
        sum += *it;
     }
-    BOOST_TEST(sum == (n*(n-1)/2));
+    BOOST_TEST(sum == (n*(n+1)));
 }

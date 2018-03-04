@@ -116,8 +116,14 @@ struct Supercell
 namespace traits 
 {
     
-template<typename TFrame>
-struct IndexType<hzdr::Supercell<TFrame> >
+template<
+    typename TFrame,
+    typename SFIANE
+>
+struct IndexType<
+    hzdr::Supercell<TFrame>,
+    SFIANE
+>
 {
     typedef TFrame* type; 
 } ;
@@ -150,6 +156,7 @@ struct ComponentType<Supercell<TFrame> >
 {
     typedef TFrame type;
 } ;
+
 
 template<typename TFrame>
 struct NumberElements<Supercell<TFrame> >
@@ -196,4 +203,402 @@ std::ostream& operator<<(std::ostream& out, const Supercell<TFrame>& Supercell)
     return out;
 }
 
-} // namespace PIC
+namespace traits 
+{
+template<
+    typename TFrame, 
+    typename SFIANE
+>
+struct IsBidirectional<
+    hzdr::Supercell<TFrame>, 
+    SFIANE
+>
+{
+    static const bool value = true;
+} ;    
+
+template<
+    typename TFrame,
+    typename SFIANE
+>
+struct IsRandomAccessable<
+    hzdr::Supercell<TFrame>, 
+    SFIANE
+>
+{
+    static const bool value = true;
+} ;
+namespace accessor
+{
+
+/**
+ * @brief get the value of the element, at the iterator positions. \see Get.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TComponent,
+    typename TIndex
+>
+struct Get<
+    hzdr::Supercell<TFrame>,
+    TComponent, 
+    TIndex, 
+    SFIANE
+>
+{
+    HDINLINE
+    TComponent&
+    operator() (hzdr::Supercell<TFrame>*, TIndex& idx)
+    {
+        return *idx;
+    }
+} ;    
+
+/**
+ * @brief check if both iterators are at the same element. \see Equal.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TComponent,
+    typename TIndex
+>
+struct Equal<
+    hzdr::Supercell<TFrame>,
+    TComponent, 
+    TIndex, 
+    SFIANE
+>
+{
+    HDINLINE
+    bool
+    operator() (
+        hzdr::Supercell<TFrame>* con1, 
+        TIndex const & idx1, 
+        hzdr::Supercell<TFrame>* con2, 
+        TIndex const & idx2
+    )
+    {
+        return con1 == con2 && idx1 == idx2;
+    }
+} ;
+
+ /**
+ * @brief Check if the iterator one is ahead the second one. \see Ahead.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TComponent,
+    typename TIndex
+>
+struct Ahead<
+    hzdr::Supercell<TFrame>,
+    TComponent, 
+    TIndex, 
+    SFIANE
+>
+{
+    HDINLINE
+    bool
+    operator() (
+        hzdr::Supercell<TFrame>* con1, 
+        TIndex const & idx1, 
+        hzdr::Supercell<TFrame>* con2, 
+        TIndex const & idx2
+    )
+    {
+        if(con1 != con2)
+            return false;
+        
+        TIndex tmp = idx1;
+        while(tmp != nullptr)
+        {
+            tmp = tmp->previousFrame;
+            if(tmp == idx2) 
+                return true;
+           
+        }
+        return false;
+    }
+} ;
+
+
+
+/**
+ * @brief check wheter the iterator 1 is behind the second one. \see Behind.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TComponent,
+    typename TIndex
+>
+struct Behind<
+    hzdr::Supercell<TFrame>,
+    TComponent, 
+    TIndex, 
+    SFIANE
+>
+{
+    HDINLINE
+    bool
+    operator() (
+        hzdr::Supercell<TFrame>*, 
+        TIndex const & idx1, 
+        hzdr::Supercell<TFrame>*, 
+        TIndex const & idx2
+    )
+    {
+        TIndex tmp = idx1;
+        while(tmp != nullptr)
+        {
+            tmp = tmp->nextFrame;
+            if(tmp == idx2) 
+                return true;
+            
+        }
+        return false;
+    }
+} ;
+
+} // namespace accessor
+    
+    
+namespace navigator
+{
+
+/**
+ * @brief Implementation to get the first element. \see FirstElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex
+>
+struct FirstElement<
+    hzdr::Supercell<TFrame>,
+    TIndex, 
+    SFIANE
+>
+{
+    HDINLINE
+    void
+    operator() (
+        hzdr::Supercell<TFrame>* container, 
+        TIndex & idx
+    )
+    {
+        idx = container->firstFrame;
+    }
+} ;
+/**
+ * @brief Implementation to get the next element. For futher details \see 
+ * NExtElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex,
+    typename TRange
+>
+struct NextElement<
+    hzdr::Supercell<TFrame>,
+    TIndex,
+    TRange,
+    SFIANE
+>
+{
+
+    template<
+        typename TContainerSize
+    >
+    HDINLINE
+    TRange
+    operator() (
+        hzdr::Supercell<TFrame>*, 
+        TIndex& idx, 
+        TRange const & range,
+        TContainerSize &)
+    {
+        TRange i = 0;
+        for(i = 0; i<range; ++i)
+        {
+            idx = idx->nextFrame;
+            if(idx == nullptr)
+                break;
+        }
+        return range - i;
+    }
+} ;
+/**
+ * @brief Implementation to check whether the iterator is after the last element.
+ * \see AfterLastElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex
+>
+struct AfterLastElement<
+    hzdr::Supercell<TFrame>,
+    TIndex, 
+    SFIANE
+>
+{
+    template<typename TRangeFunction>
+    HDINLINE
+    bool
+    test(
+        hzdr::Supercell<TFrame>*, 
+        TIndex const & idx, 
+        TRangeFunction const &
+    )
+    const
+    {
+        return idx == nullptr;
+    }
+    
+    template<typename TRangeFunction>
+    HDINLINE
+    void
+    set(
+        hzdr::Supercell<TFrame>*, 
+        TIndex & idx,
+        TRangeFunction const &
+    )
+    const
+    {
+        idx = nullptr;
+    }
+} ;
+
+/**
+ * @brief Set the iterator to the last element. \see LastElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex
+>
+struct LastElement<
+    hzdr::Supercell<TFrame>,
+    TIndex,
+    SFIANE
+>
+{
+    template<typename TSizeFunction>
+    HDINLINE
+    void
+    operator() (
+        hzdr::Supercell<TFrame>* containerPtr, 
+        TIndex& index, 
+        TSizeFunction &&
+    )
+    {
+        index = containerPtr->lastFrame;
+        std::cout << "indexPtr " << index << std::endl;
+    }
+} ;
+
+/**
+ * @brief Implementation to get the next element. For futher details \see 
+ * NExtElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex,
+    typename TRange
+>
+struct PreviousElement<
+    hzdr::Supercell<TFrame>,
+    TIndex,
+    TRange,
+    SFIANE
+>
+{
+    
+    template<
+        typename TContainerSize>
+    HDINLINE
+    TRange
+    operator() (
+        hzdr::Supercell<TFrame>*, 
+        TIndex& idx, 
+        TRange const &,
+        TRange const & jumpsize,
+        TContainerSize&)
+    {
+        TRange i = 0;
+        for(i = 0; i<jumpsize; ++i)
+        {
+            idx = idx->previousFrame;
+            if(idx == nullptr)
+                return jumpsize - i;
+        }
+
+        return jumpsize - i;
+    }
+} ;
+
+/**
+ * @brief Implementation to check whether the iterator is before the fist 
+ * element. \see BeforeFirstElement.hpp
+ */
+template<
+    typename TFrame,
+    typename SFIANE,
+    typename TIndex,
+    typename TRange
+>
+struct BeforeFirstElement<
+    hzdr::Supercell<TFrame>,
+    TIndex, 
+    TRange,
+    SFIANE
+>
+{
+    
+    template<typename TRangeFunction>
+    HDINLINE
+    bool
+    test(
+        hzdr::Supercell<TFrame>*, 
+        TIndex const & idx,
+        TRange const & offset, 
+        TRangeFunction&
+    )
+    const
+    {
+        TIndex tmp = idx;
+        for(TRange i = static_cast<TRange>(0); i < offset; ++i)
+        { 
+            if(tmp == nullptr)
+                return true;
+            tmp = tmp->previousFrame;
+        }
+        return tmp == nullptr ;
+    }
+    
+
+    template<typename TRangeFunction>
+    HDINLINE
+    void
+    set(
+        hzdr::Supercell<TFrame>*, 
+        TIndex & idx,
+        TRange const &, 
+        TRangeFunction&
+    )
+    const
+    {
+        idx = nullptr;
+    }
+} ;
+}
+    
+} // namespace traits
+
+} // namespace hzdr

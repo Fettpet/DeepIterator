@@ -1,10 +1,13 @@
-
+#if 0
 #include "Test/Cuda/cuda.hpp"
-#include "PIC/SupercellManager.hpp"
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/SupercellContainerManager.hpp"
-#include "Iterator/Policies.hpp"
-#include "DeepIterator.hpp"
+#include "deepIterator/PIC/SupercellContainerManager.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
+
 
 typedef hzdr::Particle<int32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 256> Frame;
@@ -226,3 +229,5 @@ void callSupercellSquareAdd(Supercell*** superCellContainer, int nbSupercells, s
     }
     
 }
+
+#endif

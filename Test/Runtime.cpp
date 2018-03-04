@@ -12,12 +12,12 @@
 
 #define BOOST_TEST_MODULE ForwardIterator
 #include <boost/test/included/unit_test.hpp>
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-
-#include "DeepIterator.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 
 #include <boost/timer.hpp>
 
@@ -62,8 +62,13 @@ BOOST_AUTO_TEST_CASE(Test1B)
                 hzdr::makeAccessor(),
                 hzdr::makeNavigator(
                     Offset(),
-                    Jumpsize()));
-            auto && view1Layer = hzdr::makeView(data, concept1Layer);
+                    Jumpsize()
+                )
+            );
+            auto && view1Layer = hzdr::makeView(
+                data, 
+                concept1Layer
+            );
             timer.restart();
             uint_fast64_t sum1Layer = static_cast<uint_fast64_t>(0);
             for(auto && it=view1Layer.begin(); it != view1Layer.end(); ++it)

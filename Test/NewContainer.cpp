@@ -8,30 +8,15 @@
 // The container class
 #include <boost/container/vector.hpp>
 // include all the needed trait headers
-#include "Traits/Componenttype.hpp"
-#include "Traits/HasConstantSize.hpp"
-#include "Traits/IsBidirectional.hpp"
-#include "Traits/IsRandomAccessable.hpp"
-#include "Traits/IndexType.hpp"
-#include "Traits/RangeType.hpp"
-#include "Traits/NumberElements.hpp"
-
-#include "Traits/Accessor/Ahead.hpp"
-#include "Traits/Accessor/Behind.hpp"
-#include "Traits/Accessor/Equal.hpp"
-#include "Traits/Accessor/Get.hpp"
-
-#include "Traits/Navigator/AfterLastElement.hpp"
-#include "Traits/Navigator/BeforeFirstElement.hpp"
-#include "Traits/Navigator/LastElement.hpp"
-#include "Traits/Navigator/NextElement.hpp"
-#include "Traits/Navigator/PreviousElement.hpp"
-#include "Traits/Navigator/FirstElement.hpp"
+#include "deepiterator/traits/Traits.hpp"
 
 
-#include "DeepIterator.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/SupercellContainer.hpp"
+
+#include "deepiterator/DeepIterator.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/PIC/Frame.hpp"
 /**
  * Each new Container need to specify the following traits:
  * 1. Componenttype
@@ -112,8 +97,10 @@ struct NumberElements<boost::container::vector<T> >
  */
 
 template<
-    typename T>
-struct IndexType<boost::container::vector<T>, void> 
+    typename T,
+    typename SFIANE
+>
+struct IndexType<boost::container::vector<T>, SFIANE> 
 {
     typedef int_fast32_t type; 
 };

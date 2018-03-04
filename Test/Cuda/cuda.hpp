@@ -2,12 +2,13 @@
 #pragma once 
 
 
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include <vector>
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 
-#include "Definitions/hdinline.hpp"
 
 typedef hzdr::Particle<int32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 256> Frame;

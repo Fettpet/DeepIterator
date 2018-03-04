@@ -209,11 +209,18 @@ template<
     typename TPrescription,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename ComponentType = typename traits::ComponentType<TContainerNoRef>::type,
-    typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
-    typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
+    typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,    
+    typename IndexType = typename hzdr::traits::IndexType<
+        TContainerNoRef,
+        ContainerCategoryType
+    >::type,
+    
 
     bool hasConstantSize = traits::HasConstantSize<TContainerNoRef>::value,
-    bool isBidirectional = hzdr::traits::IsBidirectional<TContainerNoRef, ContainerCategoryType>::value,
+    bool isBidirectional = hzdr::traits::IsBidirectional<
+        TContainerNoRef, 
+        ContainerCategoryType
+    >::value,
     bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainerNoRef, ContainerCategoryType>::value>
 auto 
 HDINLINE

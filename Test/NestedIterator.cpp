@@ -1,12 +1,12 @@
 
 #define BOOST_TEST_MODULE NestedIterator
 #include <boost/test/included/unit_test.hpp>
-
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include "DeepIterator.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 
 //using namespace boost::unit_test;
 typedef int_fast32_t ParticleProperty;

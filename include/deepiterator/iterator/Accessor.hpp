@@ -225,8 +225,12 @@ namespace details
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TIndex = typename traits::IndexType<TContainerNoRef>::type,
     typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,
+    typename TIndex = typename traits::IndexType<
+        TContainerNoRef,
+        TContainerCategory
+    >::type,
+    
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
     typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
@@ -271,8 +275,11 @@ makeAccessor(TAccessor&&)
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TIndex = typename traits::IndexType<TContainerNoRef>::type,
-    typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,
+    typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,    
+    typename TIndex = typename traits::IndexType<
+        TContainerNoRef,
+        TContainerCategory
+    >::type,    
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
     typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
@@ -323,8 +330,12 @@ makeAccessor()
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TIndex = typename traits::IndexType<TContainerNoRef>::type,
     typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,
+    typename TIndex = typename traits::IndexType<
+        TContainerNoRef,
+        TContainerCategory
+    >::type,
+    
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
     typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,

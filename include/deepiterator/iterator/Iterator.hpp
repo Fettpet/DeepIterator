@@ -1805,7 +1805,10 @@ template<
     typename TPrescriptionNoRef =typename std::decay<TPrescription>::type, 
     typename TContainerNoRef = typename std::decay<TContainer>::type, 
     typename ContainerCategoryType = typename traits::ContainerCategory<TContainerNoRef>::type,
-    typename IndexType = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename IndexType = typename hzdr::traits::IndexType<
+        TContainerNoRef,
+        ContainerCategoryType
+    >::type,
     bool isBidirectional = hzdr::traits::IsBidirectional<TContainer, ContainerCategoryType>::value,
     bool isRandomAccessable = hzdr::traits::IsRandomAccessable<TContainer, ContainerCategoryType>::value,
     bool hasConstantSize = traits::HasConstantSize<TContainer>::value,

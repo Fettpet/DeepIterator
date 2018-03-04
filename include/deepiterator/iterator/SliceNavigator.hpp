@@ -355,9 +355,9 @@ public:
      * @param index out: last element of the iterator.
      */
 
-//     template< bool T=isBidirectional>
-//     HDINLINE 
-//     typename std::enable_if<T==true>::type
+    template< bool T=isBidirectional>
+    HDINLINE 
+    typename std::enable_if<T==true>::type
     rbegin(
         ContainerPtr containerPtr,  
         IndexType & index)

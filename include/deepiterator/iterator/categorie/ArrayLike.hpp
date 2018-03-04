@@ -43,6 +43,14 @@ struct RangeType<TContainer, hzdr::container::categorie::ArrayLike>
     typedef int_fast32_t type;
 };
 
+template<
+    typename TContainer
+>
+struct IndexType<TContainer, hzdr::container::categorie::ArrayLike>
+{
+    typedef int_fast32_t type;
+};
+
 namespace accessor 
 {
 /**

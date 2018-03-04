@@ -1,5 +1,12 @@
+#define BOOST_TEST_MODULE OwnCategorieBoostVector
+#include <boost/test/included/unit_test.hpp>
+
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 #include <boost/container/vector.hpp>
-#include "PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
 /**
  * @brief We use this test to give you an advice how you can create an own 
  * categorie. We like to use the map out of the std library as a categorie. The 
@@ -7,7 +14,7 @@
  * you need to do, give the categorie a name. 
  */
 // this contains all includes for all classes we need.
-#include "Iterator/Categorie.hpp"
+#include "deepiterator/iterator/Categorie.hpp"
 namespace hzdr 
 {
 namespace container
@@ -49,6 +56,14 @@ template<
     typename T,
     typename SFIANE>
 struct RangeType<boost::container::vector<T>, SFIANE> 
+{
+    typedef int_fast32_t type; 
+};
+
+template<
+    typename T,
+    typename SFIANE>
+struct IndexType<boost::container::vector<T>, SFIANE> 
 {
     typedef int_fast32_t type; 
 };
@@ -411,13 +426,7 @@ struct BeforeFirstElement<
 /**
  * @brief Now we test the boost vector
  */
-#define BOOST_TEST_MODULE OwnCategorieBoostVector
-#include <boost/test/included/unit_test.hpp>
 
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include "DeepIterator.hpp"
 
 using namespace boost::unit_test;
 

@@ -14,11 +14,12 @@
 
 #define BOOST_TEST_MODULE RandomAccessIterator
 #include <boost/test/included/unit_test.hpp>
-#include "PIC/SupercellContainer.hpp"
-#include "PIC/Supercell.hpp"
-#include "PIC/Frame.hpp"
-#include "PIC/Particle.hpp"
-#include "DeepIterator.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Supercell.hpp"
+#include "deepiterator/PIC/Frame.hpp"
+#include "deepiterator/PIC/SupercellContainer.hpp"
+#include "deepiterator/PIC/Particle.hpp"
+#include "deepiterator/DeepIterator.hpp"
 typedef hzdr::Particle<int_fast32_t, 2u> Particle;
 typedef hzdr::Frame<Particle, 10u> Frame;
 typedef hzdr::Supercell<Frame> Supercell;

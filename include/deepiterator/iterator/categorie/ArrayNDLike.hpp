@@ -52,6 +52,7 @@ namespace detail
             int size=1;
             for(uint j=0; j<i; ++j)
             {
+                assert(containerSize[j] != 0);
                 size *= containerSize[j];
             }
             result += idx[i] * size;
@@ -110,7 +111,7 @@ namespace detail
             int size = 1;
             for( uint j=0u; j<i; ++j)
             {
-                size *= containerSize[j];
+                size *= (containerSize[j] > 0) * containerSize[j];
             }
             result[i] = ((remaining + size -1) / size) % containerSize[i];
             remaining -= result[i] * size;
@@ -118,7 +119,7 @@ namespace detail
         int size = 1;
         for( uint j=0u; j<Dim- 1; ++j)
         {
-                size *= containerSize[j];
+                size *= containerSize[j] + (containerSize[j] == 0);
         }
         result[Dim - 1] = ((remaining + size -1) / size);
         

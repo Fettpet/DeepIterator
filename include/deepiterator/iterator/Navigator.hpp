@@ -671,7 +671,8 @@ template<
         T_ContainerNoRef
     >,
     typename T_Index = typename hzdr::traits::IndexType<
-        T_ContainerNoRef
+        T_ContainerNoRef,
+        T_ContainerCategorie
     >::type,
     typename T_Range = typename hzdr::traits::RangeType<
         T_ContainerNoRef,
@@ -812,7 +813,8 @@ template<
         T_ContainerNoRef
     >::type,
     typename T_Index = typename hzdr::traits::IndexType<
-        T_ContainerNoRef
+        T_ContainerNoRef,
+        T_ContainerCategorie
     >::type,
     typename T_Range = typename hzdr::traits::RangeType<
         T_ContainerNoRef,
