@@ -1,7 +1,7 @@
-#if 0
-#include "Test/Cuda/cuda.hpp"
-#include "deepIterator/PIC/SupercellContainerManager.hpp"
-#include "deepiterator/PIC/SupercellContainer.hpp"
+
+#include "deepiterator/../../Test/Cuda/cuda.hpp"
+#include "deepiterator/PIC/SupercellContainerManager.hpp"
+#include "deepiterator/PIC/SupercellManager.hpp"
 #include "deepiterator/PIC/Supercell.hpp"
 #include "deepiterator/PIC/Frame.hpp"
 #include "deepiterator/PIC/SupercellContainer.hpp"
@@ -230,4 +230,3 @@ void callSupercellSquareAdd(Supercell*** superCellContainer, int nbSupercells, s
     
 }
 
-#endif

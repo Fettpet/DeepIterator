@@ -466,7 +466,7 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         auto const nbElem = nbElements(containerPtr);
         auto const off = offset();
-        assert(nbElem >= off);
+     //   assert(nbElem >= off);
         return (nbElem - off + jumpsize() - static_cast<RangeType>(1)) 
             / jumpsize();
     }

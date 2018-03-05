@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::Distance, 0>()));
             
             auto view = makeView(
                 container, 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::Distance,1>()));
             
             auto view = makeView(
                 container, 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()));
             
            
             auto view = makeView(
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
             
             
             auto view = makeView(
@@ -155,7 +155,6 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 pos += jumpsize;
                 counter2++;
             }
-            //counter = std::min(2, counter);
             
             BOOST_TEST(counter == counter2);
         }
@@ -170,7 +169,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::Distance, 0>()));
             
             
             auto view = makeView(
@@ -198,69 +197,59 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()));
+                                            hzdr::Slice<hzdr::slice::Distance,1>()));
             
             
             auto view = makeView(
                 container, 
                 childPrescriptionJump1
             );
-           // std::cout << container << std::endl;
             int counter=0;
             for(auto it=view.rbegin(); it!=view.rend(); --it)
             {
-               // std::cout << *it << std::endl;
                 ++counter;
             }
-            auto counter2 = 0;
-            auto pos = off;
-            while( pos < 10)
+            
+            int counter2 = 0;
+            for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                pos += jumpsize;
-                counter2++;
+                ++counter2;
             }
-            counter2 = std::min(2, counter2);
-
-            //counter = std::min(2, counter);
             
             BOOST_TEST(counter == counter2);
         }
         
     // Backward 0
         for(int off=0; off<9; ++off)
-        for(int jumpsize=1; jumpsize<9; ++jumpsize)
-        {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
-                                            Offset(off),
-                                            Jumpsize(jumpsize),
-                                            hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
-            
-            
-            auto view = makeView(
-                container, 
-                childPrescriptionJump1
-            );
-           // std::cout << container << std::endl;
-            int counter=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(int jumpsize=1; jumpsize<9; ++jumpsize)
             {
-               // std::cout << *it << std::endl;
-                ++counter;
-            }
-            auto counter2 = 0;
-            auto pos = off;
-            while( pos < 10)
-            {
-                pos += jumpsize;
-                counter2++;
-            }
+                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
+                                            hzdr::makeAccessor(),
+                                            hzdr::makeNavigator(
+                                                Offset(off),
+                                                Jumpsize(jumpsize),
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()));
+                
+                
+                auto view = makeView(
+                    container, 
+                    childPrescriptionJump1
+                );
+                int counter=0;
+                for(auto it=view.rbegin(); it!=view.rend(); --it)
+                {
+                    ++counter;
+                }
+                auto counter2 = 0;
+                for(auto it=view.begin(); it!=view.end(); ++it)
+                {
+                    ++counter2;
+                }
 
-            //counter = std::min(2, counter);
-            
-            BOOST_TEST(counter == counter2);
-        }
+
+                
+                BOOST_TEST(counter == counter2);
+            }
         
     // forward
     for(int off=0; off<9; ++off)
@@ -271,7 +260,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         hzdr::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()));
+                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
             
             
             auto view = makeView(
@@ -282,15 +271,14 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
             int counter=0;
             for(auto it=view.rbegin(); it!=view.rend(); --it)
             {
-              //  std::cout << *it << std::endl;
+                std::cout << "Backward" << *it << std::endl;
                 ++counter;
             }
             auto counter2 = 0;
-            auto pos = off;
-            while( pos < 9)
+            for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                pos += jumpsize;
-                counter2++;
+                std::cout << "forwrad" << *it << std::endl;
+                ++counter2;
             }
 
             BOOST_TEST(counter == counter2);
@@ -316,7 +304,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::Distance,1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -358,7 +346,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::Distance,1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -381,13 +369,11 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             
             int checksum=0;
-            for(int i=9; i>=8; --i)
+            for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                for( int j=off; j<2; j+=jumpsize)
-                {
-                    checksum += container[i][j];
-                }
+                checksum+= *it;
             }
+
             BOOST_TEST(sum == checksum);
         }
     
@@ -400,7 +386,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         hzdr::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<1, hzdr::slice::NumberElements>()
+                                            hzdr::Slice<hzdr::slice::Distance,1>()
                                         ),
                                         hzdr::makeIteratorPrescription(
                                             hzdr::makeAccessor(),
@@ -423,12 +409,9 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             
             int checksum=0;
-            for(int i=9; i>=8; --i)
+            for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                for( int j=off; j<2; j+=jumpsize)
-                {
-                    checksum += container[i][j];
-                }
+                checksum+= *it;
             }
 
             BOOST_TEST(checksum == sum);
@@ -449,7 +432,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<0, hzdr::slice::NumberElements>()
+                                                hzdr::Slice<hzdr::slice::Distance, 0>()
                                             )
                                         )
             );
@@ -463,19 +446,13 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             for(auto it=view.rbegin(); it!=view.rend(); --it)
             {
                 sum += *it;
-                std::cout << *it << std::endl;
+
             }
             
             int checksum=0;
-            for(int i=0; i<10; ++i)
+            for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                int idx = std::max(off, 1);
-                // The first element is touched. The rest is outside the container
-                // so the first element is the last element
-                if (off == 0 and jumpsize >= 2)
-                    idx = 0;
-                if(idx < 2)
-                    checksum += container[i][idx];
+                checksum+= *it;
             }
             BOOST_TEST(checksum == sum);
         }
@@ -493,7 +470,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<0, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()
                                             )
                                         )
             );
@@ -532,7 +509,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -572,7 +549,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             hzdr::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<1, hzdr::slice::hzdr::slice::IgnoreLastElements>()
+                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -598,7 +575,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 BOOST_TEST(checksum == sum);
         }
         
-        for(int off=0; off<9; ++off)
+    for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
             auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
@@ -629,15 +606,12 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 std::cout << *it << std::endl;
             }
             
-            auto idx = 0;
-            if(off == 0 and jumpsize == 1)
-                idx = 1;
             int checksum=0;
-            if(off == 0)
-                for(int i=0; i<10; ++i)
-                {
-                    checksum += container[i][idx];
-                }
+            for(auto it=view.begin(); it!=view.end(); ++it)
+            {
+                checksum+= *it;
+            }
             BOOST_TEST(checksum == sum);
+        }
 }
 

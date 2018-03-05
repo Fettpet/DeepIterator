@@ -209,7 +209,7 @@ public:
             JumpsizeType && jumpsize,
             SliceType && slice
     ):
-        cur_pos(0),
+        cur_pos(static_cast<RangeType>(0)),
         offset(hzdr::forward<OffsetType>(offset)),
         jumpsize(hzdr::forward<JumpsizeType>(jumpsize)),
         slice(hzdr::forward<SliceType>(slice)),
@@ -233,36 +233,41 @@ public:
      * given by the distance parameter
      */
     HDINLINE
-    RangeType
+    auto
     next(
         ContainerPtr containerPtr,  
         IndexType & index,
-        RangeType distance)
+        RangeType distance
+    )
+    ->
+    RangeType    
     {
+    
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
-        auto remainingJumpsize = nextElement(
+        RangeType const remainingJumpsize = static_cast<RangeType>(nextElement(
             containerPtr, 
             index,  
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
-        );
+        ));
         
-        cur_pos += static_cast<int>(distance);
-        auto nbElem = size(containerPtr);
+        cur_pos += distance;
+        RangeType const nbElem = static_cast<RangeType>(size(containerPtr));
+        RangeType const distanceSlice = static_cast<RangeType>(slice.distance());
         // we need the distance from the last element to the current index position
         // this is a round up
        
         // 1. We start counting from the begininng and the position is outside
         // the slice.
-        if( slice.from_start() && (cur_pos > slice.distance()))
+        if( slice.from_start() && (cur_pos > distanceSlice))
         {
-            return cur_pos - slice.distance();
+            return cur_pos - distanceSlice;
         }
         // 2. We ignore the last elements
-        else if(not slice.from_start() && (cur_pos > static_cast<int_fast32_t>(nbElem - slice.distance())))
+        else if(not slice.from_start() && (cur_pos > nbElem - distanceSlice))
         {
-            return cur_pos + slice.distance() - nbElem;
+            return cur_pos + distanceSlice - nbElem;
         }
         // 3. if it is outside the container 
         else 
@@ -284,43 +289,47 @@ public:
      */
     template< bool T=isBidirectional>
     HDINLINE
-    typename std::enable_if<T==true, RangeType>::type
+    auto
     previous(
         ContainerPtr containerPtr,  
         IndexType & index,
-        RangeType distance)
+        RangeType distance
+    )
+    ->
+    typename std::enable_if<T==true, RangeType>::type
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
-        auto remainingJumpsize = previousElement(
+        RangeType const remainingJumpsize = static_cast<RangeType>(previousElement(
             containerPtr, 
             index,
             offset(),
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
-        );
+        ));
         
         cur_pos -= distance;
-        auto nbElem = size(containerPtr);
+        RangeType const nbElem = static_cast<RangeType>(size(containerPtr));
+        RangeType const distanceSlice = static_cast<RangeType>(slice.distance());
         // we need the distance from the last element to the current index position
         // this is a round up
        
         // 1. We start counting from the begininng and the position is outside
         // the slice.
-        if( slice.from_start() && (-1 * cur_pos > slice.distance()))
+        if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > distanceSlice))
         {
-            return -1 * cur_pos - slice.distance();
+            return static_cast<RangeType>(-1) * cur_pos - distanceSlice;
         }
         // 2. We ignore the last elements
         // The cast is nessacary since the container could be empty
-        else if(not slice.from_start() && (static_cast<int_fast32_t>(-1 * cur_pos) > static_cast<int_fast32_t>(nbElem - slice.distance())))
+        else if(not slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > nbElem - distanceSlice))
         {
-            return -1 * cur_pos + slice.distance() - nbElem;
+            return static_cast<RangeType>(-1) * cur_pos + distanceSlice - nbElem;
         }
         // 3. if it is outside the container 
         else 
         {
-            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) - 1) / static_cast<RangeType>(jumpsize());
+            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) -static_cast<RangeType>(-1)) / static_cast<RangeType>(jumpsize());
         }
     }
     
@@ -330,23 +339,27 @@ public:
      * @param index out: first element of the iterator.
      */
     HDINLINE 
-    void 
+    auto 
     begin(
         ContainerPtr containerPtr,  
-        IndexType & index)
+        IndexType & index
+    )
+    ->
+    void
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         firstElement(containerPtr, index);
-        std::cout << "begin before next: " << index << std::endl;
+    //    std::cout << "begin before next: " << index << std::endl;
 
         nextElement(
             containerPtr, 
             index,  
             offset(),
-            containerSize);
-        std::cout << "begin after next: " << index << " " << offset() << std::endl;
+            containerSize
+        );
+    //    std::cout << "begin after next: " << index << " " << offset() << std::endl;
 
-        cur_pos = 0;
+        cur_pos = static_cast<RangeType>(0);
     }
     
     /**
@@ -357,28 +370,55 @@ public:
 
     template< bool T=isBidirectional>
     HDINLINE 
-    typename std::enable_if<T==true>::type
+    auto
     rbegin(
         ContainerPtr containerPtr,  
-        IndexType & index)
+        IndexType & index
+    )
+    ->
+    typename std::enable_if<T==true>::type
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // set to the first element
-        begin(
-            containerPtr, 
-            index
-        );
-        std::cout << "rbegin before next: " << index << std::endl;
-        // go to the last element
-        next(
-            containerPtr,  
-            index,
-            slice.distance()
-        );
-        std::cout << "rbegin after next: " << index << std::endl;
-        
-        cur_pos = 0;
-        
+        if(slice.from_start())
+        {     
+           begin(
+                containerPtr, 
+                index
+           );
+         //   std::cout << "rbegin before next: " << index << std::endl;
+            // go to the last element
+            auto idxCopy = index;
+            auto counter = 0;        
+            while(
+                next(
+                    containerPtr,  
+                    idxCopy,
+                    1u  
+                ) == 0 && counter < slice.distance())
+            {
+                ++counter;
+                index = idxCopy;
+            }
+          //  std::cout << "rbegin after next: " << index << std::endl;
+            
+            cur_pos = static_cast<RangeType>(0);
+        }
+        else 
+        {
+            lastElement(
+                containerPtr,
+                index,
+                containerSize
+            );
+            previousElement(
+                containerPtr, 
+                index,
+                offset(),
+                slice.distance(),
+                containerSize
+            );
+        }
     }
     
     /**
@@ -387,12 +427,19 @@ public:
      * @param index out: index of the after last element
      */
     HDINLINE 
-    void 
+    auto 
     end(
         ContainerPtr containerPtr,  
-        IndexType & index)
+        IndexType & index
+    )
+    ->
+    void
     {
-        afterLastElement.set(containerPtr, index, containerSize);
+        afterLastElement.set(
+            containerPtr,
+            index,
+            containerSize
+        );
     }
     
     /**
@@ -404,10 +451,13 @@ public:
 
     template< bool T=isBidirectional>
     HDINLINE 
-    typename std::enable_if<T==true>::type
+    auto
     rend(
         ContainerPtr containerPtr,  
-        IndexType & index)
+        IndexType & index
+    )
+    ->
+    typename std::enable_if<T==true>::type
     {
         beforeFirstElement.set(
             containerPtr, 
@@ -436,11 +486,15 @@ public:
          * 2. if slice.from_start() and cur_pos > slice.distance()
          * 3. not slice.from_start() and cur_pos > nbElements - offset - slice.distance()
          */
+        RangeType const distance = static_cast<RangeType>(slice.distance());
+        RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr));
+        RangeType const off = static_cast<RangeType>(offset());
+        RangeType const jump = static_cast<RangeType>(jumpsize());
         return 
              afterLastElement.test(containerPtr, index, containerSize)
-          || (slice.from_start() && (cur_pos >  ( slice.distance())))
-          || (not slice.from_start() && (cur_pos * jumpsize() + offset() >= 
-                nbElements(containerPtr) - slice.distance() ));
+          || (slice.from_start() && (cur_pos >  distance))
+          || (not slice.from_start() && (cur_pos * jump + off >= 
+                 nbElem - distance ));
     }
     
     /**
@@ -451,17 +505,29 @@ public:
      */
     template< bool T=isBidirectional>
     HDINLINE 
-    typename std::enable_if<T==true, bool>::type
+    auto
     isBeforeFirst(
         ContainerPtr containerPtr,   
         IndexType const & index)
     const
+    ->
+    typename std::enable_if<T==true, bool>::type
     {
+        RangeType const distance = slice.distance();
+        RangeType const nbElem = nbElements(containerPtr); 
+        RangeType const off = static_cast<RangeType>(offset());
+        RangeType const jump = static_cast<RangeType>(jumpsize());
+        
         return 
-            beforeFirstElement.test(containerPtr, index, offset(), containerSize)
-            || (slice.from_start() && (cur_pos < -1 * slice.distance()))
-            || (not slice.from_start() && (static_cast<int_fast32_t>(cur_pos * jumpsize() - offset()) <= 
-                -1 * static_cast<int_fast32_t>(nbElements(containerPtr) - slice.distance() )));
+            beforeFirstElement.test(
+                containerPtr, 
+                index, 
+                offset(), 
+                containerSize
+            )
+            || (slice.from_start() && (cur_pos < static_cast<RangeType>(-1) * distance))
+            || (not slice.from_start() && (cur_pos * jump - off) <= 
+                static_cast<RangeType>(-1) * (nbElem - distance));
     }
     
     /**
@@ -471,9 +537,11 @@ public:
      * @return number of elements within the container
      */
     HDINLINE
-    RangeType 
+    auto 
     nbElements(ContainerPtr containerPtr)
     const
+    ->
+    RangeType
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         return containerSize(containerPtr);
@@ -487,28 +555,28 @@ public:
      * @return number of elements the navigator can access
      */
     HDINLINE
-    RangeType
+    auto
     size(ContainerPtr containerPtr)
-    const 
+    const
+    ->
+    RangeType 
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         
-        auto const nbElem = nbElements(containerPtr);
+        RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr));
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
-        
+        RangeType const distance = slice.distance();
         if(slice.from_start())
         {
             
-
-            
             // 1. Case nbElem - off > slice.distance()
-            uint sizeFirstCase = (
-                    slice.distance()
+            RangeType const sizeFirstCase = (
+                    distance
                     + jump )
                 / jump;
             // 2. Case nbElem - off < slice.distance()
-            uint sizeSecondCase = (
+            RangeType const sizeSecondCase = (
                     nbElem 
                     - off
                     + jump
@@ -516,16 +584,16 @@ public:
                 / jump;
 
             // check and give it back
-            return ((static_cast<RangeType>(nbElem) - off >= slice.distance()) * sizeFirstCase 
-                + (static_cast<RangeType>(nbElem) < slice.distance()) * sizeSecondCase);
+            return (nbElem - off >= distance) * sizeFirstCase 
+                + (nbElem < distance) * sizeSecondCase;
         }
         // it ignores the last slice.distance() elements
         else 
         {
             // 1. Case nbElem - off > slice.distance()
             // I had nbElem - off - slice.distance() elements
-                uint sizeFirstCase = (
-                    nbElem - off - slice.distance()
+                RangeType const sizeFirstCase = (
+                    nbElem - off - distance
                     + jump 
                     - static_cast<RangeType>(1))
                 / jump;
@@ -533,14 +601,14 @@ public:
             // I had 0 elements inside
             
                 
-            return (off < nbElem) * (static_cast<int_fast32_t>(nbElem) - off > slice.distance()) * sizeFirstCase;
+            return (off < nbElem) * (nbElem - off > distance) * sizeFirstCase;
                 
         }
     }
     
 //variables
 protected:
-    int cur_pos;
+    RangeType cur_pos;
     OffsetType offset;
     JumpsizeType jumpsize;
     SliceType slice;
@@ -743,7 +811,10 @@ template<
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>,
-    typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename TIndex = typename hzdr::traits::IndexType<
+        TContainerNoRef,
+        TContainerCategorie
+    >::type,
     typename TRange = typename hzdr::traits::RangeType<
         TContainerNoRef,
         TContainerCategorie
@@ -843,7 +914,10 @@ template<
     typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
     typename TContainerCategorie = typename hzdr::traits::ContainerCategory<TContainerNoRef>::type,
     typename TContainerSize = typename hzdr::traits::NumberElements<TContainerNoRef>::type,
-    typename TIndex = typename hzdr::traits::IndexType<TContainerNoRef>::type,
+    typename TIndex = typename hzdr::traits::IndexType<
+        TContainerNoRef,
+        TContainerCategorie
+    >::type,
     typename TRange = decltype(TOffset::operator()()),
     typename TFirstElement = typename hzdr::traits::navigator::FirstElement<TContainerNoRef, TIndex, TContainerCategorie>::type,
     typename TAfterLastElement = typename hzdr::traits::navigator::AfterLastElement<TContainerNoRef, TIndex, TContainerCategorie>::type,

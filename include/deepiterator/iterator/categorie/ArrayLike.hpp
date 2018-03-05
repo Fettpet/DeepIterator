@@ -215,7 +215,7 @@ struct NextElement<
         TContainerSize& size)
     {
         idx += range;
-        return (idx >= size(container)) * (idx - (size(container)-1) );
+        return (idx >= static_cast<TRange>(size(container))) * (idx - (static_cast<TRange>(size(container))-1) );
     }
     
 } ;
@@ -235,7 +235,10 @@ struct AfterLastElement<
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer* conPtr, TIndex const & idx, TSizeFunction const & size)
+    test (
+        TContainer* conPtr, 
+        TIndex const & idx, 
+        TSizeFunction const & size)
     const
     {
         return idx >= size(conPtr);

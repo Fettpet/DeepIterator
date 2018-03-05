@@ -18,6 +18,7 @@
 #include "deepiterator/PIC/SupercellContainer.hpp"
 #include "deepiterator/PIC/Particle.hpp"
 #include "deepiterator/DeepIterator.hpp"
+#include "deepiterator/../../Test/Cuda/cuda.hpp"
 typedef hzdr::Particle<int32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 256> Frame;
 typedef hzdr::Supercell<Frame> Supercell;
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     Supercell* supercell;
     auto nbParticleInLastFrame = 100u;
     auto nbFrames = 5u;
-//    callSupercellAddOne(&supercell, nbFrames, nbParticleInLastFrame);
+    callSupercellAddOne(&supercell, nbFrames, nbParticleInLastFrame);
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
     
@@ -81,39 +82,41 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
   //  callSupercellSquareAdd(&super, nbSupercells, nbFrames, nbParticles);
     
     // all first elements need to have the same number of elements
-    SupercellContainer supercellContainer(*super, nbSupercells);  
+    SupercellContainer supercellContainer(
+        *super,
+         nbSupercells
+    );  
     
     auto concept = hzdr::makeIteratorPrescription(
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
-    std::cout << supercellContainer[2] << std::endl;
-//                         
-// 
-//     auto view = hzdr::makeView(supercellContainer, concept);
-// 
-//     for(auto it=view.begin(); it!=view.end(); ++it)
-//     {
-//         auto conceptParticle = hzdr::makeIteratorPrescription(
-//             hzdr::makeAccessor(),
-//             hzdr::makeNavigator(
-//                 Offset(0u),
-//                 Jumpsize(1u)),
-//             hzdr::makeIteratorPrescription(
-//                 hzdr::makeAccessor(),
-//                 hzdr::makeNavigator(
-//                     Offset(0u),
-//                     Jumpsize(1u))));
-//         auto viewParticle = hzdr::makeView(*it, conceptParticle);
-//         auto itParticle = viewParticle.begin();
-//         auto value = (*itParticle).data[0u];
-//         BOOST_TEST((value > 0));
-//         for(; itParticle != viewParticle.end(); ++itParticle)
-//         {
-//             BOOST_TEST((*itParticle).data[1u] == value);
-//         }
-//     }
+    std::cout << supercellContainer[2] << std::endl;                         
+ 
+     auto view = hzdr::makeView(supercellContainer, concept);
+ 
+     for(auto it=view.begin(); it!=view.end(); ++it)
+     {
+         auto conceptParticle = hzdr::makeIteratorPrescription(
+             hzdr::makeAccessor(),
+             hzdr::makeNavigator(
+                 Offset(0u),
+                 Jumpsize(1u)),
+             hzdr::makeIteratorPrescription(
+                 hzdr::makeAccessor(),
+                 hzdr::makeNavigator(
+                     Offset(0u),
+                     Jumpsize(1u))));
+         auto viewParticle = hzdr::makeView(*it, conceptParticle);
+         auto itParticle = viewParticle.begin();
+         auto value = (*itParticle).data[0u];
+         BOOST_TEST((value > 0));
+         for(; itParticle != viewParticle.end(); ++itParticle)
+         {
+             BOOST_TEST((*itParticle).data[1u] == value);
+         }
+     }
     
 }
 

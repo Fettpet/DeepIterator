@@ -51,14 +51,49 @@ INCLUDE("${_DEEPITERATOR_COMMON_FILE}")
 set(DeepIterator_FOUND True)
 #-------------------------------------------------------------------------------
 # Options.
-OPTION(DEEPITERATOR_BUILD_TESTS "Build the test to verify the correctness of the deepiterator." OFF)
 OPTION(DEEPITERATOR_DEBUG "Use debugging informations" ON)
+OPTION(DEEPITERATOR_BUILD_TESTS "Build the test to verify the correctness of the deepiterator." ON)
 
+OPTION(DEEPITERATOR_TEST_BIDIRECTIONAL "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_CUDA "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_FORWARD "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_NDARRAY "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_NESTEDITERATOR "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_NEWCONTAINER "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_OWNCATEGORIE "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_RANDOMACCESS "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_RUNTIME "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_SLICENAVIGATOR "Build the Bidirectional Test" ON)
+OPTION(DEEPITERATOR_TEST_UNNESTETITERATOR "Build the Bidirectional Test" ON)
 
+mark_as_advanced(FORCE 
+    DEEPITERATOR_TEST_BIDIRECTIONAL
+    DEEPITERATOR_TEST_CUDA
+    DEEPITERATOR_TEST_FORWARD
+    DEEPITERATOR_TEST_NDARRAY
+    DEEPITERATOR_TEST_NESTEDITERATOR
+    DEEPITERATOR_TEST_OWNCATEGORIE
+    DEEPITERATOR_TEST_NEWCONTAINER
+    DEEPITERATOR_TEST_RANDOMACCESS
+    DEEPITERATOR_TEST_RUNTIME
+    DEEPITERATOR_TEST_SLICENAVIGATOR
+    DEEPITERATOR_TEST_UNNESTETITERATOR
+)
+
+SET(_DEEPITERATOR_TEST_FILE "${_DEEPITERATOR_ROOT_DIR}/cmake/test.cmake")
+SET(_DEEPITERATOR_TEST_DIR "${_DEEPITERATOR_ROOT_DIR}/Test")
+MESSAGE(STATUS "Deep Iterator Test Dir: ${_DEEPITERATOR_TEST_DIR}")
+INCLUDE("${_DEEPITERATOR_TEST_FILE}")
+MESSAGE(STATUS "Test Cmake: ${_DEEPITERATOR_TEST_FILE}") 
 #Add all the  include files in all recursive subdirectories and group them accordingly.
 #
 SET(_DEEPITERATOR_INCLUDE_DIRECTORY "${_DEEPITERATOR_ROOT_DIR}/include")
-append_recursive_files_add_to_src_group("${_DEEPITERATOR_INCLUDE_DIRECTORY}" "${_DEEPITERATOR_INCLUDE_DIRECTORY}" "hpp" _DEEPITERATOR_FILES_HEADER)
+append_recursive_files_add_to_src_group(
+    "${_DEEPITERATOR_INCLUDE_DIRECTORY}" 
+    "${_DEEPITERATOR_INCLUDE_DIRECTORY}"
+    "hpp" 
+    _DEEPITERATOR_FILES_HEADER
+)
 
 
 #-------------------------------------------------------------------------------
@@ -89,5 +124,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     "DeepIterator"
     FOUND_VAR DeepIterator_FOUND
     REQUIRED_VARS DeepIterator_INCLUDE_DIR
-    VERSION_VAR 0.1)
+    VERSION_VAR 0.1
+)
 
