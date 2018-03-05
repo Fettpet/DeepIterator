@@ -29,6 +29,7 @@ typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(SingleLayer)
 {
+
     Frame container;
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
@@ -283,6 +284,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
 
             BOOST_TEST(counter == counter2);
         }
+
 }
 
 /**
@@ -338,7 +340,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             BOOST_TEST(sum == checksum);
         }
         
-    for(int off=0; off<9; ++off)
+    for(int off=0; off<8; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
             auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
@@ -362,6 +364,8 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 container, 
                 childPrescriptionJump1
             );
+
+            std::cout << container << std::endl;
             int sum=0;
             for(auto it=view.rbegin(); it!=view.rend(); --it)
             {
@@ -376,7 +380,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
 
             BOOST_TEST(sum == checksum);
         }
-    
+
     // backward
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -417,9 +421,9 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             BOOST_TEST(checksum == sum);
         }
         
-        
-    for(int off=0; off<8; ++off)
-        for(int jumpsize=1; jumpsize<8; ++jumpsize)
+      
+    for(int off=0; off<9; ++off)
+        for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
             auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
@@ -456,6 +460,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             BOOST_TEST(checksum == sum);
         }
+  
     for(int off=0; off<1; ++off)
         for(int jumpsize=1; jumpsize<2; ++jumpsize)
         {
@@ -603,7 +608,6 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             for(auto it=view.rbegin(); it!=view.rend(); --it)
             {
                 sum += *it;
-                std::cout << *it << std::endl;
             }
             
             int checksum=0;
@@ -613,5 +617,6 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             BOOST_TEST(checksum == sum);
         }
+
 }
 

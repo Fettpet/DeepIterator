@@ -261,16 +261,30 @@ public:
         auto remainingJumpsize = previousElement(
             containerPtr, 
             index,
-            off,
             static_cast<RangeType>(jump) * distance,
             containerSize
         );
-        
+        if(remainingJumpsize == 0)
+        {
+            auto indexCopy = index;
+            remainingJumpsize = previousElement(
+                containerPtr, 
+                indexCopy,
+                off,
+                containerSize
+            );
+            return (remainingJumpsize + jump - static_cast<RangeType>(1)) 
+             / jump;
+        }
+        else 
+        {
+            return (remainingJumpsize + jump - static_cast<RangeType>(1) + off) 
+             / jump ;
+    
+        }
 
         // we need the distance from the last element to the current index 
         // position
-        return (remainingJumpsize + jump - static_cast<RangeType>(1)) 
-             / jump;
     }
     
     /**
@@ -329,14 +343,18 @@ public:
             index,
             containerSize
         );
-        previousElement(
-            containerPtr, 
-            index,
-            offset(),
-            neededJumps,
-            containerSize
-        );
-
+        if(not isBeforeFirst(
+            containerPtr,
+            index
+        ))
+        {
+            previousElement(
+                containerPtr, 
+                index,
+                neededJumps,
+                containerSize
+            );
+        }
         
     }
     
@@ -467,8 +485,9 @@ public:
         auto const nbElem = nbElements(containerPtr);
         auto const off = offset();
      //   assert(nbElem >= off);
-        return (nbElem - off + jumpsize() - static_cast<RangeType>(1)) 
+        const int elems = (nbElem - off + jumpsize() - static_cast<RangeType>(1)) 
             / jumpsize();
+        return (elems > 0) * elems;
     }
     
 //variables

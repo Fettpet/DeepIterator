@@ -300,37 +300,51 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
-        RangeType const remainingJumpsize = static_cast<RangeType>(previousElement(
+        RangeType remainingJumpsize = static_cast<RangeType>(previousElement(
             containerPtr, 
             index,
-            offset(),
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
         ));
-        
         cur_pos -= distance;
         RangeType const nbElem = static_cast<RangeType>(size(containerPtr));
         RangeType const distanceSlice = static_cast<RangeType>(slice.distance());
-        // we need the distance from the last element to the current index position
-        // this is a round up
-       
-        // 1. We start counting from the begininng and the position is outside
-        // the slice.
-        if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > distanceSlice))
+        if(remainingJumpsize == 0)
         {
-            return static_cast<RangeType>(-1) * cur_pos - distanceSlice;
+            // we need the distance from the last element to the current index position
+            // this is a round up
+           
+            // 1. We start counting from the begininng and the position is outside
+            // the slice.
+            if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > distanceSlice))
+            {
+                return static_cast<RangeType>(-1) * cur_pos - distanceSlice;
+            }
+            // 2. We ignore the last elements
+            // The cast is nessacary since the container could be empty
+            else if(not slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > nbElem - distanceSlice))
+            {
+                return static_cast<RangeType>(-1) * cur_pos + distanceSlice - nbElem;
+            }
+            // 3. if it is outside the container 
+            else 
+            {
+                auto indexCopy(index);
+                remainingJumpsize = static_cast<RangeType>(previousElement(
+                    containerPtr, 
+                    indexCopy,
+                    static_cast<RangeType>(offset()),
+                    containerSize
+                ));
+                return (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1)) / static_cast<RangeType>(jumpsize());
+            }
         }
-        // 2. We ignore the last elements
-        // The cast is nessacary since the container could be empty
-        else if(not slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > nbElem - distanceSlice))
-        {
-            return static_cast<RangeType>(-1) * cur_pos + distanceSlice - nbElem;
-        }
-        // 3. if it is outside the container 
         else 
         {
-            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) -static_cast<RangeType>(-1)) / static_cast<RangeType>(jumpsize());
+            return (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1) + offset()) / static_cast<RangeType>(jumpsize());
         }
+
+
     }
     
     /**
@@ -395,14 +409,26 @@ public:
                     containerPtr,  
                     idxCopy,
                     1u  
-                ) == 0 && counter < slice.distance())
+                ) == 0 
+                && counter < slice.distance()
+            )
             {
+
                 ++counter;
                 index = idxCopy;
             }
           //  std::cout << "rbegin after next: " << index << std::endl;
-            
             cur_pos = static_cast<RangeType>(0);
+            if(afterLastElement.test(containerPtr, index, containerSize))
+            {
+                beforeFirstElement.set(
+                    containerPtr, 
+                    index, 
+                    offset(), 
+                    containerSize
+                );
+            }
+            
         }
         else 
         {
@@ -414,7 +440,6 @@ public:
             previousElement(
                 containerPtr, 
                 index,
-                offset(),
                 slice.distance(),
                 containerSize
             );

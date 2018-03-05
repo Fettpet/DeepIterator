@@ -340,7 +340,6 @@ struct PreviousElement<
     operator() (
         TContainer*, 
         TIndex& idx, 
-        TRange const &,
         TRange const & jumpsize,
         TContainerSize&)
     {

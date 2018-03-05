@@ -377,14 +377,13 @@ struct PreviousElement<
     operator() (
         TContainer*, 
         TIndex& idx, 
-        TRange const & offset,
         TRange const & jumpsize,
         T const &
                )
     {
         idx -= jumpsize;
         
-        return (static_cast<int>(idx) < static_cast<int>(offset)) * (static_cast<int>(offset) - static_cast<int>(idx));
+        return (static_cast<int>(idx) < 0) * ( -1 * static_cast<int>(idx));
     }
 };
 

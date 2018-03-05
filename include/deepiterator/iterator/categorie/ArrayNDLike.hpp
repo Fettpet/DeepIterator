@@ -472,18 +472,17 @@ struct PreviousElement<
 {
     template<typename T>
     HDINLINE
-    int
+    TRange
     operator() (
         TContainer* container, 
         TIndex& idx, 
-        TRange const & offset,
         TRange const & jumpsize,
         T const &
     )
     {
         using namespace hzdr::detail;
         
-        int newIdxInt = idxndToInt<Dim>(
+        TRange const newIdxInt = idxndToInt<Dim>(
             idx,
             container->dim()
         ) 
@@ -492,13 +491,13 @@ struct PreviousElement<
             jumpsize,
             container->dim()
         );
-        if(newIdxInt < idxndToInt<Dim>(offset, container->dim()))
+        if(newIdxInt < static_cast<TRange>(0))
         {
             idx = intToIdxnd<Dim>(
-                -1,
+                static_cast<TRange>(-1),
                 container->dim()
             );
-            return idxndToInt<Dim>(offset, container->dim()) - newIdxInt;
+            return static_cast<TRange>(-1) * newIdxInt;
         }
         else 
         {

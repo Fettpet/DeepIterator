@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(Frames)
 BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
 {
     
-    
+
 
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
     {
         for(auto jump: jumpsizes)
         {   
-            std::cout << "Offset " << off << " Jumpsize " << jump << std::endl;
+
             Frame testFrame;
             // 0. We create a concept
             auto && concept = hzdr::makeIteratorPrescription(
@@ -162,9 +162,9 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             BOOST_TEST(( ++(--view.begin()) == view.begin()));
             BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
         }   
-    }
-
+    } 
 }
+
 
 BOOST_AUTO_TEST_CASE(ParticleInSupercell)
 {
@@ -216,19 +216,17 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
 }
 
-
 BOOST_AUTO_TEST_CASE(Borders)
 {
-    uint_fast32_t nbFrames = 5u;
-    uint_fast32_t nbParticlesInLastFrame = 2u;
+    uint_fast32_t nbFrames = 2u;
+    uint_fast32_t nbParticlesInLastFrame = 1u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
 
     typedef hzdr::SelfValue<uint_fast32_t> Offset;
     typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    
     std::vector<uint_fast32_t> offsetsInner({0u, 1u});
     std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
-    
+    std::cout << supercell << std::endl;
     for(auto jump: jumpsizesInner)
         for(auto off: offsetsInner)
         {
@@ -254,12 +252,15 @@ BOOST_AUTO_TEST_CASE(Borders)
             auto sumForward = 0u;
             for(auto && it = view.begin(); it != view.end(); ++it)
             {
+
                 sumForward += *it;
             }
             
             auto sumBackward = 0u;
+           
             for(auto && it = view.rbegin(); it != view.rend(); --it)
             {
+
                 sumBackward += *it;
             }
             BOOST_TEST(sumForward == sumBackward);
@@ -267,6 +268,7 @@ BOOST_AUTO_TEST_CASE(Borders)
     
 
 }
+
 
 
 BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
@@ -381,3 +383,4 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
         }
 
 }
+
