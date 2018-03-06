@@ -378,21 +378,11 @@ struct BeforeFirstElement<
     test(
         TContainer*, 
         TIndex const & idx,
-        TRange const & offset, 
         TRangeFunction&
     )
     const
     {
-        TIndex tmp = idx;
-        for(TRange i = static_cast<TRange>(0); i < offset; ++i)
-        { 
-            if(tmp == nullptr)
-                return true;
-            if(tmp.ptr == nullptr)
-                return true;
-            tmp = tmp->previousFrame.ptr;
-        }
-        return tmp == nullptr || tmp.ptr == nullptr;
+        return idx == nullptr || idx.ptr == nullptr;
     }
     
 
@@ -402,7 +392,6 @@ struct BeforeFirstElement<
     set(
         TContainer*, 
         TIndex & idx,
-        TRange const &, 
         TRangeFunction&
     )
     const

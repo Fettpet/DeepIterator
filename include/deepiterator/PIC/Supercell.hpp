@@ -566,19 +566,11 @@ struct BeforeFirstElement<
     test(
         hzdr::Supercell<TFrame>*, 
         TIndex const & idx,
-        TRange const & offset, 
         TRangeFunction&
     )
     const
     {
-        TIndex tmp = idx;
-        for(TRange i = static_cast<TRange>(0); i < offset; ++i)
-        { 
-            if(tmp == nullptr)
-                return true;
-            tmp = tmp->previousFrame;
-        }
-        return tmp == nullptr ;
+        return idx == nullptr ;
     }
     
 
@@ -588,7 +580,6 @@ struct BeforeFirstElement<
     set(
         hzdr::Supercell<TFrame>*, 
         TIndex & idx,
-        TRange const &, 
         TRangeFunction&
     )
     const

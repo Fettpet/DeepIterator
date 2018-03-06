@@ -397,7 +397,6 @@ public:
         beforeFirstElement.set(
             containerPtr,
             index,
-            offset(),
             containerSize
         );
     }
@@ -443,12 +442,19 @@ public:
         bool
     >::type
     {
+        IndexType indexCopy(index);
+        PreviousElement prev(previousElement);
         return beforeFirstElement.test(
             containerPtr, 
             index, 
-            offset(), 
             containerSize
-        );
+        ) || (
+        prev(
+                containerPtr, 
+                indexCopy,
+                offset(),
+                containerSize
+        ) != static_cast<RangeType>(0));
     }
     
     /**

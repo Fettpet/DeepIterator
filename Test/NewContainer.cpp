@@ -373,13 +373,16 @@ struct PreviousElement<
     
     template<typename T>
     HDINLINE
-    int
+    auto
     operator() (
         TContainer*, 
         TIndex& idx, 
         TRange const & jumpsize,
         T const &
-               )
+    )
+    const
+    ->
+    int
     {
         idx -= jumpsize;
         
@@ -406,17 +409,22 @@ struct BeforeFirstElement<
     
     template<typename TSizeFunction>
     HDINLINE
-    bool
-    test (TContainer*, TIndex const & idx, TOffset const & offset, TSizeFunction&)
+    auto
+    test (
+        TContainer*, 
+        TIndex const & idx,
+        TSizeFunction&)
     const
+    ->
+    bool
     {
-        return static_cast<int>(idx) < static_cast<int>(offset);
+        return static_cast<int>(idx) < static_cast<int>(0);
     }
     
     template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TOffset const &, TSizeFunction&)
+    set (TContainer*, TIndex & idx, TSizeFunction&)
     const
     {
         idx = static_cast<TIndex>(-1);

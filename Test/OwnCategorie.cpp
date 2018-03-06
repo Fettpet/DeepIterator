@@ -373,14 +373,13 @@ struct PreviousElement<
     operator() (
         TContainer*, 
         TIndex& idx, 
-        TRange const & offset,
         TRange const & jumpsize,
         T const &
                )
     {
         idx -= jumpsize;
         
-        return (static_cast<int>(idx) < static_cast<int>(offset)) * (static_cast<int>(offset) - static_cast<int>(idx));
+        return (static_cast<int>(idx) < static_cast<int>(0)) * (-1 * static_cast<int>(idx));
     }
 };
 
@@ -404,16 +403,16 @@ struct BeforeFirstElement<
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TOffset const & offset, TSizeFunction&)
+    test (TContainer*, TIndex const & idx, TSizeFunction&)
     const
     {
-        return static_cast<int>(idx) < static_cast<int>(offset);
+        return static_cast<int>(idx) < static_cast<int>(0);
     }
     
     template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TOffset const &, TSizeFunction&)
+    set (TContainer*, TIndex & idx, TSizeFunction&)
     const
     {
         idx = static_cast<TIndex>(-1);

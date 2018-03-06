@@ -424,7 +424,6 @@ public:
                 beforeFirstElement.set(
                     containerPtr, 
                     index, 
-                    offset(), 
                     containerSize
                 );
             }
@@ -487,7 +486,6 @@ public:
         beforeFirstElement.set(
             containerPtr, 
             index, 
-            offset(), 
             containerSize
         );
     }
@@ -542,14 +540,21 @@ public:
         RangeType const nbElem = nbElements(containerPtr); 
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
-        
+        PreviousElement prev(previousElement);
+        IndexType indexCopy(index);
         return 
             beforeFirstElement.test(
                 containerPtr, 
                 index, 
-                offset(), 
                 containerSize
             )
+            || (
+            prev(
+                    containerPtr, 
+                    indexCopy,
+                    offset(),
+                    containerSize
+            ) != static_cast<RangeType>(0))
             || (slice.from_start() && (cur_pos < static_cast<RangeType>(-1) * distance))
             || (not slice.from_start() && (cur_pos * jump - off) <= 
                 static_cast<RangeType>(-1) * (nbElem - distance));

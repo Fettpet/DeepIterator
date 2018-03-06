@@ -533,7 +533,6 @@ struct BeforeFirstElement<
     test (
         TContainer* container, 
         TIndex const & idx, 
-        TOffset const & offset, 
         TSizeFunction&)
     const
     {
@@ -544,7 +543,7 @@ struct BeforeFirstElement<
         ) 
         < 
         idxndToInt<Dim>(
-            offset,
+            0,
             container->dim()
         );
     }
@@ -555,7 +554,6 @@ struct BeforeFirstElement<
     set (
         TContainer* container, 
         TIndex & idx, 
-        TOffset const &, 
         TSizeFunction&
     )
     const

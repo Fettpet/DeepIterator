@@ -320,25 +320,27 @@ struct BeforeFirstElement<
 {
     template<typename TRangeFunction>
     HDINLINE
-    bool
-    test (TContainer*, TIndex const & idx, TRange const & offset, TRangeFunction&)
+    auto
+    test (
+        TContainer*, 
+        TIndex const & idx,
+        TRangeFunction&
+    )
     const
+    ->
+    bool
     {
-                auto tmp = idx;
-        for(TRange i=0; i < offset; ++i)
-        {
-            if(tmp == nullptr)
-                return true;
-            tmp = tmp->previous;
-        }
-        return tmp == nullptr;
+
+        return idx == nullptr;
     }
     
     template<typename TRangeFunction>
     HDINLINE
-    void
+    auto
     set (TContainer*, TIndex const & idx, TRangeFunction const &)
     const
+    ->
+    void
     {
         idx = nullptr;
     }
