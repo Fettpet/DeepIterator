@@ -341,7 +341,7 @@ public:
         }
         else 
         {
-            return (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1) + offset()) / static_cast<RangeType>(jumpsize());
+            return (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1) + static_cast<RangeType>(offset())) / static_cast<RangeType>(jumpsize());
         }
 
 
@@ -400,7 +400,6 @@ public:
                 containerPtr, 
                 index
            );
-         //   std::cout << "rbegin before next: " << index << std::endl;
             // go to the last element
             auto idxCopy = index;
             auto counter = 0;        
@@ -413,11 +412,9 @@ public:
                 && counter < slice.distance()
             )
             {
-
                 ++counter;
                 index = idxCopy;
             }
-          //  std::cout << "rbegin after next: " << index << std::endl;
             cur_pos = static_cast<RangeType>(0);
             if(afterLastElement.test(containerPtr, index, containerSize))
             {
@@ -541,23 +538,24 @@ public:
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
         PreviousElement prev(previousElement);
-        IndexType indexCopy(index);
-        return 
-            beforeFirstElement.test(
-                containerPtr, 
-                index, 
-                containerSize
-            )
-            || (
-            prev(
+        IndexType indexCopy = index;
+   
+        indexCopy = index;
+        bool beforeFirst = beforeFirstElement.test(
                     containerPtr, 
-                    indexCopy,
-                    offset(),
+                    index, 
                     containerSize
-            ) != static_cast<RangeType>(0))
-            || (slice.from_start() && (cur_pos < static_cast<RangeType>(-1) * distance))
-            || (not slice.from_start() && (cur_pos * jump - off) <= 
-                static_cast<RangeType>(-1) * (nbElem - distance));
+                );
+        bool prevValue = not beforeFirst && prev(
+                        containerPtr, 
+                        indexCopy,
+                        offset(),
+                        containerSize
+                ) != 0;
+        bool rest = (slice.from_start() && (cur_pos < static_cast<RangeType>(-1) * distance))
+                || (not slice.from_start() && (cur_pos * jump - off) <= 
+                    static_cast<RangeType>(-1) * (nbElem - distance));
+        return beforeFirst || prevValue || rest;
     }
     
     /**

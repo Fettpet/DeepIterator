@@ -85,6 +85,8 @@ struct Accessor
     HDINLINE Accessor(Accessor const &) = default;
     HDINLINE Accessor(Accessor &&) = default;
     
+    HDINLINE Accessor& operator=(Accessor const &) = default;
+    HDINLINE Accessor& operator=(Accessor &&) = default;
     /**
      * @brief this function dereference a container and a index to get the 
      * component

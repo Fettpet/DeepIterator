@@ -66,7 +66,7 @@ namespace detail
      * @param idx The index you like to transform into a linear index (int)
      * @param containerSize The size of each dimension
      * @return idx
-     */
+    */
     template<
         uint_fast32_t Dim,
         typename TSize,
@@ -85,7 +85,7 @@ namespace detail
     {
         return idx;
     }
-    
+     
     /**
      * @brief This function is a helper function, if the idx is an integer
      * @param idx The index you like to transform into a linear index (int)
@@ -344,13 +344,14 @@ struct NextElement<
     hzdr::container::categorie::ArrayNDLike<Dim> >
 {
     template<
-        typename TContainerSize>
+        typename TContainerSize,
+        typename TIndex_>
     HDINLINE
     TRange
     operator() (
         TContainer* container, 
         TIndex& idx, 
-        TIndex const & range,
+        TIndex_ const & range,
         TContainerSize& size)
     {
         using namespace hzdr::detail;
@@ -470,19 +471,21 @@ struct PreviousElement<
     TRange,
     hzdr::container::categorie::ArrayNDLike<Dim> >
 {
-    template<typename T>
+    template<
+        typename T,
+        typename TRange_>
     HDINLINE
     TRange
     operator() (
         TContainer* container, 
         TIndex& idx, 
-        TRange const & jumpsize,
+        TRange_ const & jumpsize,
         T const &
     )
     {
         using namespace hzdr::detail;
         
-        TRange const newIdxInt = idxndToInt<Dim>(
+        auto const newIdxInt = idxndToInt<Dim>(
             idx,
             container->dim()
         ) 
@@ -491,7 +494,7 @@ struct PreviousElement<
             jumpsize,
             container->dim()
         );
-        if(newIdxInt < static_cast<TRange>(0))
+        if(newIdxInt < 0)
         {
             idx = intToIdxnd<Dim>(
                 static_cast<TRange>(-1),
@@ -537,15 +540,12 @@ struct BeforeFirstElement<
     const
     {
         using namespace hzdr::detail;
+        
         return idxndToInt<Dim>(
             idx, 
             container->dim()
         ) 
-        < 
-        idxndToInt<Dim>(
-            0,
-            container->dim()
-        );
+        < 0;
     }
     
     template<typename TSizeFunction>

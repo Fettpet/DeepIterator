@@ -312,7 +312,6 @@ struct LastElement<
     )
     {
         index = containerPtr->lastFramePtr;
-        std::cout << "indexPtr " << index << std::endl;
     }
 } ;
 

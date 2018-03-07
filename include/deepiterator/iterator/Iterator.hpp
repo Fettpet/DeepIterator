@@ -95,7 +95,7 @@ In the second case, where each element can have a different number of elements,
 the deepiterator doesnt overjump elements. It walks step by step.
 \image html images/setTobegin.png
  */
-
+#include "deepiterator/iterator/categorie/ArrayNDLike.hpp"
 #pragma once
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/forward.hpp"
@@ -334,7 +334,9 @@ public:
     {
         setToRend(container);
     }
-
+    
+    HDINLINE DeepIterator& operator=(DeepIterator const &) = default;
+    HDINLINE DeepIterator& operator=(DeepIterator &&) = default;
     
     /**
      * @brief grants access to the current elment. This function calls the * 
@@ -938,6 +940,13 @@ public:
     {
         navigator.rbegin(containerPtr, index);
         // check whether the iterator is at a valid element
+//         if(isBeforeFirst())
+//         {
+//             std::stringstream str;
+//             str << "index " << index << "( " << hzdr::detail::idxndToInt<3>(index, containerPtr->dim()) << " ) is before first " << std::endl;
+//         
+//             std::cout << str.str() << std::endl;
+//         }
         while(not isBeforeFirst())
         {
             childIterator.setToRbegin((accessor.get(containerPtr, index)));
@@ -947,7 +956,7 @@ public:
         }
     }
     
-    /**
+    /** 
      * @brief This function set the iterator to the last element. This function
      * set also all childs to the begin. If the container hasnt enough elements
      * it should be set to the after-last-element or the before-first-element. 
@@ -1215,6 +1224,8 @@ public:
         setToRend(container);
     }
     
+    HDINLINE DeepIterator& operator=(DeepIterator const &) = default;
+    HDINLINE DeepIterator& operator=(DeepIterator &&) = default;
     /**
      * @brief This constructor is used to create a iterator in a middle layer. 
      * The container must be set with setToBegin or setToRbegin.
@@ -1236,6 +1247,8 @@ public:
         containerPtr(nullptr),
         index(0)
     {}
+    
+    
     
     /**
      * @brief goto the next element. If the iterator is at the before-first-element
