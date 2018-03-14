@@ -611,8 +611,6 @@ makeNavigator(
 namespace details
 {
 
-
-
     template<
         typename T,
         typename _T= typename std::decay<T>::type,
