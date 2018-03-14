@@ -38,28 +38,15 @@
 #pragma once
 
 #include <iostream>
+#include <cassert>
+
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/definitions/forward.hpp"
-#include <cassert>
+
 
 namespace hzdr
 {
-namespace details
-{
-template <typename T>
-class UndefinedAhead
-{
-    typedef char one;
-    typedef long two;
-
-    template <typename C> static one test( decltype(&C::UNDEFINED) ) ;
-    template <typename C> static two test(...);    
-
-public:
-    enum { value = sizeof(test<T>(0)) == sizeof(char) };
-}; // class UndefinedAhead
-} // namespace details
      
 template<
     typename TContainer,
@@ -88,6 +75,8 @@ struct Accessor
     
     HDINLINE Accessor& operator=(Accessor const &) = default;
     HDINLINE Accessor& operator=(Accessor &&) = default;
+    
+    
     /**
      * @brief this function dereference a container and a index to get the 
      * component
@@ -112,7 +101,7 @@ struct Accessor
     }
     
     
-        /**
+    /**
      * @brief this function compares two iterator positions. 
      * @param containerPtr1 pointer to the container of the first iterator
      * @param idx1 current position of the first iterator 
@@ -140,6 +129,7 @@ struct Accessor
             index2
         );
     }
+    
     
     /**
      * @brief this function compares two iterator positions. 
@@ -171,6 +161,7 @@ struct Accessor
             index2
         );
     }
+    
     
     /**
      * @brief this function compares two iterator positions. 
@@ -211,6 +202,7 @@ struct Accessor
      TBehind _behind;
 } ;
 
+
 /**
  * @brief the accessor prescription.
  */
@@ -234,7 +226,6 @@ struct Accessor<
 
 namespace details 
 {
-
 
 
 /**
@@ -269,7 +260,7 @@ template<
         TComponent, 
         TIndex, 
         TContainerCategory
-    >,
+    >,                                          
     typename TAhead = hzdr::traits::accessor::Ahead<
         TContainerNoRef, 
         TComponent, 
@@ -312,6 +303,7 @@ makeAccessor(TAccessor&&)
     return accessor;
 }
 
+
 /**
  * @brief This function use a container template to
  * create a accessor. To use this function several traits must be defined.
@@ -328,16 +320,41 @@ makeAccessor(TAccessor&&)
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,    
+    typename TContainerCategory = typename traits::ContainerCategory<
+        typename std::decay<TContainer>::type
+    >::type,    
     typename TIndex = typename traits::IndexType<
         TContainerNoRef,
         TContainerCategory
     >::type,    
-    typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
-    typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TEqual = hzdr::traits::accessor::Equal<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TBehind = hzdr::traits::accessor::Behind<TContainerNoRef, TComponent, TIndex, TContainerCategory> >
+    typename TComponent = typename hzdr::traits::ComponentType<
+        TContainerNoRef
+    >::type,
+    typename TGet = hzdr::traits::accessor::Get<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TAhead = hzdr::traits::accessor::Ahead<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TEqual = hzdr::traits::accessor::Equal<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TBehind = hzdr::traits::accessor::Behind<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >
+>
 auto 
 HDINLINE
 makeAccessor()
@@ -351,7 +368,7 @@ makeAccessor()
     TEqual,
     TBehind>
 {
-    typedef hzdr::Accessor<
+    using ResultType = hzdr::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
@@ -359,7 +376,8 @@ makeAccessor()
         TGet,
         TAhead,
         TEqual,
-        TBehind>                                          ResultType;
+        TBehind
+    >;
         
     return ResultType();
 }
@@ -383,18 +401,42 @@ makeAccessor()
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,
+    typename TContainerCategory = typename traits::ContainerCategory<
+        typename std::decay<TContainer>::type
+    >::type,
     typename TIndex = typename traits::IndexType<
         TContainerNoRef,
         TContainerCategory
     >::type,
     
-    typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
-    typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TEqual = hzdr::traits::accessor::Equal<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TBehind = hzdr::traits::accessor::Behind<TContainerNoRef, TComponent, TIndex, TContainerCategory> >
-    
+    typename TComponent = typename hzdr::traits::ComponentType<
+        TContainerNoRef
+    >::type,
+    typename TGet = hzdr::traits::accessor::Get<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,                                          
+    typename TAhead = hzdr::traits::accessor::Ahead<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TEqual = hzdr::traits::accessor::Equal<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TBehind = hzdr::traits::accessor::Behind<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >
+>    
 auto 
 HDINLINE
 makeAccessor(TContainer&&)
@@ -408,7 +450,7 @@ makeAccessor(TContainer&&)
     TEqual,
     TBehind>
 {
-    typedef hzdr::Accessor<
+    using ResultType = hzdr::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
@@ -416,14 +458,11 @@ makeAccessor(TContainer&&)
         TGet,
         TAhead,
         TEqual,
-        TBehind>                                         ResultType;
+        TBehind
+    >;
         
     return ResultType();
 }
-
-
-
-
 
 
 /**
@@ -442,7 +481,7 @@ makeAccessor()
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType>
 {
-    typedef hzdr::Accessor<
+    using ResultType = hzdr::Accessor<
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
@@ -450,9 +489,11 @@ makeAccessor()
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType>                           ResultType;
+        hzdr::details::UndefinedType
+    >;
     return ResultType();
 }
+
 
 /**
  * @brief This function forwards an own accessor. This is a identity function
