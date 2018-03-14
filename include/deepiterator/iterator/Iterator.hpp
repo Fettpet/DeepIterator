@@ -1,8 +1,56 @@
+/* Copyright 2018 Sebastian Hahn
 
+ * This file is part of DeepIterator.
+ *
+ * DeepIterator is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * DeepIterator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PIConGPU.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include "deepiterator/traits/Traits.hpp"
+#include "deepiterator/definitions/forward.hpp"
+#include "deepiterator/definitions/NoChild.hpp"
+#include "deepiterator/definitions/hdinline.hpp"
+#include "deepiterator/iterator/Accessor.hpp"
+#include "deepiterator/iterator/Navigator.hpp"
+#include "deepiterator/iterator/Prescription.hpp"
+#include <limits>
+#include <cassert>
+#include <type_traits>
+#include <sstream>
+#include <typeinfo>
+
+namespace hzdr 
+
+namespace details 
+{
+/**
+ * These four structs are used in the View to call the right constructor.
+ */
+namespace constructorType
+{
+struct begin{};
+struct rbegin{};
+struct end{};
+struct rend{};
+}
+}
 
 /**
- * \class DeepIterator
- * @author Sebastian Hahn (t.hahn@hzdr.de )
+ * \struct DeepIterator
+ * @author Sebastian Hahn
  * 
  * @brief The DeepIterator class is used to iterator over interleaved data 
  * structures. The simplest example for an interleaved data structure is 
@@ -95,35 +143,6 @@ In the second case, where each element can have a different number of elements,
 the deepiterator doesnt overjump elements. It walks step by step.
 \image html images/setTobegin.png
  */
-#include "deepiterator/iterator/categorie/ArrayNDLike.hpp"
-#pragma once
-#include "deepiterator/traits/Traits.hpp"
-#include "deepiterator/definitions/forward.hpp"
-#include "deepiterator/definitions/NoChild.hpp"
-#include "deepiterator/definitions/hdinline.hpp"
-#include "deepiterator/iterator/Accessor.hpp"
-#include "deepiterator/iterator/Navigator.hpp"
-#include "deepiterator/iterator/Prescription.hpp"
-#include <limits>
-#include <cassert>
-#include <type_traits>
-#include <sstream>
-#include <typeinfo>
-
-namespace hzdr 
-{
-
-namespace details 
-{
-namespace constructorType
-{
-struct begin{};
-struct rbegin{};
-struct end{};
-struct rend{};
-}
-}
-
 template<
     typename TContainer, 
     typename TAccessor, 

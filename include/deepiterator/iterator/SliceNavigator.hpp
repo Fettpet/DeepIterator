@@ -1,69 +1,24 @@
-/**
- * \struct Navigator
- @brief This is the default implementation of the navigator. The task of the 
- navigator is to define the first element, the next element and an after last 
- element. If the navigator is bidirectional it need also a last element, a previous
- element and a before first element. 
- 
- The navigator has two traits for parallel 
- walking through the container. The first one is TOffset. This is used to get the 
- distance from the first element of the container to the first element which will
- be accessed. This trait can be used to map the thread ID (for example offset 
- = threadIdx.x). The second trait is the jumpsize. The jumpsize is the distance
- between two iterator elements. The number of threads can be mapped on the jump-
- size. With this two traits you can go parallel over all elements and touch each
- element only one times. 
- 
- We had three/six traits for the behaviour of the container. The first three traits
- are 
- 1. define the first element of the container,
- 2. define a next element of the container,
- 3. define a after last element of the container.
- If the navigator is bidirectional three additional traits are needed
- 4. define the last element within the container
- 5. define a previous element of the container
- 6. define a before first element of the container.
- The navigator use this 8 traits to define methodes for parallel iteration though
- the container.
- 
- @tparam TContainer Type of the container,
- @tparam TComponent Type of the component of the container.
- @tparam TOffset Policy to get the offset. You need to specify the () operator.
- @tparam TJumpsize Policy to specify the Jumpsize. It need the operator ().
- @tparam TIndex Type of the index. The index is used to specify the iterator 
- position.
- @tparam TContainerSize Trait to specify the size of a container. It need the 
- function operator()(TContainer*). TContainer is a pointer to the container 
- instance over which the iterator walks.
- @tparam TFirstElement Trait to set the index to the first element. It need the 
- function operator()(TContainer*, TIndex&, const TRange). TRange is the result 
- type of TOffset's (). TContainer is a pointer to the container 
- instance over which the iterator walks. TIndex is used to describe the position.
- TRange is the offset.
- @tparam TNextElement Trait to set the index to the next element. The trait need 
- the function TRange operator()(TContainer*, TIndex&, TRange). The TRange 
- parameter is used to handle the jumpsize. The result of this function is the 
- remaining jumpsize. A little example. Your container has 10 elements and your
- iterator is the the 8 element. Your jumpsize is 5. This means the new position
- would be 13. So the result of the function is 3, the remaining jumpsize.
- @tparam TAfterLastElement This Trait is used to check whether the iteration is 
- after the last element. The function header is 
- bool operator()(TContainer*, TIndex&). It returns true, if the end is reached, 
- and false otherwise.
- @tparam TLastElement This trait gives the last element which the iterator would
- access, befor the end is reached, in a forward iteration case. The function 
- head is operator()(TContainer*, TIndex&, const TRange). This trait is only needed
- if the navigator is bidirectional. 
- @tparam TPreviousElement Trait to set the index to the previous element. The 
- trait need the function TRange operator()(TContainer*, TIndex&, TRange). This 
- trait is only needed if the navigator is bidirectional. For fourther 
- informations see TNextElement.
- @tparam TBeforeFirstElement Used to check whether the iterator is before the
- first element. The function header is bool operator()(TContainer*, TIndex&). 
- It returns true, if the end is reached, and false otherwise.
- @tparam isBidirectional Set the navigator to bidirectional (true) or to forward
- only (false)
+/* Copyright 2018 Sebastian Hahn
+
+ * This file is part of DeepIterator.
+ *
+ * DeepIterator is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * DeepIterator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PIConGPU.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
+
+
+
 
 #pragma once
 #include "deepiterator/definitions/forward.hpp" 
@@ -78,7 +33,7 @@ namespace slice
     struct Distance;
     struct IgnoreLastElements;
 }
-    
+ 
 template<
     typename _start_begin,
     int_fast32_t _distance
@@ -150,6 +105,74 @@ public:
     
 };
 
+
+
+/**
+ * \struct Navigator
+ @brief This is the default implementation of the navigator. The task of the 
+ navigator is to define the first element, the next element and an after last 
+ element. If the navigator is bidirectional it need also a last element, a previous
+ element and a before first element. 
+ 
+ The navigator has two traits for parallel 
+ walking through the container. The first one is TOffset. This is used to get the 
+ distance from the first element of the container to the first element which will
+ be accessed. This trait can be used to map the thread ID (for example offset 
+ = threadIdx.x). The second trait is the jumpsize. The jumpsize is the distance
+ between two iterator elements. The number of threads can be mapped on the jump-
+ size. With this two traits you can go parallel over all elements and touch each
+ element only one times. 
+ 
+ We had three/six traits for the behaviour of the container. The first three traits
+ are 
+ 1. define the first element of the container,
+ 2. define a next element of the container,
+ 3. define a after last element of the container.
+ If the navigator is bidirectional three additional traits are needed
+ 4. define the last element within the container
+ 5. define a previous element of the container
+ 6. define a before first element of the container.
+ The navigator use this 8 traits to define methodes for parallel iteration though
+ the container.
+ 
+ @tparam TContainer Type of the container,
+ @tparam TComponent Type of the component of the container.
+ @tparam TOffset Policy to get the offset. You need to specify the () operator.
+ @tparam TJumpsize Policy to specify the Jumpsize. It need the operator ().
+ @tparam TIndex Type of the index. The index is used to specify the iterator 
+ position.
+ @tparam TContainerSize Trait to specify the size of a container. It need the 
+ function operator()(TContainer*). TContainer is a pointer to the container 
+ instance over which the iterator walks.
+ @tparam TFirstElement Trait to set the index to the first element. It need the 
+ function operator()(TContainer*, TIndex&, const TRange). TRange is the result 
+ type of TOffset's (). TContainer is a pointer to the container 
+ instance over which the iterator walks. TIndex is used to describe the position.
+ TRange is the offset.
+ @tparam TNextElement Trait to set the index to the next element. The trait need 
+ the function TRange operator()(TContainer*, TIndex&, TRange). The TRange 
+ parameter is used to handle the jumpsize. The result of this function is the 
+ remaining jumpsize. A little example. Your container has 10 elements and your
+ iterator is the the 8 element. Your jumpsize is 5. This means the new position
+ would be 13. So the result of the function is 3, the remaining jumpsize.
+ @tparam TAfterLastElement This Trait is used to check whether the iteration is 
+ after the last element. The function header is 
+ bool operator()(TContainer*, TIndex&). It returns true, if the end is reached, 
+ and false otherwise.
+ @tparam TLastElement This trait gives the last element which the iterator would
+ access, befor the end is reached, in a forward iteration case. The function 
+ head is operator()(TContainer*, TIndex&, const TRange). This trait is only needed
+ if the navigator is bidirectional. 
+ @tparam TPreviousElement Trait to set the index to the previous element. The 
+ trait need the function TRange operator()(TContainer*, TIndex&, TRange). This 
+ trait is only needed if the navigator is bidirectional. For fourther 
+ informations see TNextElement.
+ @tparam TBeforeFirstElement Used to check whether the iterator is before the
+ first element. The function header is bool operator()(TContainer*, TIndex&). 
+ It returns true, if the end is reached, and false otherwise.
+ @tparam isBidirectional Set the navigator to bidirectional (true) or to forward
+ only (false)
+ */
 template<
     typename TContainer,
     typename TComponent,
