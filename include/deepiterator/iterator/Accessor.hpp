@@ -46,11 +46,32 @@ namespace hzdr
  * if the first iterator is behind the second one.
  * The functions ahead and behind are only avail, if the iterator is random 
  * accessable. 
- * To use the default Accessor you need to spezify one trait for each function:
- * 1. get: hzdr::traits::accessor::Get<TContainer, TComponent, TIndex>
- * 2. ahead: hzdr::traits::accessor::Ahead<TContainer, TComponent, TIndex>
- * 3. equal: hzdr::traits::accessor::Equal<TContainer, TComponent, TIndex>
- * 4. behind: hzdr::traits::accessor::Behind<TContainer, TComponent, TIndex>
+ * To use the default Accessor you need to spezify the following traits for 
+ * each function:
+ * 1. get: hzdr::traits::accessor::Get<
+ *      TContainer, 
+ *      TComponent, 
+ *      TIndex, 
+ *      TContainerCategory
+ * >
+ * 2. ahead: hzdr::traits::accessor::Ahead<
+ *      TContainer, 
+ *      TComponent, 
+ *      TIndex, 
+ *      TContainerCategory
+ * >
+ * 3. equal: hzdr::traits::accessor::Equal<
+ *      TContainer, 
+ *      TComponent, 
+ *      TIndex,
+ *      TContainerCategory
+ * >
+ * 4. behind: hzdr::traits::accessor::Behind<
+ *      TContainer, 
+ *      TComponent, 
+ *      TIndex,
+ *      TContainerCategory
+ * >
  * @tparam TContainer The container over which you like to iterate. 
  * @tparam TComponent The type of the container component. 
  * @tparam TIndex Type of the index to get access to the value of the iterator 
@@ -221,7 +242,7 @@ struct Accessor
 
 
 /**
- * @brief the accessor prescription.
+ * @brief the accessor prescription. This is only a threshold
  */
 template<>
 struct Accessor<
@@ -234,8 +255,6 @@ struct Accessor<
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType>
 {
-    typedef details::UndefinedType ContainerType;
-    
     HDINLINE Accessor() = default;
     HDINLINE Accessor(Accessor const &) = default;
     HDINLINE Accessor(Accessor &&) = default;
