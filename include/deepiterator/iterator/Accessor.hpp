@@ -31,7 +31,7 @@
  * one. Only needed if the iterator is random accessable.
  * @tparam TBehind Trait to define, when the first iterator is behind the second
  * one. Only needed if the iteartor is random accessable.
- * @tparam isRandomAccessable true, if the container is random accessable, false
+ * @tparam isRandomAccessable true, if thecontainer is random accessable, false
  * otherwise
  */
 
@@ -66,20 +66,21 @@ template<
     typename TComponent,
     typename TIndex,
     typename TContainerCategory,
-    typename TGet = hzdr::traits::accessor::Get<TContainer, TComponent, TIndex, TContainerCategory>,
-    typename TAhead = hzdr::traits::accessor::Ahead<TContainer, TComponent, TIndex, TContainerCategory>,
-    typename TEqual = hzdr::traits::accessor::Equal<TContainer, TComponent, TIndex, TContainerCategory>,
-    typename TBehind = hzdr::traits::accessor::Behind<TContainer, TComponent, TIndex, TContainerCategory>,
-    bool isRandomAccessable = not details::UndefinedAhead<TAhead>::value >
+    typename TGet,
+    typename TAhead,
+    typename TEqual,
+    typename TBehind,
+    bool isRandomAccessable
+>
 struct Accessor
 {
-    typedef TContainer                                              ContainerType;
-    typedef ContainerType*                                          ContainerPtr;
-    typedef TComponent                                              ComponentType;
-    typedef ComponentType*                                          ComponentPtr;
-    typedef ComponentType&                                          ComponentRef;
-    typedef TContainerCategory                                      ContainerCategory;
-    typedef TIndex                                                  IndexType;
+    using ContainerType = TContainer;
+    using ContainerPtr = ContainerType*;
+    using ComponentType = TComponent;
+    using ComponentPtr = ComponentType*;
+    using ComponentRef = ComponentType&;
+    using ContainerCategory = TContainerCategory;
+    using IndexType = TIndex;
     
     HDINLINE Accessor() = default;
     HDINLINE Accessor(Accessor const &) = default;
@@ -95,9 +96,13 @@ struct Accessor
      * @return component at the idx position
      */
     HDINLINE 
+    auto
+    get(
+        ContainerPtr containerPtr,
+        IndexType & idx
+    )
+    ->
     ComponentRef
-    get(ContainerPtr containerPtr,
-        IndexType & idx)
     {
         assert(containerPtr != nullptr);
         return _get(
@@ -116,11 +121,15 @@ struct Accessor
      * @return true if both iterators are at the same position, false otherwise
      */
     HDINLINE
+    auto
+    equal(
+        ContainerPtr const containerPtr1,
+        IndexType const & index1,
+        ContainerPtr const containerPtr2,
+        IndexType const & index2
+    )
+    ->
     bool
-    equal(ContainerPtr const containerPtr1,
-          IndexType const & index1,
-          ContainerPtr const containerPtr2,
-          IndexType const & index2)
     {
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
@@ -143,15 +152,24 @@ struct Accessor
      */
     template<bool T = isRandomAccessable>
     HDINLINE 
+    auto
+    greater(
+        ContainerPtr const containerPtr1,
+        IndexType const & index1,
+        ContainerPtr const containerPtr2,
+        IndexType const & index2
+    )
+    ->
     typename std::enable_if<T == true, bool>::type
-    greater(ContainerPtr const containerPtr1,
-          IndexType const & index1,
-          ContainerPtr const containerPtr2,
-          IndexType const & index2)
     {
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
-        return _ahead(containerPtr1, index1, containerPtr2, index2);
+        return _ahead(
+            containerPtr1, 
+            index1, 
+            containerPtr2, 
+            index2
+        );
     }
     
     /**
@@ -165,15 +183,24 @@ struct Accessor
      */
     template<bool T = isRandomAccessable>
     HDINLINE 
+    auto
+    lesser(
+        ContainerPtr const containerPtr1,
+        IndexType const & index1,
+        ContainerPtr const containerPtr2,
+        IndexType const & index2
+    )
+    ->
     typename std::enable_if<T == true, bool>::type
-    lesser(ContainerPtr const containerPtr1,
-          IndexType const & index1,
-          ContainerPtr const containerPtr2,
-          IndexType const & index2)
     {
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
-        return _behind(containerPtr1, index1, containerPtr2, index2);
+        return _behind(
+            containerPtr1, 
+            index1, 
+            containerPtr2, 
+            index2
+        );
     }
     
     
@@ -227,17 +254,40 @@ namespace details
 template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
-    typename TContainerCategory = typename traits::ContainerCategory<typename std::decay<TContainer>::type>::type,
+    typename TContainerCategory = typename traits::ContainerCategory<
+        typename std::decay<TContainer>::type
+    >::type,
     typename TIndex = typename traits::IndexType<
         TContainerNoRef,
         TContainerCategory
     >::type,
-    
-    typename TComponent = typename hzdr::traits::ComponentType<TContainerNoRef>::type,
-    typename TGet = hzdr::traits::accessor::Get<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TAhead = hzdr::traits::accessor::Ahead<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TEqual = hzdr::traits::accessor::Equal<TContainerNoRef, TComponent, TIndex, TContainerCategory>,
-    typename TBehind = hzdr::traits::accessor::Behind<TContainerNoRef, TComponent, TIndex, TContainerCategory>, 
+    typename TComponent = typename hzdr::traits::ComponentType<
+        TContainerNoRef
+    >::type,
+    typename TGet = hzdr::traits::accessor::Get<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TAhead = hzdr::traits::accessor::Ahead<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TEqual = hzdr::traits::accessor::Equal<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >,
+    typename TBehind = hzdr::traits::accessor::Behind<
+        TContainerNoRef, 
+        TComponent, 
+        TIndex, 
+        TContainerCategory
+    >, 
     typename TAccessor>
 HDINLINE
 auto 
@@ -252,11 +302,12 @@ makeAccessor(TAccessor&&)
     TEqual,
     TBehind>
 {
-    typedef hzdr::Accessor<
+    using AccessorType =  hzdr::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
-        TContainerCategory> AccessorType;
+        TContainerCategory
+    > ;
     auto && accessor = AccessorType();
     return accessor;
 }
