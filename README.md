@@ -10,7 +10,7 @@ A **view** binds a prescription to a container. A view has functionality similar
 ## Example
 The project delivers some make functions. We use the functions to iterate over each int inside the hierarchical container.
 
-    #include "deepiterator/"
+    #include "deepiterator/DeepIterator.hpp"
     // create the prescription to get all int's out of std::vector<int>
     auto && prescriptionSingleLayer = hzdr::makeIteratorPrescription 
         hzdr::makeAccessor(),
@@ -47,6 +47,8 @@ The project delivers some make functions. We use the functions to iterate over e
       std::cout << *it;
     }
     
+More examples are in the Test directory.    
+
 ## Installation
 The DeepIterator Library is a header only library. You need to add the following lines to your cmake project.
 
