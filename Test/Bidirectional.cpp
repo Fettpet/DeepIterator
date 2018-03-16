@@ -40,7 +40,9 @@ BOOST_AUTO_TEST_CASE(Frames)
         hzdr::makeAccessor(),
         hzdr::makeNavigator(
             Offset(0u),
-            Jumpsize(1u)));
+            Jumpsize(1u)
+        )
+    );
     auto && view = hzdr::makeView(testFrame, concept);
     
     // 1. Test we iterate over the frame and read all particles 

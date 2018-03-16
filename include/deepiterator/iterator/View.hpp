@@ -251,8 +251,7 @@ public:
             details::constructorType::begin()
         );
     }
-
-
+    
 
 protected:
     ContainerPtr containerPtr;

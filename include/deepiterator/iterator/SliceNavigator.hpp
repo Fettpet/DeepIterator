@@ -30,7 +30,7 @@ namespace hzdr
 {
 namespace slice
 {
-    struct Distance;
+    struct NumberElements;
     struct IgnoreLastElements;
 }
  
@@ -44,7 +44,7 @@ template<
     int_fast32_t _distance
 >
 struct Slice<
-    hzdr::slice::Distance,
+    hzdr::slice::NumberElements,
     _distance
 >
 {
@@ -286,9 +286,10 @@ public:
        
         // 1. We start counting from the begininng and the position is outside
         // the slice.
-        if( slice.from_start() && (cur_pos > distanceSlice))
+        if( slice.from_start() && (cur_pos >= distanceSlice))
         {
-            return cur_pos - distanceSlice;
+            // +1 since distanceSlice == 1 looks only at the current position
+            return cur_pos - distanceSlice + 1;
         }
         // 2. We ignore the last elements
         else if(not slice.from_start() && (cur_pos > nbElem - distanceSlice))
@@ -298,7 +299,12 @@ public:
         // 3. if it is outside the container 
         else 
         {
-            return  (remainingJumpsize + static_cast<RangeType>(jumpsize()) - static_cast<RangeType>(1)) / static_cast<RangeType>(jumpsize());
+            return (
+                remainingJumpsize + 
+                static_cast<RangeType>(jumpsize()) - 
+                static_cast<RangeType>(1)
+                ) /
+                static_cast<RangeType>(jumpsize());
         }
     }
     
@@ -345,9 +351,9 @@ public:
            
             // 1. We start counting from the begininng and the position is outside
             // the slice.
-            if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > distanceSlice))
+            if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos >= distanceSlice))
             {
-                return static_cast<RangeType>(-1) * cur_pos - distanceSlice;
+                return static_cast<RangeType>(-1) * cur_pos - distanceSlice + static_cast<RangeType>(1);
             }
             // 2. We ignore the last elements
             // The cast is nessacary since the container could be empty
@@ -442,7 +448,7 @@ public:
                     idxCopy,
                     1u  
                 ) == 0 
-                && counter < slice.distance()
+                && counter <= slice.distance()
             )
             {
                 ++counter;
@@ -556,8 +562,8 @@ public:
                  index, 
                  containerSize
              ) 
-            || (slice.from_start() && (cur_pos >  distance))
-            || (not slice.from_start() && (cur_pos * jump + off >= 
+            || (slice.from_start() && (cur_pos >= distance))
+            || (not slice.from_start() && (cur_pos * jump + off >=
                  nbElem - distance ));
     }
     
@@ -581,8 +587,8 @@ public:
         bool
     >::type
     {
-        RangeType const distance = slice.distance();
-        RangeType const nbElem = nbElements(containerPtr); 
+        RangeType const distance = static_cast<RangeType>(slice.distance());
+        RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr)); 
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
         PreviousElement prev(previousElement);
@@ -600,8 +606,8 @@ public:
                         offset(),
                         containerSize
                 ) != 0;
-        bool rest = (slice.from_start() && (cur_pos < static_cast<RangeType>(-1) * distance))
-                || (not slice.from_start() && (cur_pos * jump - off) <= 
+        bool rest = (slice.from_start() && (cur_pos <= static_cast<RangeType>(-1) * distance))
+                || (not slice.from_start() && (cur_pos * jump - off) <=
                     static_cast<RangeType>(-1) * (nbElem - distance));
         return beforeFirst || prevValue || rest;
     }
@@ -644,17 +650,18 @@ public:
         RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr));
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
-        RangeType const distance = slice.distance();
+        RangeType const distance = static_cast<RangeType>(slice.distance());
         if(slice.from_start())
         {
             
             // 1. Case nbElem - off > slice.distance()
             RangeType const sizeFirstCase = (
                     distance
-                    + jump )
+                    + jump
+                    - static_cast<RangeType>(1))
                 / jump;
             // 2. Case nbElem - off < slice.distance()
-            RangeType const sizeSecondCase = (
+            RangeType const sizeSecondCase = (nbElem > off) *(
                     nbElem 
                     - off
                     + jump
@@ -663,7 +670,7 @@ public:
 
             // check and give it back
             return (nbElem - off >= distance) * sizeFirstCase 
-                + (nbElem < distance) * sizeSecondCase;
+                + (nbElem - off < distance) * sizeSecondCase;
         }
         // it ignores the last slice.distance() elements
         else 
@@ -672,14 +679,14 @@ public:
             // I had nbElem - off - slice.distance() elements
                 RangeType const sizeFirstCase = (
                     nbElem - off - distance
-                    + jump 
+                    + jump
                     - static_cast<RangeType>(1))
                 / jump;
             // 2. Case nbElem - off < slice.distance()
             // I had 0 elements inside
             
                 
-            return (off < nbElem) * (nbElem - off > distance) * sizeFirstCase;
+            return (off < nbElem) * (nbElem - off >= distance) * sizeFirstCase;
                 
         }
     }

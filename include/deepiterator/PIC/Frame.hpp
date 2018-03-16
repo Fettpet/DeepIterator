@@ -19,7 +19,8 @@ namespace hzdr
 {
 template<
     typename TParticle,
-    int_fast32_t maxParticles>
+    int_fast32_t maxParticles
+>
 struct Frame
 {
     typedef TParticle                           ValueType;

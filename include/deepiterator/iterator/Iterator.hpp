@@ -460,12 +460,7 @@ public:
     DeepIterator
     {
         DeepIterator tmp(*this);
-        if(isBeforeFirst())
-        {
-            setToBegin();
-            return tmp;
-        }
-        gotoNext(1u);
+        ++(*this);
         return tmp;
     }
     
@@ -1337,7 +1332,7 @@ public:
         TNavigator_ && navi,
         TChild_ && 
     ):
-        navigator(hzdr::forward<TNavigator_>(navigator)),
+        navigator(hzdr::forward<TNavigator_>(navi)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
         childIterator()
     {}
@@ -1458,7 +1453,7 @@ public:
     DeepIterator
     {
         DeepIterator tmp(*this);
-        ++tmp;
+        ++(*this);
         return tmp;
     }
     
@@ -1573,11 +1568,11 @@ public:
     -> 
     typename std::enable_if<
         T == true, 
-        DeepIterator 
+        DeepIterator
     >::type
     {
         DeepIterator tmp(*this);
-        --tmp;
+        --(*this);
         return tmp;
     }
     
@@ -2044,7 +2039,7 @@ public:
     -> 
     typename std::enable_if<
         T == true,
-        uint
+        int32_t
     >::type
     {
         return navigator.size(containerPtr);

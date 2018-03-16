@@ -183,7 +183,7 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
-        auto remainingJumpsize = nextElement(
+        RangeType remainingJumpsize = nextElement(
             containerPtr, 
             index,  
             static_cast<RangeType>(jumpsize()) * distance,
@@ -192,8 +192,10 @@ public:
         
         // we need the distance from the last element to the current index 
         // position this is a round up
-        return (remainingJumpsize + jumpsize() - static_cast<RangeType>(1)) /
-               jumpsize();
+        return (remainingJumpsize + 
+                static_cast<RangeType>(jumpsize()) -
+                static_cast<RangeType>(1)) /
+                static_cast<RangeType>(jumpsize()) ;
     }
     
     
@@ -222,12 +224,10 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
-        auto && off = offset();
-        auto && jump = jumpsize();
         auto remainingJumpsize = previousElement(
             containerPtr, 
             index,
-            static_cast<RangeType>(jump) * distance,
+            static_cast<RangeType>(jumpsize())  * distance,
             containerSize
         );
         if(remainingJumpsize == 0)
@@ -236,16 +236,24 @@ public:
             remainingJumpsize = previousElement(
                 containerPtr, 
                 indexCopy,
-                off,
+                static_cast<RangeType>(offset()) ,
                 containerSize
             );
-            return (remainingJumpsize + jump - static_cast<RangeType>(1)) 
-             / jump;
+
+            return (
+                remainingJumpsize + 
+                static_cast<RangeType>(jumpsize()) -
+                static_cast<RangeType>(1)) /
+                static_cast<RangeType>(jumpsize());
         }
         else 
         {
-            return (remainingJumpsize + jump - static_cast<RangeType>(1) + off) 
-             / jump ;
+            return 
+                (remainingJumpsize + 
+                static_cast<RangeType>(jumpsize()) - 
+                static_cast<RangeType>(1) + 
+                static_cast<RangeType>(offset())) /
+                static_cast<RangeType>(jumpsize()) ;
     
         }
 
@@ -296,20 +304,31 @@ public:
     -> void
     {
         assert(containerPtr != nullptr); // containerptr should be valid
-        auto nbElementsVar = nbElements(containerPtr);
+        RangeType nbElementsVar = static_cast<RangeType>(
+            nbElements(containerPtr)
+        );
         // -1 since we dont like to jump outside
-        auto nbJumps = (nbElementsVar - offset() - static_cast<RangeType>(1)) 
-                      / jumpsize();
-        auto lastPosition = nbJumps * jumpsize() + offset();
+        RangeType nbJumps = ((nbElementsVar > static_cast<RangeType>(offset()))*
+                        (nbElementsVar - 
+                        static_cast<RangeType>(offset()) - 
+                        static_cast<RangeType>(1)) /
+                        static_cast<RangeType>(jumpsize()));
+
+        RangeType lastPosition = nbJumps * 
+                            static_cast<RangeType>(jumpsize()) +
+                             static_cast<RangeType>(offset());
         // -1 since we need the last position
-        auto neededJumps = (nbElementsVar - static_cast<RangeType>(1))
-                         - lastPosition;
+        RangeType neededJumps = nbElementsVar - 
+                                static_cast<RangeType>(1) -
+                                lastPosition;
+        neededJumps *= neededJumps > 0;
 
         lastElement(
             containerPtr,
             index,
             containerSize
         );
+
         if(not isBeforeFirst(
             containerPtr,
             index
@@ -337,7 +356,8 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index
     )
-    -> void
+    -> 
+    void
     {
         afterLastElement.set(
             containerPtr,
@@ -360,7 +380,8 @@ public:
         ContainerPtr containerPtr,  
         IndexType & index
     )
-    ->     typename std::enable_if<T==true>::type
+    ->    
+    typename std::enable_if<T==true>::type
     {
         beforeFirstElement.set(
             containerPtr,
@@ -419,10 +440,10 @@ public:
             index, 
             containerSize
         ) || (
-        prev(
+            prev(
                 containerPtr, 
                 indexCopy,
-                offset(),
+                static_cast<RangeType>(offset()),
                 containerSize
         ) != static_cast<RangeType>(0));
     }
@@ -460,11 +481,15 @@ public:
     -> uint_fast32_t
     {
         assert(containerPtr != nullptr); // containerptr should be valid
-        auto const nbElem = nbElements(containerPtr);
-        auto const off = offset();
+        auto && nbElem = nbElements(containerPtr);
      //   assert(nbElem >= off);
-        const int elems = (nbElem - off + jumpsize() - static_cast<RangeType>(1)) 
-            / jumpsize();
+        const int elems = (
+            nbElem -
+            static_cast<RangeType>(offset()) + 
+            static_cast<RangeType>(jumpsize()) - 
+            static_cast<RangeType>(1)
+            ) / 
+            static_cast<RangeType>(jumpsize());
         return (elems > 0) * elems;
     }
     
