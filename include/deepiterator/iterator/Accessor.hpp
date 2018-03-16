@@ -244,16 +244,18 @@ struct Accessor
 /**
  * @brief the accessor prescription. This is only a threshold
  */
-template<>
+template<bool isRandomAccessable>
 struct Accessor<
     details::UndefinedType, 
     details::UndefinedType,
     details::UndefinedType,
     details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType>
+    details::UndefinedType,
+    details::UndefinedType,
+    details::UndefinedType,
+    details::UndefinedType,
+    isRandomAccessable
+>
 {
     HDINLINE Accessor() = default;
     HDINLINE Accessor(Accessor const &) = default;
@@ -282,7 +284,7 @@ template<
     typename TContainer,
     typename TContainerNoRef = typename std::decay<TContainer>::type,
     typename TContainerCategory = typename traits::ContainerCategory<
-        typename std::decay<TContainer>::type
+        TContainerNoRef
     >::type,
     typename TIndex = typename traits::IndexType<
         TContainerNoRef,
@@ -315,7 +317,12 @@ template<
         TIndex, 
         TContainerCategory
     >, 
-    typename TAccessor>
+    typename TAccessor,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+        TContainerNoRef,
+        TContainerCategory
+    >::value
+>
 HDINLINE
 auto 
 makeAccessor(TAccessor&&)
@@ -327,13 +334,20 @@ makeAccessor(TAccessor&&)
     TGet,
     TAhead,
     TEqual,
-    TBehind>
+    TBehind,
+    isRandomAccessable
+>
 {
     using AccessorType =  hzdr::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
-        TContainerCategory
+        TContainerCategory,
+        TGet,
+        TAhead,
+        TEqual,
+        TBehind,
+        isRandomAccessable
     > ;
     auto && accessor = AccessorType();
     return accessor;
@@ -389,12 +403,17 @@ template<
         TComponent, 
         TIndex, 
         TContainerCategory
-    >
+    >,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+        TContainer,
+        TContainerCategory
+    >::value
 >
 auto 
 HDINLINE
 makeAccessor()
--> hzdr::Accessor<
+-> 
+hzdr::Accessor<
     TContainerNoRef,
     TComponent,
     TIndex,
@@ -402,7 +421,9 @@ makeAccessor()
     TGet,
     TAhead,
     TEqual,
-    TBehind>
+    TBehind,
+    isRandomAccessable
+>
 {
     using ResultType = hzdr::Accessor<
         TContainerNoRef,
@@ -412,7 +433,8 @@ makeAccessor()
         TGet,
         TAhead,
         TEqual,
-        TBehind
+        TBehind,
+        isRandomAccessable
     >;
         
     return ResultType();
@@ -471,7 +493,11 @@ template<
         TComponent, 
         TIndex, 
         TContainerCategory
-    >
+    >,
+    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+        TContainer,
+        TContainerCategory
+    >::value
 >    
 auto 
 HDINLINE
@@ -484,7 +510,9 @@ makeAccessor(TContainer&&)
     TGet,
     TAhead,
     TEqual,
-    TBehind>
+    TBehind,
+    isRandomAccessable
+>
 {
     using ResultType = hzdr::Accessor<
         TContainerNoRef,
@@ -494,7 +522,8 @@ makeAccessor(TContainer&&)
         TGet,
         TAhead,
         TEqual,
-        TBehind
+        TBehind,
+        isRandomAccessable
     >;
         
     return ResultType();
@@ -515,7 +544,8 @@ makeAccessor()
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
     hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType>
+    hzdr::details::UndefinedType,
+    false>
 {
     using ResultType = hzdr::Accessor<
         hzdr::details::UndefinedType,
@@ -525,7 +555,8 @@ makeAccessor()
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
         hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType
+        hzdr::details::UndefinedType,
+        false
     >;
     return ResultType();
 }

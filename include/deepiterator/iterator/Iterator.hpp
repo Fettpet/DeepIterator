@@ -33,7 +33,7 @@
 #include <typeinfo>
 
 namespace hzdr 
-
+{
 namespace details 
 {
 /**
@@ -1212,8 +1212,8 @@ public:
     >::type;
     using ComponentPtr = ComponentType*;
     using ComponentReference = ComponentType&;
-    using ChildIterator = TChild;
-    using ReturnType = typename ChildIterator::ReturnType;
+    using ChildIterator = hzdr::NoChild;
+    using ReturnType = ComponentReference;
 
 // container stuff
     using IndexType = TIndexType;
@@ -1329,10 +1329,27 @@ public:
     template<
         typename TAccessor_,
         typename TNavigator_,
-        typename TChild_>
+        typename TChild_
+    >
     HDINLINE
-    DeepIterator(    HDINLINE DeepIterator& operator=(DeepIterator const &) = default;
-    HDINLINE DeepIterator& operator=(DeepIterator &&) = default;
+    DeepIterator( 
+        TAccessor_ && accessor,
+        TNavigator_ && navi,
+        TChild_ && 
+    ):
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
+        childIterator()
+    {}
+    
+    
+    template<
+        typename TAccessor_,
+        typename TNavigator_,
+        typename TChild_
+    >
+    HDINLINE
+    DeepIterator( 
             ContainerPtr container, 
             TAccessor_&& accessor, 
             TNavigator_&& navigator,
@@ -1856,7 +1873,7 @@ public:
      */
     HDINLINE 
     auto
-    setToBegin(ContainerReference con)
+    setToBegin(ContainerRef con)
     -> 
     void
     {
@@ -1915,7 +1932,7 @@ public:
      */
     HDINLINE
     auto
-    setToRbegin(ContainerReference con)
+    setToRbegin(ContainerRef con)
     -> 
     void
     {
