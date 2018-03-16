@@ -263,10 +263,10 @@ struct Ahead<
         using namespace hzdr::detail;
         return (idxndToInt<Dim>(
             idx1,
-            con1->dim()) 
+            con1->extent()) 
         > idxndToInt<Dim>(
             idx2,
-            con2->dim()))
+            con2->extent()))
         && con1 == con2;
     }
     
@@ -299,10 +299,10 @@ struct Behind<
         using namespace hzdr::detail;
         return (idxndToInt<Dim>(
             idx1,
-            con1->dim()) 
+            con1->extent()) 
         < idxndToInt<Dim>(
             idx2,
-            con2->dim()))
+            con2->extent()))
         && con1 == con2;
     }
     
@@ -340,7 +340,7 @@ struct FirstElement<
         using namespace hzdr::detail;
         idx = intToIdxnd<Dim>(
             0,
-            con->dim()
+            con->extent()
         );
     }
     
@@ -374,20 +374,20 @@ struct NextElement<
         TContainerSize& size)
     {
         using namespace hzdr::detail;
-        auto newIdxInt = idxndToInt<Dim>(idx, container->dim())
-                       + idxndToInt<Dim>(range, container->dim());
+        auto newIdxInt = idxndToInt<Dim>(idx, container->extent())
+                       + idxndToInt<Dim>(range, container->extent());
 
 
         if(newIdxInt >= size(container))
         {
-            idx = container->dim();
+            idx = container->extent();
             return (newIdxInt - (size(container)-1));
         }
         else 
         {
             idx = intToIdxnd<Dim>(
                 newIdxInt,
-                container->dim()
+                container->extent()
             );
             return 0;
         }
@@ -420,10 +420,10 @@ struct AfterLastElement<
     const
     {
         using namespace hzdr::detail;
-//         std::cout << "After last element test " << conPtr->dim() << " size " << idx << std::endl;
+//         std::cout << "After last element test " << conPtr->extent() << " size " << idx << std::endl;
         return idxndToInt<Dim>(
                 idx,
-                conPtr->dim()
+                conPtr->extent()
         ) >= size(conPtr);
     }
     
@@ -436,7 +436,7 @@ struct AfterLastElement<
         using namespace hzdr::detail;
         idx = intToIdxnd<Dim>(
             size(conPtr),
-            conPtr->dim()
+            conPtr->extent()
         );
     }
     
@@ -468,7 +468,7 @@ struct LastElement<
         using namespace hzdr::detail;
         index = intToIdxnd<Dim>(
             size(conPtr) - 1,
-            conPtr->dim()
+            conPtr->extent()
         );
     }
     
@@ -506,18 +506,18 @@ struct PreviousElement<
         
         auto const newIdxInt = idxndToInt<Dim>(
             idx,
-            container->dim()
+            container->extent()
         ) 
         - 
         idxndToInt<Dim>(
             jumpsize,
-            container->dim()
+            container->extent()
         );
         if(newIdxInt < 0)
         {
             idx = intToIdxnd<Dim>(
                 static_cast<TRange>(-1),
-                container->dim()
+                container->extent()
             );
             return static_cast<TRange>(-1) * newIdxInt;
         }
@@ -525,7 +525,7 @@ struct PreviousElement<
         {
             idx = intToIdxnd<Dim>(
                 newIdxInt,
-                container->dim()
+                container->extent()
             );
             return 0;
         }
@@ -562,7 +562,7 @@ struct BeforeFirstElement<
         
         return idxndToInt<Dim>(
             idx, 
-            container->dim()
+            container->extent()
         ) 
         < 0;
     }
@@ -580,7 +580,7 @@ struct BeforeFirstElement<
         using namespace hzdr::detail;
         idx = intToIdxnd<Dim>(
             -1,
-            container->dim()
+            container->extent()
         );
     }
     

@@ -11,7 +11,7 @@
 #include "deepiterator/PIC/Particle.hpp"
 #include "deepiterator/DeepIterator.hpp"
 
-const int numberElementsInTest = 15;
+const int numberElementsInTest = 10;
     
 template<
     typename T,
@@ -33,7 +33,7 @@ std::ostream& operator<<(
  * @brief this is our container to test the ndArray categorie. The container 
  * must must support the following conditions:
  * 1. operator[](TIndex)
- * 2. dim(): This function returns A TIndex with the size in each dimension.
+ * 2. extent(): This function returns A TIndex with the size in each dimension.
  * 3. 
  */
 
@@ -105,7 +105,7 @@ struct Container3d
         return *this;
     }
     
-    TIndex dim()
+    TIndex extent()
     {
         return dimVar;
     }
@@ -126,7 +126,7 @@ struct Container3d
     
     const 
     TIndex& 
-    dim() 
+    extent() 
     const
     {
         return dimVar;
@@ -281,7 +281,7 @@ struct NumberElements<Container3d<
     operator()( Container const * const f)
     const
     {
-        return f->dim()[0] * f->dim()[1] * f->dim()[2];    
+        return f->extent()[0] * f->extent()[1] * f->extent()[2];    
     }
 } ;// struct NumberElements
 
