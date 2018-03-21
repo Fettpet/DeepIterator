@@ -24,11 +24,6 @@
 #include "deepiterator/definitions/forward.hpp"
 
 #include "deepiterator/DeepIterator.hpp"
-
-#include "deepiterator/iterator/Prescription.hpp"
-#include "deepiterator/iterator/Accessor.hpp"
-#include "deepiterator/iterator/Navigator.hpp"
-#include "deepiterator/iterator/SliceNavigator.hpp"
 #include "deepiterator/traits/Traits.hpp"
 
 #include <type_traits>
@@ -94,46 +89,28 @@ namespace hzdr
  */
 template<
     typename TContainer,
-    typename TComponentType,
-    typename TAccessor,
-    typename TNavigator,
-    typename TChild,
-    typename TIndexType,
-    bool hasConstantSize,
-    bool isBidirectional,
-    bool isRandomAccessable>
+    typename TPrescription,
+    typename TIteratorForward,
+    typename TIteratorBackward = void,
+    bool isBidirectional = false
+>
 struct View
 {
 public:
     using ContainerType = TContainer;
     using ContainerPtr = ContainerType*;
-    using ContainerRef = ContainerType&;
+    using ContainerRef = ContainerType&;  
     
-    using ComponentType = TComponentType;
-    using ComponentPtr = ComponentType*;
-    using ComponentRef = ComponentType&;
+    using Prescription = TPrescription;
     
-    using AccessorType = TAccessor;
-    using NavigatorType = TNavigator;
-    using ChildType = TChild;
     
-    using IteratorType = DeepIterator<
-        ContainerType,
-        AccessorType,
-        NavigatorType,
-        ChildType,
-        TIndexType,
-        hasConstantSize,
-        isBidirectional,
-        isRandomAccessable
-    >;
-        
     HDINLINE View() = default;
     HDINLINE View(View const &) = default;
     HDINLINE View(View &&) = default;
     HDINLINE View& operator=(View const &) = default;
     HDINLINE View& operator=(View &&) = default;
     
+
     /**
      * @brief This is the constructor to create a useable view.
      * @param container The container over which you like to iterate
@@ -142,30 +119,31 @@ public:
      * @param child other iterator to handle nested datastructures
      */
     template<
-        typename TAccessor_,
-        typename TNavigator_,
-        typename TChild_>
+        typename TPrescription_
+    >
     HDINLINE
     View(
          ContainerType& container,
-         TAccessor_ && accessor,
-         TNavigator_ && navigator,
-         TChild_ && child
-        ):
+         TPrescription_ && prescription
+    ):
         containerPtr(&container),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        child(hzdr::forward<TChild_>(child))
+        prescription(hzdr::forward<TPrescription_>(prescription))
+    {}
+
+
+    /**
+    * @brief This function creates an iterator, which is at the first element
+    */
+    HDINLINE
+    auto 
+    begin()
+    -> 
+    TIteratorForward
     {
-        static_assert(std::is_same<
-            typename std::decay<TAccessor_>::type,
-            typename std::decay<TAccessor>::type>::value,
-            "The type of the accessor given by the template and the accessor given as parameter are not the same"
-        );
-        static_assert(std::is_same<
-            typename std::decay<TNavigator_>::type,
-            typename std::decay<TNavigator>::type>::value,
-            "The type of the accessor given by the template and the accessor given as parameter are not the same"
+        return TIteratorForward(
+            containerPtr, 
+            prescription,
+            details::constructorType::begin()
         );
     }
 
@@ -177,13 +155,11 @@ public:
     auto
     end()
     -> 
-    IteratorType
+    TIteratorForward
     {
-        return IteratorType(
+        return TIteratorForward(
             containerPtr, 
-            accessor, 
-            navigator, 
-            child, 
+            prescription,
             details::constructorType::end()
         );
     }
@@ -194,19 +170,17 @@ public:
     */
     template<bool T = isBidirectional>
     HDINLINE
-    auto 
+    auto
     rbegin()
     -> 
     typename std::enable_if<
-        T == true, 
-        IteratorType
+        T == true,
+        TIteratorBackward
     >::type
     {
-        return IteratorType(
+        return TIteratorBackward(
             containerPtr, 
-            accessor, 
-            navigator, 
-            child, 
+            prescription,
             details::constructorType::rbegin()
         );
     }
@@ -223,41 +197,20 @@ public:
     -> 
     typename std::enable_if<
         T == true,
-        IteratorType
+        TIteratorBackward
     >::type
     {
-        return IteratorType(
+        return TIteratorBackward(
             containerPtr, 
-            accessor, 
-            navigator, 
-            child, 
+            prescription,
             details::constructorType::rend()
         );
     }
     
-    
-    /**
-    * @brief This function creates an iterator, which is at the first element
-    */
-    HDINLINE
-    IteratorType
-    begin()
-    {
-        return IteratorType(
-            containerPtr, 
-            accessor, 
-            navigator, 
-            child, 
-            details::constructorType::begin()
-        );
-    }
-    
-
 protected:
     ContainerPtr containerPtr;
-    AccessorType accessor;
-    NavigatorType navigator;
-    ChildType child;
+    Prescription prescription;
+    
 } ;
 
 /**
@@ -276,16 +229,7 @@ template<
     typename ContainerCategoryType = typename traits::ContainerCategory<
         TContainerNoRef
     >::type,    
-    typename IndexType = typename hzdr::traits::IndexType<
-        TContainerNoRef,
-        ContainerCategoryType
-    >::type,
-    bool hasConstantSize = traits::HasConstantSize<TContainerNoRef>::value,
     bool isBidirectional = hzdr::traits::IsBidirectional<
-        TContainerNoRef, 
-        ContainerCategoryType
-    >::value,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
         TContainerNoRef, 
         ContainerCategoryType
     >::value
@@ -299,65 +243,42 @@ makeView(
 ->
     View<
         TContainerNoRef,
-        ComponentType,
-        decltype(details::makeAccessor<TContainerNoRef>(
-            hzdr::forward<TPrescription>(concept).accessor
+        decltype(hzdr::details::makeIteratorPrescription<
+            TContainerNoRef
+        >(concept)),
+        decltype(details::makeIterator<TContainerNoRef>(
+            hzdr::forward<TPrescription>(concept)
         )),
-        decltype(details::makeNavigator<TContainerNoRef>(
-            hzdr::forward<TPrescription>(concept).navigator
+        decltype(details::makeReverseIterator<TContainerNoRef>(
+            hzdr::forward<TPrescription>(concept)
         )),
-        decltype(details::makeIterator<ComponentType>(
-            hzdr::forward<TPrescription>(concept).child
-        )),
-        IndexType,
-        hasConstantSize,
-        isBidirectional,
-        isRandomAccessable
+        isBidirectional
     >
 {
-
+    using ContainerType = TContainerNoRef;
+    
+    using Prescription = decltype(hzdr::details::makeIteratorPrescription<
+            TContainerNoRef
+        >(concept));
         
-        using ContainerType = TContainerNoRef;
-
-        using AccessorType = decltype(details::makeAccessor<ContainerType>( 
-            hzdr::forward<TPrescription>(concept).accessor
-        ));
-        using NavigatorType = decltype(details::makeNavigator<ContainerType>( 
-            hzdr::forward<TPrescription>(concept).navigator
-        ));
-        using ChildType = decltype(details::makeIterator<ComponentType>(
-            hzdr::forward<TPrescription>(concept).child
-        ));
-        using ResultType = View<
-            ContainerType,
-            ComponentType,
-            AccessorType,
-            NavigatorType,
-            ChildType,
-            IndexType,
-            hasConstantSize,
-            isBidirectional,
-            isRandomAccessable
-        >;
+    using ResultType = View<
+        ContainerType,
+        Prescription,
+        decltype(details::makeIterator<ContainerType>(
+            hzdr::forward<TPrescription>(concept)
+        )),
+        decltype(details::makeReverseIterator<ContainerType>(
+            hzdr::forward<TPrescription>(concept)
+        )),
+        isBidirectional
+    >;
      
 
-        auto && accessor = details::makeAccessor<ContainerType>(
-            concept.accessor
-        );
-        
-        auto && navigator = details::makeNavigator<ContainerType>(
-            concept.navigator
-        );
-        auto && child = details::makeIterator<ComponentType>(
-            concept.child
-        );
-        auto && result =  ResultType(
-            hzdr::forward<TContainer>(con), 
-            accessor, 
-            navigator, 
-            child
-        );
-        return result;
+    return ResultType(
+        hzdr::forward<TContainer>(con), 
+        hzdr::details::makeIteratorPrescription<TContainerNoRef>(concept)
+    );
+    
 }
 
 } // namespace hzdr

@@ -142,11 +142,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 container, 
                 childPrescriptionJump1
             );
-           // std::cout << container << std::endl;
+
             int counter=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
-            //    std::cout << *it << std::endl;
                 ++counter;
             }
             auto pos = off;
@@ -177,11 +176,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 container, 
                 childPrescriptionJump1
             );
-           // std::cout << container << std::endl;
+
             int counter=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
-                //std::cout << *it << std::endl;
                 ++counter;
             }
 
@@ -206,7 +204,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 childPrescriptionJump1
             );
             int counter=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
                 ++counter;
             }
@@ -237,7 +235,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                     childPrescriptionJump1
                 );
                 int counter=0;
-                for(auto it=view.rbegin(); it!=view.rend(); --it)
+                for(auto it=view.rbegin(); it!=view.rend(); ++it)
                 {
                     ++counter;
                 }
@@ -268,17 +266,14 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 container, 
                 childPrescriptionJump1
             );
-           // std::cout << container << std::endl;
             int counter=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
-                std::cout << "Backward" << *it << std::endl;
                 ++counter;
             }
             auto counter2 = 0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
-                std::cout << "forwrad" << *it << std::endl;
                 ++counter2;
             }
 
@@ -365,9 +360,9 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 childPrescriptionJump1
             );
 
-            std::cout << container << std::endl;
+
             int sum=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
                 sum += *it;
             }
@@ -407,7 +402,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 childPrescriptionJump1
             );
             int sum=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
                 sum += *it;
             }
@@ -447,7 +442,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 childPrescriptionJump1
             );
             int sum=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
                 sum += *it;
 
@@ -605,7 +600,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 childPrescriptionJump1
             );
             int sum=0;
-            for(auto it=view.rbegin(); it!=view.rend(); --it)
+            for(auto it=view.rbegin(); it!=view.rend(); ++it)
             {
                 sum += *it;
             }

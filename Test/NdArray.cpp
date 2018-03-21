@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE(UNNESTED_LAYER)
                 
                 // backward
                 sum=0;
-                for(auto it=view.rbegin(); it!=view.rend(); --it)
+                for(auto it=view.rbegin(); it!=view.rend(); ++it)
                 {
                     sum +=*it;
                 }
@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
                 BOOST_TEST(sum == (n*(n+1)));
                 
                 sum=0; 
-                for(auto it=view.rbegin(); it!=view.rend(); --it)
+                for(auto it=view.rbegin(); it!=view.rend(); ++it)
                 {
                     sum += *it; 
                 }
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
                 BOOST_TEST(sum == (n*(n+1)/2));
                 
                 sum=0; 
-                for(auto it=view.rbegin(); it!=view.rend(); it-=2)
+                for(auto it=view.rbegin(); it!=view.rend(); it+=2)
                 {
                     sum += *it; 
                 }
@@ -551,7 +551,7 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_Second)
     int sum=0; 
     auto n = 8;
     
-    for(auto it=view.rbegin(); it!=view.rend(); --it)
+    for(auto it=view.rbegin(); it!=view.rend(); ++it)
     {
         std::cout <<*it << std::endl;
        sum += *it;

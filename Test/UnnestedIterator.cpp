@@ -39,38 +39,43 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
                                     hzdr::makeNavigator(
                                         Offset(0u),
                                         Jumpsize(1u))));
+
   //  hzdr::View<Particle, hzdr::Direction::Forward<1>> con(&test1);
     auto it = view.begin();
     
-   
+
     BOOST_TEST(*it == property1);
+
     ++it;
     // check wheter ++ and == work
     
-    
+
     
     BOOST_TEST(*it == property2);
-    
+       
     // Check end
     ++it;
     BOOST_TEST((view.end() == it));
-    
+
 
 /**
  *@brief 2. test: Backward 
 */   
-
+   
     auto it2 = view.rbegin();
-
+     
     BOOST_TEST(*it2 == property2);
-    --it2;
+    ++it2;
     BOOST_TEST(*it2 == property1);
-    --it2;
+    ++it2;
     BOOST_TEST((view.rend() == it2));
 
-    it2 += 2;
+    it2 -= 2;
     --it;
+
+    BOOST_TEST((*it2 == *it));
     BOOST_TEST((it2 == it));
+
 }
 
 /**
@@ -147,14 +152,14 @@ We implement a own collectivity class
     std::cout << *(supercell.firstFrame) << std::endl;
     std::cout << "Values from it" << std::endl;
     counter = 0;
-    for(auto && it=view.rbegin(); it != view.rend(); it -= 3)
+    for(auto && it=view.rbegin(); it != view.rend(); it += 3)
     {   
         std::cout << "\t" << *it << std::endl;
             counter += (*it).data[0u] + (*it).data[1u];
     }
     std::cout << "Values from it3" << std::endl;
     auto counterBackwardJump3 = 0;
-    for(auto && it=viewJump3.rbegin(); it != viewJump3.rend(); --it)
+    for(auto && it=viewJump3.rbegin(); it != viewJump3.rend(); ++it)
     {   
         std::cout << "\t" << *it << std::endl;
             counterBackwardJump3 += (*it).data[0u] + (*it).data[1u];
@@ -196,7 +201,7 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     
     // we count the number of frames reverse
     auto counterReverse = 0u;
-    for(auto it=view.rbegin(); it!=view.rend(); --it)
+    for(auto it=view.rbegin(); it!=view.rend(); ++it)
     {
         ++counterReverse;
     }
@@ -220,11 +225,12 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     BOOST_TEST((counterJump2 == ((nbFrames + 1u)/2u) ));
     
     auto counterJump2Reverse = 0u;
-    for(auto it=viewJump2.rbegin(); it!=viewJump2.rend(); --it)
+    for(auto it=viewJump2.rbegin(); it!=viewJump2.rend(); ++it)
     {
         counterJump2Reverse++;
     }
     BOOST_TEST((counterJump2Reverse == ((nbFrames + 1u)/2u) ));
+
 }   
 
 

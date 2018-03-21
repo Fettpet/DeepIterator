@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(SimpleTest)
     }
     BOOST_TEST(counter == 11);
     
-    for(auto && it=view.rbegin(); it != view.rend(); --it)
+    for(auto && it=view.rbegin(); it != view.rend(); ++it)
     {
         BOOST_TEST( *it == --counter);
     }

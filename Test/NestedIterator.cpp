@@ -10,7 +10,7 @@
 
 //using namespace boost::unit_test;
 typedef int_fast32_t ParticleProperty;
-typedef hzdr::Particle<ParticleProperty, 2> Particle;
+typedef hzdr::Particle<int_fast32_t, 2> Particle;
 typedef hzdr::Frame<Particle, 10> Frame;
 typedef hzdr::Supercell<Frame> Supercell;
 typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
@@ -30,20 +30,26 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
  * @brief The first test is used to verify the iteration over all particle 
  * attributes within a frame. 
  */
+
     auto && view = hzdr::makeView(
                         *(supercell.firstFrame), 
                         hzdr::makeIteratorPrescription(
                             hzdr::makeAccessor(),
                             hzdr::makeNavigator( 
                                 Offset(0),
-                                Jumpsize(1)),
+                                Jumpsize(1)
+                            ),
                             hzdr::makeIteratorPrescription(
                                 hzdr::makeAccessor(),
                                 hzdr::makeNavigator(
                                     Offset(0),
-                                    Jumpsize(1)))));
-                            
-    std::cout << *(supercell.firstFrame) << std::endl;
+                                    Jumpsize(1)
+                                )
+                            )
+                        )
+                    );
+
+
     // 1. test ++it
     uint counter = 0u;
     for(auto && it = view.begin(); it != view.end(); ++it)
@@ -61,12 +67,13 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     }
     // sum([0, 19]) = 190
     BOOST_TEST(counter == 190u); 
-    
+
+
+ 
     // 3. test --it
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); --it)
+    for(auto && it = view.rbegin(); it != view.rend(); ++it)
     {
-        std::cout << *it << std::endl;
         counter += (*it);
     }
     // sum([0, 19]) = 190
@@ -74,13 +81,14 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     
     // 4. test it--
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); it--)
+    for(auto && it = view.rbegin(); it != view.rend(); it++)
     {
         counter += (*it);
     }
 
 //     // sum([0, 19]) = 190
     BOOST_TEST(counter == 190u); 
+
 }
 
 
@@ -106,7 +114,11 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(
                                             Offset(0),
-                                            Jumpsize(1)))));
+                                            Jumpsize(1)
+                                        )
+                                    )
+                                )
+    );
      
     
    // 1. test ++it
@@ -129,22 +141,21 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     
     // 3. test --it
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); --it)
+    for(auto && it = view.rbegin(); it != view.rend(); ++it)
     {
         counter++;
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 42u);
-    
+ 
     // 4. test it--
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); it--)
+    for(auto && it = view.rbegin(); it != view.rend(); it++)
     {
         counter++;
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 42u);
-
 
 }
 
@@ -179,15 +190,16 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
                     hzdr::makeNavigator(
                         Offset(0),
                         Jumpsize(1))))));
-     
+
     std::cout << "Data structure: " << std::endl << supercell << std::endl;
     // test ++it
     uint counter = 0u;
     for(auto it = view.begin(); it != view.end(); ++it)
     {
-        std::cout << *it << std::endl;
+
         counter++;            
     }
+
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 84u);
     
@@ -197,12 +209,13 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
     {
         counter++;            
     }
+
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 84u);
     
     //test --it
     counter = 0u;
-    for(auto it = view.rbegin(); it != view.rend(); --it)
+    for(auto it = view.rbegin(); it != view.rend(); ++it)
     {
         counter++;            
     }
@@ -211,14 +224,16 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
 
     //test it--
     counter = 0u;
-    for(auto it = view.rbegin(); it != view.rend(); it--)
+    for(auto it = view.rbegin(); it != view.rend(); it++)
     {
         counter++;            
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 84u);
+
 }
 
+// doesnt use this
 #if 0
 BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
 {

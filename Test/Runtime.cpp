@@ -21,7 +21,7 @@
 
 #include <boost/timer.hpp>
 
-uint const nbTries = 25u;
+uint const nbTries = 5u;
 using namespace boost::unit_test;
 typedef hzdr::Particle<int_fast32_t, 1u> Particle;
 typedef hzdr::Frame<Particle, 100u> Frame;

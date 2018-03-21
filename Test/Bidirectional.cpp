@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(Frames)
     
     // 1. Test we iterate over the frame and read all particles 
     auto counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); --it)
+    for(auto && it = view.rbegin(); it != view.rend(); ++it)
     {
         std::cout << *it <<std::endl;
         buffer[counter++] = *it;
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(Frames)
     
     // 2. Test the read results
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); it--)
+    for(auto && it = view.rbegin(); it != view.rend(); it++)
     {
         BOOST_TEST(buffer[counter++] == (*it));
     }
@@ -66,14 +66,14 @@ BOOST_AUTO_TEST_CASE(Frames)
     Particle particle = Particle(0,0);
     
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); it--)
+    for(auto && it = view.rbegin(); it != view.rend(); it++)
     {
         *it = particle;
     }
     
     // test the result
     counter = 0u;
-    for(auto && it = view.rbegin(); it != view.rend(); it--)
+    for(auto && it = view.rbegin(); it != view.rend(); it++)
     {
         BOOST_TEST((*it) == particle);
     }
@@ -82,9 +82,6 @@ BOOST_AUTO_TEST_CASE(Frames)
     
     BOOST_TEST((it == --(++it)));
     
-    // test the bidirectional iterator property
-    BOOST_TEST((--(view.begin()) == view.rend()));
-    BOOST_TEST((view.end() == ++(view.rbegin())));
     
     BOOST_TEST(( ++(--view.begin()) == view.begin()));
     BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
@@ -123,7 +120,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             
             // 1. Test we iterate over the frame and read all particles 
             auto counter = 0u;
-            for(auto && it = view.rbegin(); it != view.rend(); --it)
+            for(auto && it = view.rbegin(); it != view.rend(); ++it)
             {
                 if(off == 1 and jump == 2)
                     std::cout << *it << std::endl;
@@ -133,7 +130,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             
             // 2. Test the read results
             counter = 0u;
-            for(auto && it = view.rbegin(); it != view.rend(); it--)
+            for(auto && it = view.rbegin(); it != view.rend(); it++)
             {
                 BOOST_TEST(buffer[counter++] == (*it));
             }
@@ -142,13 +139,13 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             // 3. write new particles in the frame
             Particle particle = Particle(0,0);
             
-            for(auto && it = view.rbegin(); it != view.rend(); it--)
+            for(auto && it = view.rbegin(); it != view.rend(); it++)
             {
                 *it = particle;
             }
             
             // test the result
-            for(auto && it = view.rbegin(); it != view.rend(); it--)
+            for(auto && it = view.rbegin(); it != view.rend(); it++)
             {
                 BOOST_TEST((*it) == particle);
             }
@@ -158,8 +155,7 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             BOOST_TEST((it == --(++it)));
             
             // test the bidirectional iterator property
-            BOOST_TEST((--(view.begin()) == view.rend()));
-            BOOST_TEST((view.end() == ++(view.rbegin())));
+
             
             BOOST_TEST(( ++(--view.begin()) == view.begin()));
             BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
@@ -195,7 +191,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     
 
     uint counter{0u};
-    for(auto it=view.rbegin(); it != view.rend(); --it)
+    for(auto it=view.rbegin(); it != view.rend(); ++it)
     {
         counter++;            
     }
@@ -203,16 +199,13 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     BOOST_TEST(counter == 42u);
     
     counter = 0u;
-    for(auto it=view.rbegin(); it != view.rend(); it--)
+    for(auto it=view.rbegin(); it != view.rend(); it++)
     {
         counter++;            
     }
     // There are 4 full frames with 10 Elements an one frame with 2 elements
     BOOST_TEST(counter == 42u);
 
-    // check the border properties of a bidirectional iterator
-    BOOST_TEST((--(view.begin()) == view.rend()));
-    BOOST_TEST((view.end() == ++(view.rbegin())));
     
     BOOST_TEST(( ++(--view.begin()) == view.begin()));
     BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
@@ -260,7 +253,7 @@ BOOST_AUTO_TEST_CASE(Borders)
             
             auto sumBackward = 0u;
            
-            for(auto && it = view.rbegin(); it != view.rend(); --it)
+            for(auto && it = view.rbegin(); it != view.rend(); ++it)
             {
 
                 sumBackward += *it;
@@ -314,7 +307,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             nbParticles += ((nbFrames - 1u - off) % jump == 0 and off < nbFrames) * nbParticlesInLastFrame;
 
             uint counter{0u};
-            for(auto it=view.rbegin(); it != view.rend(); --it)
+            for(auto it=view.rbegin(); it != view.rend(); ++it)
             {
                 if(off == 0u and jump == 3u)
                     std::cout << *it << std::endl;
@@ -325,7 +318,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             BOOST_TEST(counter == nbParticles);
             
             counter = 0u;
-            for(auto it=view.rbegin(); it != view.rend(); it--)
+            for(auto it=view.rbegin(); it != view.rend(); it++)
             {
                 counter++;            
             }
@@ -365,7 +358,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
                 ++nbParticles;
             }
             counter = 0u;
-            for(auto it=viewInner.rbegin(); it != viewInner.rend(); --it)
+            for(auto it=viewInner.rbegin(); it != viewInner.rend(); ++it)
             {
                 std::cout << *it << std::endl;
                 counter++;            
@@ -376,7 +369,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             BOOST_TEST(counter == nbParticles);
             
             counter = 0u;
-            for(auto it=viewInner.rbegin(); it != viewInner.rend(); it--)
+            for(auto it=viewInner.rbegin(); it != viewInner.rend(); it++)
             {
                 counter++;            
             }

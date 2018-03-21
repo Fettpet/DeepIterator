@@ -420,7 +420,6 @@ struct AfterLastElement<
     const
     {
         using namespace hzdr::detail;
-//         std::cout << "After last element test " << conPtr->extent() << " size " << idx << std::endl;
         return idxndToInt<Dim>(
                 idx,
                 conPtr->extent()

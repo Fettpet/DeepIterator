@@ -38,12 +38,18 @@ namespace details
 template<
     typename TAccessor,
     typename TNavigator,
-    typename TChild>
+    typename TChild
+>
 struct IteratorPrescription
 {
     typedef TNavigator NavigatorType;
     typedef TAccessor AccessorType;
     typedef TChild ChildType;
+    
+    static const bool hasChild = not std::is_same<
+        TChild,
+        hzdr::NoChild
+    >::value;
     
     HDINLINE 
     IteratorPrescription() = delete;
@@ -134,8 +140,7 @@ makeIteratorPrescription(
         hzdr::forward<TNavigator>(navigator)
     );
 }
-  
-  
+
 /**
  * @brief creates an iterator concept. This concept has no childs.
  * @param accessor Describes a concept to dereference the element 
@@ -162,18 +167,115 @@ hzdr::details::IteratorPrescription<
 >
 {
     
-    using Iterator = hzdr::details::IteratorPrescription< 
+    using Prescription = hzdr::details::IteratorPrescription< 
         typename std::decay<TAccessor>::type,
         typename std::decay<TNavigator>::type,
         typename std::decay<TChild>::type
     >;
     
-    return Iterator(
+    return Prescription(
         hzdr::forward<TAccessor>(accessor), 
         hzdr::forward<TNavigator>(navigator),
         hzdr::forward<TChild>(child)
     );
 }
+
+namespace details 
+{
+
+template<
+    typename TContainer,
+    typename TPrescription,
+    typename TPrescriptionNoRef = typename std::decay<TPrescription>::type,
+    typename = typename std::enable_if<not TPrescriptionNoRef::hasChild>::type
+>
+HDINLINE
+auto
+makeIteratorPrescription(
+    TPrescription && prescription
+)
+-> 
+    hzdr::details::IteratorPrescription<
+        decltype(makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor)),
+        decltype(makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator)),
+        hzdr::NoChild
+    >
+{
+    using Prescription = hzdr::details::IteratorPrescription< 
+        decltype(makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor)),
+        decltype(makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator)),
+        hzdr::NoChild
+    >;
+    
+    return Prescription(
+        makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor
+        ), 
+        makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator
+        )
+    );
+}
+
+
+template<
+    typename TContainer,
+    typename ComponentType = typename hzdr::traits::ComponentType<
+        TContainer
+    >::type,
+    typename TPrescription,
+    typename TPrescriptionNoRef = typename std::decay<TPrescription>::type,
+    typename = typename std::enable_if<TPrescriptionNoRef::hasChild>::type
+>
+HDINLINE
+auto
+makeIteratorPrescription(
+    TPrescription && prescription
+)
+-> 
+    hzdr::details::IteratorPrescription<
+        decltype(makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor)),
+        decltype(makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator)),
+        decltype(makeIteratorPrescription<ComponentType>(
+            hzdr::forward<TPrescription>(prescription).child)
+        )
+    >
+{
+
+    using Prescription = hzdr::details::IteratorPrescription< 
+        decltype(makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor)),
+        decltype(makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator)),
+        decltype(makeIteratorPrescription<ComponentType>(
+            hzdr::forward<TPrescription>(prescription).child)
+        )
+    >;
+    
+    return Prescription(
+        makeAccessor<TContainer>(
+            hzdr::forward<TPrescription>(prescription).accessor
+        ), 
+        makeNavigator<TContainer>(
+            hzdr::forward<TPrescription>(prescription).navigator
+        ),
+        makeIteratorPrescription<ComponentType>(
+            hzdr::forward<TPrescription>(prescription).child
+        )
+        
+    );
+    
+}
+  
+
+    
+} // namespace details
 
 } // namespace hzdr
 

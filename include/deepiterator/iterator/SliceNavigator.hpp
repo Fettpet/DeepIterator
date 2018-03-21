@@ -402,7 +402,7 @@ public:
             containerPtr, 
             index
         );
-    //    std::cout << "begin before next: " << index << std::endl;
+
 
         nextElement(
             containerPtr, 
@@ -410,7 +410,7 @@ public:
             offset(),
             containerSize
         );
-    //    std::cout << "begin after next: " << index << " " << offset() << std::endl;
+
 
         cur_pos = static_cast<RangeType>(0);
     }

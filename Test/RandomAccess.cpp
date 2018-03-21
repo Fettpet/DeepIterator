@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
 
     for(auto it=view.begin(); it!=view.end()-2; it++)
     {
-        std::cout << *it << std::endl;
         sum += (*it).data[0] + (*it).data[1];
     }
     // sum [0, 15] = 120
@@ -75,7 +74,11 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     BOOST_TEST(sum == 30);
     
     sum = 0;
-    for(auto it=view.rbegin()-1; it>view.rend()+2; it-=3)
+
+
+
+    std::cout << * (view.rbegin()+1) << std::endl;
+    for(auto it=view.rbegin()+1; it>view.rend()-2; it+=3)
     {
         sum += (*it).data[0] + (*it).data[1];
     }
@@ -171,7 +174,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
     std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
     std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
     std::vector<uint> ns{1u, 2u, 3u, 4u};
-    std::cout << supercell << std::endl;
+
    // 1. we change the outer iterator
     for(auto jump : jumpsizes)
         for(auto off : offsets)
@@ -215,7 +218,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
                 BOOST_TEST(counter == nbParticles);
                 
                 counter = 0u;
-                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                for(auto it=view.rbegin(); it!=view.rend(); it+=n)
                 {
                     ++counter;
                 }
@@ -262,7 +265,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
                 BOOST_TEST(counter == nbParticles);
                 
                 counter = 0u;
-                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                for(auto it=view.rbegin(); it!=view.rend(); it+=n)
                 {
 
                     ++counter;
@@ -288,10 +291,10 @@ BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
     
     Supercell supercell(nbFrames, nbParticleInLastFrame);
     
-    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u};
+    std::vector<uint> jumpsizes{1u, 2u, 3u, 4u, 5u};
     std::vector<uint> offsets{0u, 1u, 2u, 3u, 4u};
     std::vector<uint> ns{1u, 2u, 3u};
-    std::cout << supercell << std::endl;
+
    // 1. we change the outer iterator
     for(auto jump : jumpsizes)
         for(auto off : offsets)
@@ -326,24 +329,28 @@ BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
                     // we add the unfull frame
                     for(uint i=first; i<nbParticleInLastFrame * 2u; i+= n)
                     {
-
                         nbParticles++;
                     }
                 
-                auto view = makeView(supercell,childPrescriptionJump1);
+                auto view = makeView(
+                    supercell,
+                    childPrescriptionJump1
+                );
                 uint counter = 0u;
                 for(auto it=view.begin(); it!=view.end(); it+=n)
                 {
+
                     ++counter;
                 }
                 BOOST_TEST(counter == nbParticles);
-                
+
                 counter = 0u;
-                for(auto it=view.rbegin(); it!=view.rend(); it-=n)
+                for(auto it=view.rbegin(); it!=view.rend(); it+=n)
                 {
-                    
+
                     ++counter;
                 }
+
                 BOOST_TEST(counter == nbParticles);
             }
 }
@@ -366,7 +373,6 @@ BOOST_AUTO_TEST_CASE(CompareOperators)
         for(auto off : offsets)
             for(auto  n : ns)
             {
-                std::cout << "jump " << jump << " off " << off << " n " << n << std::endl;
                 auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
                                         hzdr::makeAccessor(),
                                         hzdr::makeNavigator(

@@ -1,13 +1,13 @@
 /* Copyright 2018 Sebastian Hahn
 
- * This file is part of DeepIterator.
+ * This file is part of ReverseDeepIterator.
  *
- * DeepIterator is free software: you can redistribute it and/or modify
+ * ReverseDeepIterator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * DeepIterator is distributed in the hope that it will be useful,
+ * ReverseDeepIterator is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,10 +22,7 @@
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/forward.hpp"
 #include "deepiterator/definitions/NoChild.hpp"
-#include "deepiterator/definitions/hdinline.hpp"
-#include "deepiterator/iterator/Accessor.hpp"
-#include "deepiterator/iterator/Navigator.hpp"
-#include "deepiterator/iterator/Prescription.hpp"
+#include "deepiterator/DeepIterator.hpp"
 #include <limits>
 #include <cassert>
 #include <type_traits>
@@ -42,21 +39,21 @@ namespace details
  */
 namespace constructorType
 {
-struct begin{};
-struct end{};
+struct rbegin{};
+struct rend{};
 }
 }
 
 /**
- * \struct DeepIterator
+ * \struct ReverseDeepIterator
  * @author Sebastian Hahn
  * 
- * @brief The DeepIterator class is used to iterator over interleaved data 
+ * @brief The ReverseDeepIterator class is used to iterator over interleaved data 
  * structures. The simplest example for an interleaved data structure is 
- * std::vector< std::vector< int > >. The deepiterator iterates over all ints 
+ * std::vector< std::vector< int > >. The ReverseDeepIterator iterates over all ints 
  * within the structure. 
  * 
- * Inside the deepiterator are two variables. These are importent for the 
+ * Inside the ReverseDeepIterator are two variables. These are importent for the 
  * templates. These Variables are:
  * 1. containerPtr: is the pointer to the container, given by the constructor
  * 2. index: the current element index within the container.
@@ -87,7 +84,7 @@ struct end{};
     7. default constructor
     8. copy constructor
     9. constructor with childtype && containertype as variables
-   It it is recommended to use DeepIterator as TChild.
+   It it is recommended to use ReverseDeepIterator as TChild.
    @tparam TIndexType Type of the index. The index is used to access the component 
    within the container. The index must support a cast from int especially from
    0.
@@ -105,7 +102,7 @@ struct end{};
    lesser, greater, if this flag is set to true.
    \see Componenttype.hpp Accessor.hpp
  # Implementation details{#sectionD2}
-The DeepIterator supports up to four constructors: begin, end, rbegin, rend. To 
+The ReverseDeepIterator supports up to four constructors: begin, end, rbegin, rend. To 
 get the right one, we had four classes in details::constructorType. The 
 constructors has five parameters: 
     ContainerPtr container, 
@@ -114,15 +111,15 @@ constructors has five parameters:
     TChild && child,
     details::constructorType::__
 If your container has no interleaved layer, use \b hzdr::NoChild as child.
-A DeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
+A ReverseDeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
 and all childs are bidirectional. The same applies to random accessablity.
 
-We had two algorithms inside the DeepIterator. The first one is used to find the
+We had two algorithms inside the ReverseDeepIterator. The first one is used to find the
 first element within a nested data structure. The second one is used to find the
 next element within the data structure. Lets start with the find the first 
 element procedure. The setToBegin function has an optional parameter, this is 
 the container over which the iterator walks. The first decision "Has Childs" is
-done by the compiler. We had two different DeepIterators. One for the has childs
+done by the compiler. We had two different ReverseDeepIterators. One for the has childs
 case, and one for the has no childs case. The case where the iterator has childs
 search now an element, where all childs are valid. It pass the current element
 to the child. The child go also the the beginning. If the current element hasnt
@@ -139,7 +136,7 @@ each element of the container has the same size. The spit the jumpsize in 3 valu
 2. the number of elements, which are overjumped,
 3. the remainder of the resulting element
 In the second case, where each element can have a different number of elements, 
-the deepiterator doesnt overjump elements. It walks step by step.
+the ReverseDeepIterator doesnt overjump elements. It walks step by step.
 \image html images/setTobegin.png
  */
 template<
@@ -151,7 +148,7 @@ template<
     bool hasConstantSizeSelf = false,
     bool isBidirectionalSelf = true,
     bool isRandomAccessableSelf = true>
-struct DeepIterator
+struct ReverseDeepIterator
 {
 // datatypes
     
@@ -200,14 +197,15 @@ public:
 public:
 
 // The default constructors
-    HDINLINE DeepIterator() = default;
-    HDINLINE DeepIterator(DeepIterator const &) = default;
-    HDINLINE DeepIterator(DeepIterator &&) = default;
+    HDINLINE ReverseDeepIterator() = default;
+    HDINLINE ReverseDeepIterator(ReverseDeepIterator const &) = default;
+    HDINLINE ReverseDeepIterator(ReverseDeepIterator &&) = default;
     
 // the default copy operators
-    HDINLINE DeepIterator& operator=(DeepIterator const &) = default;
-    HDINLINE DeepIterator& operator=(DeepIterator &&) = default;
+    HDINLINE ReverseDeepIterator& operator=(ReverseDeepIterator const &) = default;
+    HDINLINE ReverseDeepIterator& operator=(ReverseDeepIterator &&) = default;
 
+    
     /**
      * @brief This constructor is used to create a iterator in a middle layer. 
      * The container must be set with setToBegin or setToRbegin. The iterator 
@@ -221,7 +219,7 @@ public:
         typename TNavigator_,
         typename TChild_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             TAccessor_ && accessor, 
             TNavigator_ && navigator,
             TChild_ && child
@@ -235,48 +233,70 @@ public:
     
     
     /**
-     * @brief This constructor is used to create an iterator at the begin element.
+     * @brief This constructor is used to create an iterator at the rbegin element.
      * @param ContainerPtr A pointer to the container you like to iterate through.
      * @param accessor The accessor
      * @param navigator The navigator, needs a specified offset and a jumpsize.
-     * @param child Use NoChild()
-     * @param details::constructorType::begin used to specify that the begin
-     * element is needed. We recommend details::constructorType::begin() as 
+     * @param child iterator for the next layer
+     * @param details::constructorType::begin used to specify that the begin 
+     * element is needed. We recommend details::constructorType::rbegin() as 
      * parameter.
      */
+    template<
+        typename TAccessor_,
+        typename TNavigator_,
+        typename TChild_>
+    HDINLINE
+    ReverseDeepIterator(
+            ContainerPtr container, 
+            TAccessor_&& accessor, 
+            TNavigator_&& navigator,
+            TChild_&& child,
+            details::constructorType::rbegin
+    ):
+        containerPtr(container),
+        index(static_cast<IndexType>(0)),
+        childIterator(hzdr::forward<TChild_>(child)),
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor))
+    {
+        setToRbegin(container);
+    }
+    
+    
     template<
         typename TPrescription
     >
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             ContainerPtr container, 
             TPrescription&& prescription,
-            details::constructorType::begin 
+            details::constructorType::rbegin
     ):
         containerPtr(container),
         index(static_cast<IndexType>(0)),
         childIterator(
             hzdr::forward<TPrescription>(prescription).child, 
-            details::constructorType::begin()
+            details::constructorType::rbegin()
         ),
         navigator(hzdr::forward<TPrescription>(prescription).navigator),
         accessor(hzdr::forward<TPrescription>(prescription).accessor)
     {
-        setToBegin(container);
+        setToRbegin(container);
     }
     
     
     template<typename TPrescription_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator( 
             TPrescription_ && prescription, 
-            details::constructorType::begin
+            details::constructorType::rbegin
     ):
         containerPtr(nullptr),
-        index(static_cast<IndexType>(0)),
+        index(0),
         childIterator(
             hzdr::forward<TPrescription_>(prescription).child,
-            details::constructorType::begin()
+            details::constructorType::rbegin()
         ),
         navigator(hzdr::forward<TPrescription_>(prescription).navigator),
         accessor(hzdr::forward<TPrescription_>(prescription).accessor)
@@ -284,13 +304,13 @@ public:
     
     
     /**
-     * @brief This constructor is used to create an iterator at the begin element.
+     * @brief This constructor is used to create an iterator at the rend element.
      * @param ContainerPtr A pointer to the container you like to iterate through.
      * @param accessor The accessor
      * @param navigator The navigator, needs a specified offset and a jumpsize.
      * @param child iterator for the next layer
-     * @param details::constructorType::begin used to specify that the begin 
-     * element is needed. We recommend details::constructorType::begin() as 
+     * @param details::constructorType::rend used to specify that the end
+     * element is needed. We recommend details::constructorType::rend() as 
      * parameter.
      */
     template<
@@ -298,12 +318,12 @@ public:
         typename TNavigator_,
         typename TChild_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             ContainerPtr container, 
             TAccessor_&& accessor, 
             TNavigator_&& navigator,
             TChild_&& child,
-            details::constructorType::begin 
+            details::constructorType::rend
     ):
         containerPtr(container),
         index(static_cast<IndexType>(0)),
@@ -312,89 +332,46 @@ public:
         accessor(hzdr::forward<TAccessor_>(accessor))
         
     {
-         setToBegin(container);
+        setToRend(container);
     }
+
     
-    
-    /**
-     * @brief This constructor is used to create an iterator at the end element.
-     * @param ContainerPtr A pointer to the container you like to iterate through.
-     * @param accessor The accessor
-     * @param navigator The navigator, needs a specified offset and a jumpsize.
-     * @param child iterator for the next layer
-     * @param details::constructorType::end used to specify that the end
-     * element is needed. We recommend details::constructorType::end() as 
-     * parameter.
-     */
-    template<
-        typename TAccessor_,
-        typename TNavigator_,
-        typename TChild_>
-    HDINLINE
-    DeepIterator(
-            ContainerPtr container, 
-            TAccessor_&& accessor, 
-            TNavigator_&& navigator,
-            TChild_&& child,
-            details::constructorType::end
-    ):
-        containerPtr(container),
-        index(static_cast<IndexType>(0)),
-        childIterator(hzdr::forward<TChild_>(child)),
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
-    {
-        setToEnd(container);
-    }
-    
-   
-    /**
-     * @brief This constructor is used to create an iterator at the begin element.
-     * @param ContainerPtr A pointer to the container you like to iterate through.
-     * @param accessor The accessor
-     * @param navigator The navigator, needs a specified offset and a jumpsize.
-     * @param child Use NoChild()
-     * @param details::constructorType::begin used to specify that the begin
-     * element is needed. We recommend details::constructorType::begin() as 
-     * parameter.
-     */
     template<
         typename TPrescription
     >
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             ContainerPtr container, 
             TPrescription&& prescription,
-            details::constructorType::end 
+            details::constructorType::rend 
     ):
         containerPtr(container),
         index(static_cast<IndexType>(0)),
         childIterator(
             hzdr::forward<TPrescription>(prescription).child, 
-            details::constructorType::end()
+            details::constructorType::rend()
         ),
         navigator(hzdr::forward<TPrescription>(prescription).navigator),
         accessor(hzdr::forward<TPrescription>(prescription).accessor)
     {
-        setToEnd(container);
+        setToRend(container);
     }
     
     
     template<typename TPrescription_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             TPrescription_ && prescription, 
-            details::constructorType::end
+            details::constructorType::rend
     ):
         containerPtr(nullptr),
-        index(static_cast<IndexType>(0)),
+        index(0),
         childIterator(
             hzdr::forward<TPrescription_>(prescription).child,
-            details::constructorType::end()
+            details::constructorType::rend()
         ),
         navigator(hzdr::forward<TPrescription_>(prescription).navigator),
         accessor(hzdr::forward<TPrescription_>(prescription).accessor)
-        
     {}
     
     
@@ -415,13 +392,13 @@ public:
     
     
     /**
-     * @brief compares the DeepIterator with an other DeepIterator.
+     * @brief compares the ReverseDeepIterator with an other ReverseDeepIterator.
      * @return true: if the iterators are at different positions, false
      * if they are at the same position
      */
     HDINLINE
     bool
-    operator!=(const DeepIterator& other)
+    operator!=(const ReverseDeepIterator& other)
     const
     {
         return not (*this == other);
@@ -441,13 +418,13 @@ public:
     }
 
     /**
-     * @brief compares the DeepIterator with an other DeepIterator.
+     * @brief compares the ReverseDeepIterator with an other ReverseDeepIterator.
      * @return false: if the iterators are at different positions, true
      * if they are at the same position
      */
     HDINLINE
     auto
-    operator==(const DeepIterator& other)
+    operator==(const ReverseDeepIterator& other)
     const
     ->
     bool
@@ -467,9 +444,9 @@ public:
      */
     HDINLINE
     auto
-    operator++()
+    operator--()
     ->
-    DeepIterator&
+    ReverseDeepIterator&
     {   
         if(isBeforeFirst())
         {
@@ -487,12 +464,12 @@ public:
      */
     HDINLINE
     auto
-    operator++(int)
+    operator--(int)
     -> 
-    DeepIterator
+    ReverseDeepIterator
     {
-        DeepIterator tmp(*this);
-        ++(*this);
+        ReverseDeepIterator tmp(*this);
+        --tmp;
         return tmp;
     }
     
@@ -503,15 +480,11 @@ public:
      * support this function.
      * @return reference to the previous element
      */
-    template<bool T = isBidirectional>
     HDINLINE
     auto
-    operator--()
+    operator++()
     ->
-    typename std::enable_if<
-        T == true, 
-        DeepIterator&
-    >::type
+    ReverseDeepIterator&
     {
         // if the iterator is after the last element, we set it to the last 
         // element
@@ -530,36 +503,14 @@ public:
      * support this function.
      * @return reference to the current element
      */
-    template<bool T = isBidirectional>
     HDINLINE
     auto
-    operator--(int)
+    operator++(int)
     ->
-    typename std::enable_if<
-        T == true, 
-        DeepIterator
-    >::type
+    ReverseDeepIterator
     {
-        DeepIterator tmp(*this);
-        --(*this);
-        return tmp;
-    }
-
-    /**
-     * @brief creates an iterator which is jumpsize elements ahead. The iterator 
-     * need to be random access to support this function.
-     * @param jumpsize distance to the next element
-     * @return iterator which is jumpsize elements ahead
-     */
-    template<bool T = isRandomAccessable>    
-    HDINLINE 
-    auto
-    operator+(uint const & jumpsize)
-    ->
-    typename std::enable_if<T == true, DeepIterator>::type
-    {
-        DeepIterator tmp(*this);
-        tmp += jumpsize;
+        ReverseDeepIterator tmp(*this);
+        ++(*this);
         return tmp;
     }
     
@@ -568,15 +519,11 @@ public:
      * need to be random access to support this function.
      * @param jumpsize distance to the next element
      */
-    template<bool T = isRandomAccessable>    
     HDINLINE 
     auto
-    operator+=(uint const & jumpsize) 
+    operator-=(uint const & jumpsize) 
     -> 
-    typename std::enable_if<
-        T == true, 
-        DeepIterator&
-    >::type
+    ReverseDeepIterator&
     {
         auto tmpJump = jumpsize;
         // if the iterator is before the first element, be set it to the first
@@ -588,160 +535,6 @@ public:
         gotoNext(tmpJump);
         return *this;
 
-    }
-    
-    /**
-     * @brief the gotoNext function has two implementations. The first one is used
-     * if the container of the child has a constant size. This is implemented 
-     * here. The second one is used if the container of the child hasnt a 
-     * constant size. The cost of this function is O(1).
-     * @param jumpsize Distance to the next element
-     * @return The result value is importent if the iterator is in a middle layer.
-     * When we reach the end of the container, we need to give the higher layer
-     * informations about the remainig elements, we need to overjump. This distance
-     * is the return value of this function.
-     */
-    template< bool T = hasConstantSizeChild> 
-    HDINLINE 
-    auto
-    gotoNext(uint const & jumpsize)
-    ->    
-    typename std::enable_if<
-        T == true, 
-        uint
-    >::type 
-    {
-        /**
-         * The variable jumpsize is compond from three other variables:
-         * 1. The distance of the child to these end
-         * 2. the number of childs we can overjump
-         * 3. the remaining jumpsize for the new child
-         */
-        
-        // get the number of elements and overjump, if it has not enough 
-        // elements
-        auto && childNbElements = childIterator.nbElements();        
-        
-        if(childNbElements == 0)
-        {
-            setToEnd(containerPtr);
-            return 0;
-        }
-        
-        auto && remaining = childIterator.gotoNext(jumpsize);
-        
-        // the -1 is used, since we jump from an end to the begining of the next cell
-        auto && overjump = (remaining - 1 + childNbElements) / childNbElements;
-        int childJumps = ((remaining - 1) % childNbElements);
-        
-        int && result = navigator.next(containerPtr, index, overjump);
-        // result == 0 means the point lays within this data structure
-        // overjump > 0 means we change the datastructure
-        if((result == 0) && (overjump > 0))
-        {
-            childIterator.setToBegin(accessor.get(containerPtr, index));
-            childIterator += childJumps;
-        }
-        // we only need to return something, if we are at the end
-        uint const condition = (result > 0);
-        // the size of the jumps
-        uint const notOverjumpedElements = (result-1) * childNbElements;
-        
-        // The 1 is to set to the first element
-        return condition * (notOverjumpedElements + childJumps + 1u);
-    }
-    
-    /**
-     * @brief the gotoNext function has two implementations. The first one is used
-     * if the container of the child has a constant size. The second one is used
-     * if the container of the child hasnt a constant size. This is implemented 
-     * here. The function, we go in the child to the end, go to the next element
-     * and repeat this procedure until we had enough jumps. This is an expensive
-     * procedure.
-     * @param jumpsize Distance to the next element
-     * @return The result value is importent if the iterator is in a middle layer.
-     * When we reach the end of the container, we need to give the higher layer
-     * informations about the remainig elements, we need to overjump. This distance
-     * is the return value of this function.
-     */
-    template<bool T = hasConstantSizeChild> 
-    HDINLINE 
-    auto 
-    gotoNext(uint const & jumpsize)
-    -> 
-    typename std::enable_if<
-        T == false, 
-        uint
-    >::type 
-    {
-        // we need to go over all elements
-        auto remaining = jumpsize;
-        while(remaining > 0u && not isAfterLast())
-        {
-            if(not childIterator.isAfterLast())
-            {
-                // we go to the right element, or the end of this container
-                remaining = childIterator.gotoNext(remaining);
-                // we have found the right element
-                if(remaining == 0u)
-                    break;
-                // we go to the next container
-                --remaining;
-            }
-            while(childIterator.isAfterLast() && not isAfterLast())
-            {
-                navigator.next(containerPtr, index, 1u);
-                // only valid, if it contains enough elements
-                if(not isAfterLast())
-                    childIterator.setToBegin(accessor.get(containerPtr, index));
-            }
-        }
-        return remaining;
-    }
-
-        /**
-     * @brief creates an iterator which is jumpsize elements behind. The iterator 
-     * need to be random access to support this function.
-     * @param jumpsize distance to the previous element
-     * @return iterator which is jumpsize elements behind
-     */
-    template<bool T = isRandomAccessable>    
-    HDINLINE 
-    auto
-    operator-(uint const & jumpsize)
-    -> 
-    typename std::enable_if<
-        T == true,
-        DeepIterator
-    >::type
-    {
-        DeepIterator tmp(*this);
-        tmp -= jumpsize;
-        return tmp;
-    }
-    /**
-     * @brief set the iterator jumpsize elements behind. The iterator 
-     * need to be random access to support this function.
-     * @param jumpsize distance to the next element
-     */
-    template<bool T = isRandomAccessable>
-    HDINLINE 
-    auto 
-    operator-=(const uint & jumpsize)
-    ->
-    typename std::enable_if<
-        T == true, 
-        DeepIterator&
-    >::type
-    {
-        auto tmpJump = jumpsize;
-        if(isAfterLast())
-        {
-            --tmpJump;
-            setToRbegin();
-        }
-        gotoPrevious(tmpJump);
-        return *this;
     }
     
     /**
@@ -799,7 +592,9 @@ public:
                     containerPtr, 
                     index
                 ));
-                childIterator -= childJumps;
+                childIterator.gotoPrevious(
+                    childJumps
+                );
 
         }
         // we only need to return something, if we are at the end
@@ -851,9 +646,169 @@ public:
             }
             while(childIterator.isBeforeFirst() && not isBeforeFirst())
             {
-                navigator.previous(containerPtr, index, 1u);
+                navigator.previous(
+                    containerPtr, 
+                    index, 
+                    1u
+                );
                 if(not isBeforeFirst())
-                    childIterator.setToRbegin(accessor.get(containerPtr, index));
+                    childIterator.setToRbegin(accessor.get(
+                        containerPtr, 
+                        index
+                    ));
+            }
+        }
+        return remaining;
+    }
+    
+    
+    /**
+     * @brief creates an iterator which is jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the previous element
+     * @return iterator which is jumpsize elements behind
+     */
+    HDINLINE 
+    auto
+    operator-(uint const & jumpsize)
+    -> 
+    ReverseDeepIterator
+    {
+        ReverseDeepIterator tmp(*this);
+        tmp -= jumpsize;
+        return tmp;
+    }
+
+
+    /**
+     * @brief set the iterator jumpsize elements behind. The iterator 
+     * need to be random access to support this function.
+     * @param jumpsize distance to the next element
+     */
+    HDINLINE 
+    auto 
+    operator+=(const uint & jumpsize)
+    ->
+    ReverseDeepIterator&
+    {
+        auto tmpJump = jumpsize;
+        if(isAfterLast())
+        {
+            --tmpJump;
+            setToRbegin();
+        }
+        gotoPrevious(tmpJump);
+        return *this;
+    }
+
+    
+    /**
+     * @brief the gotoNext function has two implementations. The first one is used
+     * if the container of the child has a constant size. This is implemented 
+     * here. The second one is used if the container of the child hasnt a 
+     * constant size. The cost of this function is O(1).
+     * @param jumpsize Distance to the next element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
+    template< bool T = hasConstantSizeChild> 
+    HDINLINE 
+    auto
+    gotoNext(uint const & jumpsize)
+    ->    
+    typename std::enable_if<
+        T == true, 
+        uint
+    >::type 
+    {
+        /**
+         * The variable jumpsize is compond from three other variables:
+         * 1. The distance of the child to these end
+         * 2. the number of childs we can overjump
+         * 3. the remaining jumpsize for the new child
+         */
+        
+        // get the number of elements and overjump, if it has not enough 
+        // elements
+        auto && childNbElements = childIterator.nbElements();        
+        
+        if(childNbElements == 0)
+        {
+            setToEnd(containerPtr);
+            return 0;
+        }
+        
+        auto && remaining = childIterator.gotoNext(jumpsize);
+        
+        // the -1 is used, since we jump from an end to the begining of the next cell
+        auto && overjump = (remaining - 1 + childNbElements) / childNbElements;
+        int childJumps = ((remaining - 1) % childNbElements);
+        
+        int && result = navigator.next(containerPtr, index, overjump);
+        // result == 0 means the point lays within this data structure
+        // overjump > 0 means we change the datastructure
+        if((result == 0) && (overjump > 0))
+        {
+            childIterator.setToBegin(accessor.get(
+                containerPtr, 
+                index
+            ));
+            childIterator.gotoNext(childJumps);
+        }
+        // we only need to return something, if we are at the end
+        uint const condition = (result > 0);
+        // the size of the jumps
+        uint const notOverjumpedElements = (result-1) * childNbElements;
+        
+        // The 1 is to set to the first element
+        return condition * (notOverjumpedElements + childJumps + 1u);
+    }
+    
+    /**
+     * @brief the gotoNext function has two implementations. The first one is used
+     * if the container of the child has a constant size. The second one is used
+     * if the container of the child hasnt a constant size. This is implemented 
+     * here. The function, we go in the child to the end, go to the next element
+     * and repeat this procedure until we had enough jumps. This is an expensive
+     * procedure.
+     * @param jumpsize Distance to the next element
+     * @return The result value is importent if the iterator is in a middle layer.
+     * When we reach the end of the container, we need to give the higher layer
+     * informations about the remainig elements, we need to overjump. This distance
+     * is the return value of this function.
+     */
+    template<bool T = hasConstantSizeChild> 
+    HDINLINE 
+    auto 
+    gotoNext(uint const & jumpsize)
+    -> 
+    typename std::enable_if<
+        T == false, 
+        uint
+    >::type 
+    {
+        // we need to go over all elements
+        auto remaining = jumpsize;
+        while(remaining > 0u && not isAfterLast())
+        {
+            if(not childIterator.isAfterLast())
+            {
+                // we go to the right element, or the end of this container
+                remaining = childIterator.gotoNext(remaining);
+                // we have found the right element
+                if(remaining == 0u)
+                    break;
+                // we go to the next container
+                --remaining;
+            }
+            while(childIterator.isAfterLast() && not isAfterLast())
+            {
+                navigator.next(containerPtr, index, 1u);
+                // only valid, if it contains enough elements
+                if(not isAfterLast())
+                    childIterator.setToBegin(accessor.get(containerPtr, index));
             }
         }
         return remaining;
@@ -866,7 +821,7 @@ public:
     template< bool T=isRandomAccessable>
     HDINLINE
     auto
-    operator<(DeepIterator const & other)
+    operator>(ReverseDeepIterator const & other)
     -> 
     typename std::enable_if<
         T == true, 
@@ -899,7 +854,7 @@ public:
     template<bool T = isRandomAccessable>
     HDINLINE
     auto
-    operator>(DeepIterator const & other)
+    operator<(ReverseDeepIterator const & other)
     -> 
     typename std::enable_if<
         T == true, 
@@ -922,7 +877,7 @@ public:
                 other.index
             ) 
             &&
-            childIterator > other.childIterator
+            childIterator < other.childIterator
         )
             return true;
             
@@ -936,7 +891,7 @@ public:
     template< bool T=isRandomAccessable>
     HDINLINE
     auto 
-    operator<=(DeepIterator const & other) 
+    operator<=(ReverseDeepIterator const & other) 
     ->    
     typename std::enable_if<
         T == true, 
@@ -946,14 +901,15 @@ public:
         return *this < other || *this == other;
     }
     
-        /**
+    
+    /**
      * @brief check whether the iterator is ahead or equal a second one.
      * @return true if the iterator is ahead or equal, false otherwise
      */
     template<bool T = isRandomAccessable>
     HDINLINE
     auto 
-    operator>=(DeepIterator const & other) 
+    operator>=(ReverseDeepIterator const & other) 
     -> 
     typename std::enable_if<
         T == true, 
@@ -962,6 +918,7 @@ public:
     {
         return *this > other || *this == other;
     }
+    
     
     /**
      * @return get the element at the specified position.
@@ -976,7 +933,7 @@ public:
         ReturnType&
     >::type
     {
-        DeepIterator tmp(*this);
+        ReverseDeepIterator tmp(*this);
         tmp.setToBegin();
         tmp += index;
         return *tmp;
@@ -1094,7 +1051,10 @@ public:
     -> 
     void
     {
-        navigator.rbegin(containerPtr, index);
+        navigator.rbegin(
+            containerPtr, 
+            index
+        );
         
         // check whether the iterator is at a valid element
         while(not isBeforeFirst())
@@ -1220,14 +1180,14 @@ public:
     {
         return childIterator;
     }
-} ; // struct DeepIterator
+} ; // struct ReverseDeepIterator
 
 
 
 
 
 /** ************************************+
- * @brief The flat implementation. This deepiterator has no childs. 
+ * @brief The flat implementation. This ReverseDeepIterator has no childs. 
  * ************************************/
 template<
     typename TContainer, 
@@ -1237,7 +1197,7 @@ template<
     bool hasConstantSizeSelf,
     bool isBidirectionalSelf,
     bool isRandomAccessableSelf>
-struct DeepIterator<
+struct ReverseDeepIterator<
     TContainer,     
     TAccessor, 
     TNavigator,
@@ -1245,7 +1205,8 @@ struct DeepIterator<
     TIndexType,
     hasConstantSizeSelf,
     isBidirectionalSelf,
-    isRandomAccessableSelf>
+    isRandomAccessableSelf
+>
 {
 // datatypes
 public:
@@ -1296,12 +1257,63 @@ public:
 public:
 
 
-    HDINLINE DeepIterator() = default;
-    HDINLINE DeepIterator(const DeepIterator&) = default;
-    HDINLINE DeepIterator(DeepIterator&&) = default;
+    HDINLINE ReverseDeepIterator() = default;
+    HDINLINE ReverseDeepIterator(const ReverseDeepIterator&) = default;
+    HDINLINE ReverseDeepIterator(ReverseDeepIterator&&) = default;
 
-    HDINLINE DeepIterator& operator=(DeepIterator const &) = default;
-    HDINLINE DeepIterator& operator=(DeepIterator &&) = default;
+    HDINLINE ReverseDeepIterator& operator=(ReverseDeepIterator const &) = default;
+    HDINLINE ReverseDeepIterator& operator=(ReverseDeepIterator &&) = default;
+    
+    
+     /**
+     * @brief This constructor is used to create an iterator at the begin element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::begin used to specify that the begin
+     * element is needed. We recommend details::constructorType::begin() as 
+     * parameter.
+     */
+    template<
+        typename TAccessor_,
+        typename TNavigator_,
+        typename TChild_>
+    HDINLINE
+    ReverseDeepIterator(
+            ContainerPtr container, 
+            TAccessor_&& accessor, 
+            TNavigator_&& navigator,
+            TChild_ const &,
+            details::constructorType::rbegin
+    ):
+        navigator(hzdr::forward<TNavigator_>(navigator)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
+        childIterator(),
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
+    {
+        setToRbegin(container);
+    }
+    
+    
+    template<
+        typename TPrescription
+    >
+    HDINLINE
+    ReverseDeepIterator(
+            ContainerPtr container, 
+            TPrescription&& prescription,
+            details::constructorType::rbegin 
+    ):
+        navigator(hzdr::forward<TPrescription>(prescription).navigator),
+        accessor(hzdr::forward<TPrescription>(prescription).accessor),
+        childIterator(),
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
+    {
+        setToRbegin(container);
+    }
     
     
     /**
@@ -1317,61 +1329,15 @@ public:
      */
     template< typename TPrescription_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             TPrescription_&& prescription, 
-            details::constructorType::begin 
+            details::constructorType::rbegin 
     ):
         navigator(hzdr::forward<TPrescription_>(prescription).navigator),
         accessor(hzdr::forward<TPrescription_>(prescription).accessor),
         childIterator(),
         containerPtr(nullptr),
-        index(0)
-    {}
-    
-    
-    /**
-     * @brief This constructor is used to create an iterator at the begin element.
-     * @param ContainerPtr A pointer to the container you like to iterate through.
-     * @param accessor The accessor
-     * @param navigator The navigator, needs a specified offset and a jumpsize.
-     * @param child Use NoChild()
-     * @param details::constructorType::begin used to specify that the begin
-     * element is needed. We recommend details::constructorType::begin() as 
-     * parameter.
-     */
-    template<
-        typename TPrescription
-    >
-    HDINLINE
-    DeepIterator(
-            ContainerPtr container, 
-            TPrescription&& prescription,
-            details::constructorType::begin 
-    ):
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor),
-        childIterator(),
-        containerPtr(container),
         index(static_cast<IndexType>(0))
-    {
-        setToBegin(container);
-    }
-    
-    
-    template<
-        typename TAccessor_,
-        typename TNavigator_,
-        typename TChild_
-    >
-    HDINLINE
-    DeepIterator( 
-        TAccessor_ && accessor,
-        TNavigator_ && navi,
-        TChild_ && 
-    ):
-        navigator(hzdr::forward<TNavigator_>(navi)),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
-        childIterator()
     {}
     
     
@@ -1384,31 +1350,77 @@ public:
      * @param details::constructorType::end used to specify that the end
      * element is needed. We recommend details::constructorType::end() as 
      * parameter.
-     */    
+     */
     template<
         typename TAccessor_,
         typename TNavigator_,
         typename TChild_
     >
     HDINLINE
-    DeepIterator( 
+    ReverseDeepIterator( 
+        TAccessor_ && accessor,
+        TNavigator_ && navi,
+        TChild_ && 
+    ):
+        navigator(hzdr::forward<TNavigator_>(navi)),
+        accessor(hzdr::forward<TAccessor_>(accessor)),
+        childIterator()
+    {}
+    
+    
+    /**
+     * @brief This constructor is used to create an iterator at the rend element.
+     * @param ContainerPtr A pointer to the container you like to iterate through.
+     * @param accessor The accessor
+     * @param navigator The navigator, needs a specified offset and a jumpsize.
+     * @param child Use NoChild()
+     * @param details::constructorType::rend used to specify that the rend
+     * element is needed. We recommend details::constructorType::end() as 
+     * parameter.
+     */
+    template<
+        typename TAccessor_,
+        typename TNavigator_,
+        typename TChild_>
+    HDINLINE
+    ReverseDeepIterator(
             ContainerPtr container, 
             TAccessor_&& accessor, 
             TNavigator_&& navigator,
             TChild_ const &,
-            details::constructorType::end
+            details::constructorType::rend
     ):
         navigator(hzdr::forward<TNavigator_>(navigator)),
         accessor(hzdr::forward<TAccessor_>(accessor)),
         containerPtr(container),
-        index(0)
+        index(static_cast<IndexType>(0))
     {
-        setToEnd(container);
+        setToRend(container);
+    }
+    
+    
+    template<
+        typename TPrescription
+    >
+    HDINLINE
+    ReverseDeepIterator(
+            ContainerPtr container, 
+            TPrescription&& prescription,
+            details::constructorType::rend 
+    ):
+        navigator(hzdr::forward<TPrescription>(prescription).navigator),
+        accessor(hzdr::forward<TPrescription>(prescription).accessor),
+        childIterator(),
+        containerPtr(container),
+        index(static_cast<IndexType>(0))
+    {
+        setToRend(container);
     }
     
     
     /**
-     * @brief This constructor is used to create an iterator at the begin element.
+     * @brief This constructor is used to create an iterator at the begin 
+     * element. We use this constructor for hierachicale data structures
      * @param ContainerPtr A pointer to the container you like to iterate through.
      * @param accessor The accessor
      * @param navigator The navigator, needs a specified offset and a jumpsize.
@@ -1417,11 +1429,11 @@ public:
      * element is needed. We recommend details::constructorType::begin() as 
      * parameter.
      */
-    template<typename TPrescription_>
+    template< typename TPrescription_>
     HDINLINE
-    DeepIterator(
-            TPrescription_ && prescription, 
-            details::constructorType::end
+    ReverseDeepIterator(
+            TPrescription_&& prescription, 
+            details::constructorType::rend
     ):
         navigator(hzdr::forward<TPrescription_>(prescription).navigator),
         accessor(hzdr::forward<TPrescription_>(prescription).accessor),
@@ -1431,24 +1443,6 @@ public:
     {}
     
     
-    template<
-        typename TPrescription
-    >
-    HDINLINE
-    DeepIterator(
-            ContainerPtr container, 
-            TPrescription&& prescription,
-            details::constructorType::end 
-    ):
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor),
-        childIterator(),
-        containerPtr(container),
-        index(static_cast<IndexType>(0))
-    {
-        setToEnd(container);
-    }
-
     /**
      * @brief This constructor is used to create a iterator in a middle layer. 
      * The container must be set with setToBegin or setToRbegin.
@@ -1460,7 +1454,7 @@ public:
         typename TAccessor_, 
         typename TNavigator_>
     HDINLINE
-    DeepIterator(
+    ReverseDeepIterator(
             TAccessor_ && accessor, 
             TNavigator_ && navigator,
             hzdr::NoChild const &
@@ -1479,9 +1473,9 @@ public:
      */
     HDINLINE
     auto
-    operator++()
+    operator--()
     -> 
-    DeepIterator&
+    ReverseDeepIterator&
     {
         if(isBeforeFirst())
         {
@@ -1508,9 +1502,9 @@ public:
     auto 
     operator++(int)
     -> 
-    DeepIterator
+    ReverseDeepIterator
     {
-        DeepIterator tmp(*this);
+        ReverseDeepIterator tmp(*this);
         ++(*this);
         return tmp;
     }
@@ -1553,13 +1547,13 @@ public:
     
     
     /**
-     * @brief compares the DeepIterator with an other DeepIterator.
+     * @brief compares the ReverseDeepIterator with an other ReverseDeepIterator.
      * @return true: if the iterators are at different positions, false
      * if they are at the same position
      */
     HDINLINE
     auto
-    operator!=(const DeepIterator& other)
+    operator!=(const ReverseDeepIterator& other)
     const
     -> 
     bool
@@ -1573,13 +1567,13 @@ public:
     
     
     /**
-     * @brief compares the DeepIterator with an other DeepIterator.
+     * @brief compares the ReverseDeepIterator with an other ReverseDeepIterator.
      * @return false: if the iterators are at different positions, true
      * if they are at the same position
      */
     HDINLINE
     auto
-    operator==(const DeepIterator& other)
+    operator==(const ReverseDeepIterator& other)
     const
     -> 
     bool
@@ -1594,15 +1588,11 @@ public:
      * bidirectional to support this function.
      * @return reference to the previous element
      */
-    template<bool T = isBidirectional>
     HDINLINE 
     auto 
-    operator--()
+    operator++()
     -> 
-    typename std::enable_if<
-        T == true, 
-        DeepIterator& 
-    >::type
+    ReverseDeepIterator& 
     {
         navigator.previous(
             containerPtr, 
@@ -1619,17 +1609,13 @@ public:
      * bidirectional to support this function.
      * @return reference to the current element
      */
-    template<bool T = isBidirectional>
     HDINLINE 
     auto 
     operator--(int)
     -> 
-    typename std::enable_if<
-        T == true, 
-        DeepIterator
-    >::type
+    ReverseDeepIterator
     {
-        DeepIterator tmp(*this);
+        ReverseDeepIterator tmp(*this);
         --(*this);
         return tmp;
     }
@@ -1643,11 +1629,11 @@ public:
     template<bool T=isRandomAccessable>
     HDINLINE
     auto
-    operator+=(RangeType const & jump)
+    operator-=(RangeType const & jump)
     -> 
     typename std::enable_if<
         T == true, 
-        DeepIterator&
+        ReverseDeepIterator&
     >::type
     {
         auto tmpJump = jump;
@@ -1673,11 +1659,11 @@ public:
     template<bool T = isRandomAccessable>
     HDINLINE
     auto
-    operator-=(RangeType const & jump) 
+    operator+=(RangeType const & jump) 
     -> 
     typename std::enable_if<
         T == true, 
-        DeepIterator&
+        ReverseDeepIterator&
     >::type
     {
         auto tmpJump = jump;
@@ -1708,10 +1694,10 @@ public:
     -> 
     typename std::enable_if<
         T == true, 
-        DeepIterator
+        ReverseDeepIterator
     >::type
     {
-        DeepIterator tmp = *this;
+        ReverseDeepIterator tmp = *this;
         tmp+=jump;
         return tmp;
     }
@@ -1730,10 +1716,10 @@ public:
     ->
     typename std::enable_if<
         T == true, 
-        DeepIterator
+        ReverseDeepIterator
     >::type
     {
-        DeepIterator tmp = *this;
+        ReverseDeepIterator tmp = *this;
         tmp-=jump;
         return tmp;
     }
@@ -1743,10 +1729,10 @@ public:
      * @brief check whether the iterator is behind a second one.
      * @return true if the iterator is behind, false otherwise
      */
-    template< bool T=isRandomAccessable>
+    template<bool T = isRandomAccessable>
     HDINLINE
     auto
-    operator<(DeepIterator const & other) 
+    operator<(ReverseDeepIterator const & other) 
     -> 
     typename std::enable_if<
         T == true, 
@@ -1769,7 +1755,7 @@ public:
     template<bool T = isRandomAccessable>
     HDINLINE
     auto
-    operator>(DeepIterator const & other)
+    operator>(ReverseDeepIterator const & other)
     -> 
     typename std::enable_if<
         T == true, 
@@ -1792,7 +1778,7 @@ public:
     template< bool T=isRandomAccessable>
     HDINLINE
     auto 
-    operator<=(DeepIterator const & other)
+    operator<=(ReverseDeepIterator const & other)
     -> 
     typename std::enable_if<
         T == true, 
@@ -1811,7 +1797,7 @@ public:
     template<bool T = isRandomAccessable>
     HDINLINE
     auto
-    operator>=(DeepIterator const & other)
+    operator>=(ReverseDeepIterator const & other)
     -> 
     typename std::enable_if<
         T == true, 
@@ -2118,7 +2104,9 @@ public:
     {
         return index;
     }
-} ; // struct DeepIterator
+
+private:
+} ; // struct ReverseDeepIterator
 
 
 namespace details 
@@ -2143,7 +2131,7 @@ template<
 >
 HDINLINE
 auto
-makeIterator( TChild &&)
+makeReverseIterator( TChild &&)
 ->
 hzdr::NoChild
 {
@@ -2187,11 +2175,11 @@ template<
 >
 HDINLINE
 auto 
-makeIterator (
+makeReverseIterator (
     TPrescription && concept
 )
 ->
-DeepIterator<
+ReverseDeepIterator<
         TContainer,
         decltype(makeAccessor<TContainer>(
             hzdr::forward<TPrescription>(concept).accessor
@@ -2199,7 +2187,7 @@ DeepIterator<
         decltype(makeNavigator<TContainer>(
             hzdr::forward<TPrescription>(concept).navigator
         )),
-        decltype(makeIterator<
+        decltype(makeReverseIterator<
             typename traits::ComponentType<TContainer>::type>(
                 hzdr::forward<TPrescription>(concept).child
             )
@@ -2221,13 +2209,13 @@ DeepIterator<
         )
     );
     using ChildType = decltype(
-        makeIterator<typename traits::ComponentType<TContainer>::type>(
+        makeReverseIterator<typename traits::ComponentType<TContainer>::type>(
             hzdr::forward<TPrescription>(concept).child
         )
     );
 
 
-    using Iterator = DeepIterator<
+    using Iterator = ReverseDeepIterator<
         ContainerType,
         AccessorType,
         NavigatorType,
@@ -2245,7 +2233,7 @@ DeepIterator<
         makeNavigator<ContainerType>(
             hzdr::forward<TPrescription>(concept).navigator
         ),
-        makeIterator<typename traits::ComponentType<TContainer>::type>(
+        makeReverseIterator<typename traits::ComponentType<TContainer>::type>(
             hzdr::forward<TPrescription>(concept).child
         )
     );
@@ -2286,18 +2274,18 @@ template<
     >::value>
 HDINLINE 
 auto
-makeIterator(
+makeReverseIterator(
     TContainer && container,
     hzdr::details::IteratorPrescription<
         TAccessor,
         TNavigator,
         TChild> && concept)
 -> 
-DeepIterator<
+ReverseDeepIterator<
         typename std::decay<TContainer>::type,
         decltype(details::makeAccessor(container, concept.accessor)),
         decltype(details::makeNavigator(container, concept.navigator)),
-        decltype(details::makeIterator<
+        decltype(details::makeReverseIterator<
             typename traits::ComponentType<
                 typename std::decay<TContainer>::type
             >::type
@@ -2324,11 +2312,11 @@ DeepIterator<
     );
     
     using ChildType = decltype(
-        details::makeIterator<ComponentType>(concept.childIterator)
+        details::makeReverseIterator<ComponentType>(concept.childIterator)
     );
     
 
-    using Iterator = DeepIterator<
+    using Iterator = ReverseDeepIterator<
         ContainerType,
         AccessorType,
         NavigatorType,
@@ -2343,7 +2331,7 @@ DeepIterator<
         container, 
         details::makeAccessor<ContainerType>(),
         details::makeNavigator<ContainerType>(concept.navigator),
-        details::makeIterator<ComponentType>(concept.childIterator));
+        details::makeReverseIterator<ComponentType>(concept.childIterator));
 }
 
 } // namespace hzdr
@@ -2359,7 +2347,7 @@ template<
     bool isRandomAccessableSelf>
 std::ostream& operator<<(
     std::ostream& out, 
-    hzdr::DeepIterator<
+    hzdr::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2384,7 +2372,7 @@ template<
     bool isRandomAccessableSelf>
 std::ostream& operator<<(
     std::ostream& out, 
-    hzdr::DeepIterator<
+    hzdr::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2397,5 +2385,345 @@ std::ostream& operator<<(
 {
     out << "conPtr " << iter.containerPtr << " index " << iter.index;
     return out;
-    
+}
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator==(
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return lhs.getContainerPtr() == rhs.getContainerPtr() && lhs.getIndex() == rhs.getIndex();
+}
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator==(
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return rhs == lhs;
+}
+
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator!=(
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return lhs.getContainerPtr() != rhs.getContainerPtr() || lhs.getIndex() != rhs.getIndex();
+}
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator!=(
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        hzdr::NoChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return rhs != lhs;
+}
+
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TChild,
+    typename TNavigator, 
+    typename TIndexType,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator==(
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return lhs.getContainerPtr() == rhs.getContainerPtr() && lhs.getIndex() == rhs.getIndex() && rhs.getChild() == lhs.getChild();
+}
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    typename TChild,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator==(
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return rhs == lhs;
+}
+
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    typename TChild,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator!=(
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return not (lhs == rhs);
+}
+
+/**
+ * @brief this function compares the forward and the reverse iterator. You only can use it, if the template paremter are equal
+ * 
+ */
+template<
+    typename TContainer, 
+    typename TAccessor, 
+    typename TNavigator, 
+    typename TIndexType,
+    typename TChild,
+    bool hasConstantSizeSelf,
+    bool isBidirectionalSelf,
+    bool isRandomAccessableSelf
+>
+HDINLINE 
+auto
+operator!=(
+    hzdr::ReverseDeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & lhs,
+    hzdr::DeepIterator<
+        TContainer,
+        TAccessor,
+        TNavigator,
+        TChild,
+        TIndexType,
+        hasConstantSizeSelf,
+        isBidirectionalSelf,
+        isRandomAccessableSelf
+    > const & rhs
+)
+-> 
+bool
+{
+    return rhs != lhs;
 }

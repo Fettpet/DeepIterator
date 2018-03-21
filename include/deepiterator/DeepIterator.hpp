@@ -2,6 +2,7 @@
 
 #pragma once
 #include "deepiterator/iterator/Iterator.hpp"
+#include "deepiterator/iterator/ReverseIterator.hpp"
 #include "deepiterator/iterator/View.hpp"
 #include "deepiterator/iterator/Accessor.hpp"
 #include "deepiterator/iterator/Navigator.hpp"
