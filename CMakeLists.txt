@@ -30,7 +30,7 @@ project(DeepIterator VERSION 0.1.0 LANGUAGES CXX)
 ################################################################################
 SET(_DEEPITERATOR_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 SET(DeepIterator_INCLUDE_DIR "${_DEEPITERATOR_ROOT_DIR}/include")
-SET(DeepIterator_TEST_DIR "${_DEEPITERATOR_ROOT_DIR}/Test")
+SET(_DEEPITERATOR_TEST_DIR "${_DEEPITERATOR_ROOT_DIR}/Test")
 UNSET(DEEPITERATOR_FILES_HEADER)
 SET(_DEEPITERATOR_COMMON_FILE "${_DEEPITERATOR_ROOT_DIR}/cmake/common.cmake")
 INCLUDE("${_DEEPITERATOR_COMMON_FILE}")
@@ -140,6 +140,75 @@ install(EXPORT DeepIterator
     DESTINATION lib/cmake/DeepIterator
 )
 
-# Debug output ######################################
+# TEST Things ######################################
+include(cmake/test.cmake)
+enable_testing()
 
+
+if(DEEPITERATOR_TEST_BIDIRECTIONAL)
+    add_test(
+        NAME Bidirectional        
+        COMMAND Tests/Bidirectional
+    )
+endif()
+if(DEEPITERATOR_TEST_FORWARD)
+    add_test(
+        NAME Forward        
+        COMMAND Tests/Forward
+    )
+endif()        
+if(DEEPITERATOR_TEST_NDARRAY)
+    add_test(
+        NAME NdArray        
+        COMMAND Tests/NdArray
+    )
+endif()        
+if(DEEPITERATOR_TEST_NESTEDITERATOR)
+    add_test(
+        NAME NestedIterator        
+        COMMAND Tests/NestedIterator
+    )
+endif()        
+if(DEEPITERATOR_TEST_OWNCATEGORIE)
+    add_test(
+        NAME OwnCategorie        
+        COMMAND Tests/OwnCategorie
+    )
+endif()
+if(DEEPITERATOR_TEST_NEWCONTAINER)
+    add_test(
+        NAME NewContainer        
+        COMMAND Tests/NewContainer
+    )
+endif()
+if(DEEPITERATOR_TEST_RANDOMACCESS)
+    add_test(
+        NAME RandomAccess        
+        COMMAND Tests/RandomAccess
+    )
+endif()
+if(DEEPITERATOR_TEST_RUNTIME)
+    add_test(
+        NAME Runtime        
+        COMMAND Tests/Runtime
+    )
+endif()
+if(DEEPITERATOR_TEST_SLICENAVIGATOR)
+    add_test(
+        NAME SliceNavigator        
+        COMMAND Tests/SliceNavigator
+    )
+endif()
+if(DEEPITERATOR_TEST_UNNESTETITERATOR)
+    add_test(
+        NAME UnnestedIterator        
+        COMMAND Tests/UnnestedIterator
+    )
+endif()
+if(DEEPITERATOR_TEST_CUDA)
+    add_test(
+        NAME Cuda        
+        COMMAND Tests/Cuda
+    )
+endif()
 
