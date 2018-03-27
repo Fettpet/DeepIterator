@@ -42,7 +42,7 @@ The project delivers some make functions. We use the functions to iterate over e
       std::cout << *it;
     }
     // outputs all int's reverse
-    for(auto && it=view.rbegin(); it != view.rend(); --it)
+    for(auto && it=view.rbegin(); it != view.rend(); ++it)
     {
       std::cout << *it;
     }
