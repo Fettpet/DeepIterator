@@ -8,7 +8,7 @@
 #pragma once
 #include "deepiterator/definitions/hdinline.hpp"
 
-namespace hzdr 
+namespace deepiterator 
 {
 template <class T>
 HDINLINE T&& forward(typename std::remove_reference<T>::type& t) noexcept

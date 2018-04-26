@@ -19,12 +19,12 @@
 
 #pragma once
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits
 {
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief Each container category need to specify one range type. This is the 
  * type of the distance between two iterator points. The range type need a 
  * constructor such that it can be constructed from int. The RangeType need the 
@@ -41,6 +41,6 @@ struct RangeType;
 
 
 }// namespace traits
-}// namespace hzdr
+}// namespace deepiterator
 
 

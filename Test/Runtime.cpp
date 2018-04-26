@@ -23,20 +23,20 @@
 
 uint const nbTries = 5u;
 using namespace boost::unit_test;
-typedef hzdr::Particle<int_fast32_t, 1u> Particle;
-typedef hzdr::Frame<Particle, 100u> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 1u> Particle;
+typedef deepiterator::Frame<Particle, 100u> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
-typedef hzdr::Frame<Particle, 1u> FrameSingle;
-typedef hzdr::Supercell<FrameSingle> SupercellSingle;
+typedef deepiterator::Frame<Particle, 1u> FrameSingle;
+typedef deepiterator::Supercell<FrameSingle> SupercellSingle;
 
 
 BOOST_AUTO_TEST_CASE(Test1B)
 {
     std::cout << std::endl <<  "Second Test with compiletime jumpsize and offset. we use list<int>" << std::endl;
-    typedef hzdr::SelfValue<uint_fast32_t, 0u> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t, 1u> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t, 0u> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t, 1u> Jumpsize;
     
     std::vector<uint> sizes{1000000, 10000000, 100000000};
     
@@ -58,14 +58,14 @@ BOOST_AUTO_TEST_CASE(Test1B)
             timetrival += timer.elapsed();
             
             
-            auto && concept1Layer = hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            auto && concept1Layer = deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(),
                     Jumpsize()
                 )
             );
-            auto && view1Layer = hzdr::makeView(
+            auto && view1Layer = deepiterator::makeView(
                 data, 
                 concept1Layer
             );
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(Test1B)
 
 BOOST_AUTO_TEST_CASE(Test2B)
 {
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     
     std::vector<uint> sizes{1000000, 10000000, 100000000};
@@ -113,12 +113,12 @@ BOOST_AUTO_TEST_CASE(Test2B)
             timetrival += timer.elapsed();
             
             
-            auto && concept1Layer = hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            auto && concept1Layer = deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(0u),
                     Jumpsize(1u)));
-            auto && view1Layer = hzdr::makeView(data, concept1Layer);
+            auto && view1Layer = deepiterator::makeView(data, concept1Layer);
             timer.restart();
             uint_fast64_t sum1Layer = static_cast<uint_fast64_t>(0);
             for(auto && it=view1Layer.begin(); it != view1Layer.end(); ++it)
@@ -149,8 +149,8 @@ BOOST_AUTO_TEST_CASE(Test2B)
 BOOST_AUTO_TEST_CASE(Test2A)
 {
     std::cout << std::endl << " Test with runtime jumpsize and offset. We use list<vector<int> >" << std::endl;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
    
     
     std::vector<uint> sizes{10000, 100000, 1000000};
@@ -177,18 +177,18 @@ BOOST_AUTO_TEST_CASE(Test2A)
             timetrival += timer.elapsed();
             
             
-            auto && concept1Layer = hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            auto && concept1Layer = deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(0u),
                     Jumpsize(1u)), 
-                hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(0u),
                         Jumpsize(1u))));
             
-            auto && view1Layer = hzdr::makeView(data, concept1Layer);
+            auto && view1Layer = deepiterator::makeView(data, concept1Layer);
             timer.restart();
             uint_fast64_t sum1Layer = static_cast<uint_fast64_t>(0);
             for(auto && it=view1Layer.begin(); it != view1Layer.end(); ++it)
@@ -213,8 +213,8 @@ BOOST_AUTO_TEST_CASE(Test2A)
 BOOST_AUTO_TEST_CASE(Test1A)
 {
     std::cout << std::endl << "Test with compiletime jumpsize and offset. We use list<vector<int> >" << std::endl;
-    typedef hzdr::SelfValue<uint_fast32_t, 0u> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t, 1u> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t, 0u> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t, 1u> Jumpsize;
     
     std::vector<uint> sizes{10000, 100000, 1000000};
     
@@ -239,18 +239,18 @@ BOOST_AUTO_TEST_CASE(Test1A)
             timetrival += timer.elapsed();
             
             
-            auto && concept1Layer = hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            auto && concept1Layer = deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(),
                     Jumpsize()), 
-                hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(),
                         Jumpsize())));
             
-            auto && view1Layer = hzdr::makeView(data, concept1Layer);
+            auto && view1Layer = deepiterator::makeView(data, concept1Layer);
             timer.restart();
             uint_fast64_t sum1Layer = static_cast<uint_fast64_t>(0);
             for(auto && it=view1Layer.begin(); it != view1Layer.end(); ++it)

@@ -1,6 +1,6 @@
 
 /**
- * @author Sebastian Hahn t.hahn <at> hzdr.de
+ * @author Sebastian Hahn t.hahn <at> deepiterator.de
  * @brief In this test collection we verify the functionality of the simple 
  * forward iteration. We use the PIConGPU data structures for our tests. 
  * 1. Test Frames: Read all particles in a frame and write particles in the frame
@@ -19,26 +19,26 @@
 
 using namespace boost::unit_test;
 
-typedef hzdr::Particle<int_fast32_t, 2u> Particle;
-typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 2u> Particle;
+typedef deepiterator::Frame<Particle, 10u> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(Frames)
 {
  
     Frame testFrame;
     
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     std::array<Particle, 10u> buffer;
     // 0. We create a concept
-    auto && concept = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && concept = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
-    auto && view = hzdr::makeView(testFrame, concept);
+    auto && view = deepiterator::makeView(testFrame, concept);
     
     // 1. Test we iterate over the frame and read all particles 
     auto counter = 0u;
@@ -83,18 +83,18 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     uint_fast32_t nbParticlesInLastFrame = 2u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
 
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    auto && view = hzdr::makeView(
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
+    auto && view = deepiterator::makeView(
                         supercell, 
                         makeIteratorPrescription(
-                            hzdr::makeAccessor(),
-                            hzdr::makeNavigator(
+                            deepiterator::makeAccessor(),
+                            deepiterator::makeNavigator(
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorPrescription(
-                                hzdr::makeAccessor(),
-                                hzdr::makeNavigator(
+                            deepiterator::makeIteratorPrescription(
+                                deepiterator::makeAccessor(),
+                                deepiterator::makeNavigator(
                                     Offset(0u),
                                     Jumpsize(1u)))));
      

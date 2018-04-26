@@ -1,6 +1,6 @@
 #pragma once
 #include "deepiterator/definitions/hdinline.hpp"
-namespace hzdr 
+namespace deepiterator 
 {
 
 /**
@@ -67,4 +67,4 @@ protected:
     T value;
 } ;
 
-} // namespace hzdr
+} // namespace deepiterator

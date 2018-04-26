@@ -19,14 +19,14 @@
 
 #pragma once
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
 namespace accessor
 {
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used to get a component out of the container. The trait
  * need the operator () overloaded with two arguments:
  * 1. A pointer to the container of the iterator,
@@ -51,4 +51,4 @@ struct Get ;
     
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator

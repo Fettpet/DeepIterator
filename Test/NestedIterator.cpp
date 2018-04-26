@@ -10,10 +10,10 @@
 
 //using namespace boost::unit_test;
 typedef int_fast32_t ParticleProperty;
-typedef hzdr::Particle<int_fast32_t, 2> Particle;
-typedef hzdr::Frame<Particle, 10> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 2> Particle;
+typedef deepiterator::Frame<Particle, 10> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
 
 BOOST_AUTO_TEST_CASE(PositionsInFrames)
@@ -23,25 +23,25 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     uint_fast32_t const nbParticlesInLastFrame = 2u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
     
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
 /**
  * @brief The first test is used to verify the iteration over all particle 
  * attributes within a frame. 
  */
 
-    auto && view = hzdr::makeView(
+    auto && view = deepiterator::makeView(
                         *(supercell.firstFrame), 
-                        hzdr::makeIteratorPrescription(
-                            hzdr::makeAccessor(),
-                            hzdr::makeNavigator( 
+                        deepiterator::makeIteratorPrescription(
+                            deepiterator::makeAccessor(),
+                            deepiterator::makeNavigator( 
                                 Offset(0),
                                 Jumpsize(1)
                             ),
-                            hzdr::makeIteratorPrescription(
-                                hzdr::makeAccessor(),
-                                hzdr::makeNavigator(
+                            deepiterator::makeIteratorPrescription(
+                                deepiterator::makeAccessor(),
+                                deepiterator::makeNavigator(
                                     Offset(0),
                                     Jumpsize(1)
                                 )
@@ -100,19 +100,19 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     uint_fast32_t const nbParticlesInLastFrame = 2u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
     
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto && view = hzdr::makeView( 
+    auto && view = deepiterator::makeView( 
                                supercell,
-                               hzdr::makeIteratorPrescription(
-                                    hzdr::makeAccessor(),
-                                    hzdr::makeNavigator(
+                               deepiterator::makeIteratorPrescription(
+                                    deepiterator::makeAccessor(),
+                                    deepiterator::makeNavigator(
                                         Offset(0),
                                         Jumpsize(1)),
-                                    hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+                                    deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         )
@@ -169,25 +169,25 @@ BOOST_AUTO_TEST_CASE(PositionsInSupercell)
     uint_fast32_t const nbFrames = 5u;
     uint_fast32_t const nbParticlesInLastFrame = 2u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     
-    auto && view = hzdr::makeView(
+    auto && view = deepiterator::makeView(
         supercell, 
         makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0),
                 Jumpsize(1)),
-            hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(0),
                     Jumpsize(1)),
-                hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(0),
                         Jumpsize(1))))));
 
@@ -241,15 +241,15 @@ BOOST_AUTO_TEST_CASE(ParticleParticleInteraction)
     const int nbFramesInSupercell = 2;
     SupercellContainer supercellContainer(nbSupercells, nbFramesInSupercell);
     
-    typedef hzdr::View<Frame, hzdr::Direction::Forward<1> > ParticleInFrame;
+    typedef deepiterator::View<Frame, deepiterator::Direction::Forward<1> > ParticleInFrame;
     
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSupercell1(supercellContainer[0]); 
+    deepiterator::View<Supercell, deepiterator::Direction::Forward<1>, ParticleInFrame> iterSupercell1(supercellContainer[0]); 
 // create the second iteartor
 
     
-    hzdr::View<Supercell, hzdr::Direction::Forward<1>, ParticleInFrame> iterSupercell2(supercellContainer[1]);
+    deepiterator::View<Supercell, deepiterator::Direction::Forward<1>, ParticleInFrame> iterSupercell2(supercellContainer[1]);
 // first add all 
     for(auto it=iterSupercell1.begin(); it != iterSupercell1.end(); ++it)
     {
@@ -293,26 +293,26 @@ BOOST_AUTO_TEST_CASE(ParticlesWithSimulatedThreads)
      * over all particles.
      */
     Supercell cell(5, 2);
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     for(int nbThreads = 2; nbThreads <=5; ++nbThreads)
     {
 
         int count = 0;
         auto myId = 1;
 
-        auto && it = hzdr::makeIterator(
+        auto && it = deepiterator::makeIterator(
                         cell,
-                        hzdr::makeAccessor(cell),
-                        hzdr::makeNavigator(
+                        deepiterator::makeAccessor(cell),
+                        deepiterator::makeNavigator(
                             cell, 
-                            hzdr::Direction::Forward(),
+                            deepiterator::Direction::Forward(),
                             Offset(0),
                             Jumpsize(1)),
-                        hzdr::make_child(
-                            hzdr::makeAccessor(),
-                            hzdr::makeNavigator(
-                                hzdr::Direction::Forward(),
+                        deepiterator::make_child(
+                            deepiterator::makeAccessor(),
+                            deepiterator::makeNavigator(
+                                deepiterator::Direction::Forward(),
                                 Offset(myId),
                                 Jumpsize(nbThreads))));
             
@@ -342,18 +342,18 @@ BOOST_AUTO_TEST_CASE(ParticlesWithSimulatedThreads)
          */
         for(auto myId=0; myId<nbThreads;++myId)
         {
-            auto it2 = hzdr::makeIterator(
+            auto it2 = deepiterator::makeIterator(
                                 cell,
-                                hzdr::makeAccessor(cell),
-                                hzdr::makeNavigator(
+                                deepiterator::makeAccessor(cell),
+                                deepiterator::makeNavigator(
                                     cell, 
-                                    hzdr::Direction::Forward(),
+                                    deepiterator::Direction::Forward(),
                                     Offset(0),
                                     Jumpsize(1)),
-                                hzdr::make_child(
-                                    hzdr::makeAccessor(),
-                                    hzdr::makeNavigator(
-                                        hzdr::Direction::Forward(),
+                                deepiterator::make_child(
+                                    deepiterator::makeAccessor(),
+                                    deepiterator::makeNavigator(
+                                        deepiterator::Direction::Forward(),
                                         Offset(myId),
                                         Jumpsize(nbThreads))));
             for(; not it2.isAtEnd(); ++it2)

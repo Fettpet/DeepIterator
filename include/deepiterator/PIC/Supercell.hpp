@@ -14,7 +14,7 @@
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/traits/Traits.hpp"
 
-namespace hzdr
+namespace deepiterator
 {
 template<typename TFrame>
 struct Supercell
@@ -121,7 +121,7 @@ template<
     typename SFIANE
 >
 struct IndexType<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     SFIANE
 >
 {
@@ -133,7 +133,7 @@ template<
     typename SFIANE
 >
 struct RangeType<
-    hzdr::Supercell<TFrame>, 
+    deepiterator::Supercell<TFrame>, 
     SFIANE 
 >
 {
@@ -210,7 +210,7 @@ template<
     typename SFIANE
 >
 struct IsBidirectional<
-    hzdr::Supercell<TFrame>, 
+    deepiterator::Supercell<TFrame>, 
     SFIANE
 >
 {
@@ -222,7 +222,7 @@ template<
     typename SFIANE
 >
 struct IsRandomAccessable<
-    hzdr::Supercell<TFrame>, 
+    deepiterator::Supercell<TFrame>, 
     SFIANE
 >
 {
@@ -241,7 +241,7 @@ template<
     typename TIndex
 >
 struct Get<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TComponent, 
     TIndex, 
     SFIANE
@@ -249,7 +249,7 @@ struct Get<
 {
     HDINLINE
     TComponent&
-    operator() (hzdr::Supercell<TFrame>*, TIndex& idx)
+    operator() (deepiterator::Supercell<TFrame>*, TIndex& idx)
     {
         return *idx;
     }
@@ -265,7 +265,7 @@ template<
     typename TIndex
 >
 struct Equal<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TComponent, 
     TIndex, 
     SFIANE
@@ -274,9 +274,9 @@ struct Equal<
     HDINLINE
     bool
     operator() (
-        hzdr::Supercell<TFrame>* con1, 
+        deepiterator::Supercell<TFrame>* con1, 
         TIndex const & idx1, 
-        hzdr::Supercell<TFrame>* con2, 
+        deepiterator::Supercell<TFrame>* con2, 
         TIndex const & idx2
     )
     {
@@ -294,7 +294,7 @@ template<
     typename TIndex
 >
 struct Ahead<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TComponent, 
     TIndex, 
     SFIANE
@@ -303,9 +303,9 @@ struct Ahead<
     HDINLINE
     bool
     operator() (
-        hzdr::Supercell<TFrame>* con1, 
+        deepiterator::Supercell<TFrame>* con1, 
         TIndex const & idx1, 
-        hzdr::Supercell<TFrame>* con2, 
+        deepiterator::Supercell<TFrame>* con2, 
         TIndex const & idx2
     )
     {
@@ -336,7 +336,7 @@ template<
     typename TIndex
 >
 struct Behind<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TComponent, 
     TIndex, 
     SFIANE
@@ -345,9 +345,9 @@ struct Behind<
     HDINLINE
     bool
     operator() (
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex const & idx1, 
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex const & idx2
     )
     {
@@ -378,7 +378,7 @@ template<
     typename TIndex
 >
 struct FirstElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex, 
     SFIANE
 >
@@ -386,7 +386,7 @@ struct FirstElement<
     HDINLINE
     void
     operator() (
-        hzdr::Supercell<TFrame>* container, 
+        deepiterator::Supercell<TFrame>* container, 
         TIndex & idx
     )
     {
@@ -404,7 +404,7 @@ template<
     typename TRange
 >
 struct NextElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex,
     TRange,
     SFIANE
@@ -417,7 +417,7 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex& idx, 
         TRange const & range,
         TContainerSize &)
@@ -442,7 +442,7 @@ template<
     typename TIndex
 >
 struct AfterLastElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex, 
     SFIANE
 >
@@ -451,7 +451,7 @@ struct AfterLastElement<
     HDINLINE
     bool
     test(
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex const & idx, 
         TRangeFunction const &
     )
@@ -464,7 +464,7 @@ struct AfterLastElement<
     HDINLINE
     void
     set(
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex & idx,
         TRangeFunction const &
     )
@@ -483,7 +483,7 @@ template<
     typename TIndex
 >
 struct LastElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex,
     SFIANE
 >
@@ -492,7 +492,7 @@ struct LastElement<
     HDINLINE
     void
     operator() (
-        hzdr::Supercell<TFrame>* containerPtr, 
+        deepiterator::Supercell<TFrame>* containerPtr, 
         TIndex& index, 
         TSizeFunction &&
     )
@@ -513,7 +513,7 @@ template<
     typename TRange
 >
 struct PreviousElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex,
     TRange,
     SFIANE
@@ -525,7 +525,7 @@ struct PreviousElement<
     HDINLINE
     TRange
     operator() (
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex& idx, 
         TRange const & jumpsize,
         TContainerSize&)
@@ -553,7 +553,7 @@ template<
     typename TRange
 >
 struct BeforeFirstElement<
-    hzdr::Supercell<TFrame>,
+    deepiterator::Supercell<TFrame>,
     TIndex, 
     TRange,
     SFIANE
@@ -564,7 +564,7 @@ struct BeforeFirstElement<
     HDINLINE
     bool
     test(
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex const & idx,
         TRangeFunction&
     )
@@ -578,7 +578,7 @@ struct BeforeFirstElement<
     HDINLINE
     void
     set(
-        hzdr::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*, 
         TIndex & idx,
         TRangeFunction&
     )
@@ -591,4 +591,4 @@ struct BeforeFirstElement<
     
 } // namespace traits
 
-} // namespace hzdr
+} // namespace deepiterator

@@ -21,7 +21,7 @@
 
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
-namespace hzdr
+namespace deepiterator
 {
     
 namespace container 
@@ -42,7 +42,7 @@ namespace traits
 template<typename TContainer>
 struct IsBidirectional<
     TContainer, 
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     static const bool value = true;
 } ;       
@@ -50,7 +50,7 @@ struct IsBidirectional<
 template<typename TContainer>
 struct IsRandomAccessable<
     TContainer, 
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     static const bool value = true;
 } ;   
@@ -58,7 +58,7 @@ struct IsRandomAccessable<
 template<typename TContainer>
 struct RangeType<
     TContainer, 
-    hzdr::container::categorie::DoublyLinkListLike
+    deepiterator::container::categorie::DoublyLinkListLike
 >
 {
     typedef int_fast32_t type;
@@ -79,7 +79,7 @@ struct Get<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike
+    deepiterator::container::categorie::DoublyLinkListLike
     >
 {
     HDINLINE
@@ -102,7 +102,7 @@ struct Equal<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike
+    deepiterator::container::categorie::DoublyLinkListLike
     >
 {
     HDINLINE
@@ -124,7 +124,7 @@ struct Ahead<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     HDINLINE
     bool
@@ -157,7 +157,7 @@ struct Behind<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike
+    deepiterator::container::categorie::DoublyLinkListLike
     >
 {
     HDINLINE
@@ -190,7 +190,7 @@ template<
 struct FirstElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     HDINLINE
     void
@@ -212,7 +212,7 @@ struct NextElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     template<
         typename TContainerSize>
@@ -244,7 +244,7 @@ template<
 struct AfterLastElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     template<typename TRangeFunction>
     HDINLINE
@@ -274,7 +274,7 @@ template<
 struct LastElement<
     TContainer,
     TIndex,
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -301,7 +301,7 @@ struct PreviousElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     template<
         typename TContainerSize>
@@ -336,7 +336,7 @@ struct BeforeFirstElement<
     TContainer, 
     TIndex, 
     TRange,
-    hzdr::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike>
 {
     template<typename TRangeFunction>
     HDINLINE
@@ -369,4 +369,4 @@ struct BeforeFirstElement<
     
 } // namespace traits
 
-}// namespace hzdr
+}// namespace deepiterator

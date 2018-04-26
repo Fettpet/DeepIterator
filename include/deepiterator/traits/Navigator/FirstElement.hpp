@@ -20,7 +20,7 @@
 #pragma once
 
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
@@ -28,7 +28,7 @@ namespace navigator
 {
     
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used to set the iterator to the first element. If there
  * are not enough elements (e.g. empty container) The iterator is set to the 
  * AfterLastElement or the BeforeFirstElement. The trait need the operator() 
@@ -49,4 +49,4 @@ struct FirstElement;
 } // namespace navigator
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator

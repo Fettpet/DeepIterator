@@ -15,7 +15,7 @@
  */
 // this contains all includes for all classes we need.
 #include "deepiterator/iterator/Categorie.hpp"
-namespace hzdr 
+namespace deepiterator 
 {
 namespace container
 {
@@ -420,7 +420,7 @@ struct BeforeFirstElement<
 };
 }// namespace navigator
 } // namespace traits
-} // namespace hzdr
+} // namespace deepiterator
 
 /**
  * @brief Now we test the boost vector
@@ -429,34 +429,34 @@ struct BeforeFirstElement<
 
 using namespace boost::unit_test;
 
-typedef hzdr::Particle<int_fast32_t, 2u> Particle;
-typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 2u> Particle;
+typedef deepiterator::Frame<Particle, 10u> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(Frames)
 {
     boost::container::vector<Frame> data(10);
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto && prescription = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && prescription = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0),
             Jumpsize(1)),
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0),
                 Jumpsize(1)),
-            hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(0),
                     Jumpsize(1)))));
                                                            
-    auto && view = hzdr::makeView(data, prescription);
+    auto && view = deepiterator::makeView(data, prescription);
     uint sum = 0;
     for(auto && it = view.begin(); it != view.end(); ++it)
     {

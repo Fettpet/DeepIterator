@@ -20,7 +20,7 @@
 #pragma once
 
 
-namespace hzdr
+namespace deepiterator
 {
 /**
  * @brief The NoChild is used to define the last layer in a nested Iterator

@@ -21,7 +21,7 @@
 
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
-namespace hzdr
+namespace deepiterator
 {
 namespace container
 {
@@ -41,7 +41,7 @@ namespace traits
 template<typename TContainer>
 struct IsBidirectional<
     TContainer, 
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     static const bool value = true;
 } ;    
@@ -49,7 +49,7 @@ struct IsBidirectional<
 template<typename TContainer>
 struct IsRandomAccessable<
     TContainer, 
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     static const bool value = true;
 } ;
@@ -57,7 +57,7 @@ struct IsRandomAccessable<
 template<
     typename TContainer
 >
-struct RangeType<TContainer, hzdr::container::categorie::ArrayLike>
+struct RangeType<TContainer, deepiterator::container::categorie::ArrayLike>
 {
     typedef int_fast32_t type;
 };
@@ -65,7 +65,7 @@ struct RangeType<TContainer, hzdr::container::categorie::ArrayLike>
 template<
     typename TContainer
 >
-struct IndexType<TContainer, hzdr::container::categorie::ArrayLike>
+struct IndexType<TContainer, deepiterator::container::categorie::ArrayLike>
 {
     typedef int_fast32_t type;
 };
@@ -84,7 +84,7 @@ struct Get<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    deepiterator::container::categorie::ArrayLike
     >
 {
     HDINLINE
@@ -108,7 +108,7 @@ struct Equal<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    deepiterator::container::categorie::ArrayLike
     >
 {
     HDINLINE
@@ -137,7 +137,7 @@ struct Ahead<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     HDINLINE
     bool
@@ -164,7 +164,7 @@ struct Behind<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike
+    deepiterator::container::categorie::ArrayLike
     >
 {
     HDINLINE
@@ -198,7 +198,7 @@ template<
 struct FirstElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     HDINLINE
     void
@@ -221,7 +221,7 @@ struct NextElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     template<
         typename TContainerSize>
@@ -249,7 +249,7 @@ template<
 struct AfterLastElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -284,7 +284,7 @@ template<
 struct LastElement<
     TContainer,
     TIndex,
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -310,7 +310,7 @@ struct PreviousElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     template<typename T>
     HDINLINE
@@ -341,7 +341,7 @@ struct BeforeFirstElement<
     TContainer, 
     TIndex,
     TOffset,
-    hzdr::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike>
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -367,4 +367,4 @@ struct BeforeFirstElement<
 }// namespace navigator
 } // namespace traits
     
-}// namespace hzdr
+}// namespace deepiterator

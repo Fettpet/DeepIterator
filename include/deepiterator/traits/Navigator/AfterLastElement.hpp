@@ -20,14 +20,14 @@
 #pragma once
 
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
 namespace navigator
 {
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used as the element after the last one. The trait has
  * two functions: 
  * 1. test(Container*, Index, ContainerSizeFunction): returns true if the 
@@ -59,5 +59,5 @@ struct AfterLastElement;
 
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator
 

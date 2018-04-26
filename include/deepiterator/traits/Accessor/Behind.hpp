@@ -19,7 +19,7 @@
 
 #pragma once
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
@@ -27,7 +27,7 @@ namespace accessor
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief We use this trait to check whether an iterators position is behind an
  * other iterators position. This means it1 < it2. The trait need the operator()
  * which has four arguments:
@@ -56,5 +56,5 @@ struct Behind{};
 } // namespace accessor
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator
 

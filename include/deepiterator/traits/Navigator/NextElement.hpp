@@ -21,14 +21,14 @@
 
 
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
 namespace navigator
 {
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used to set the index to the next element. The trait need
  * the operator() with four arguments:
  * 1. A pointer to the container
@@ -58,5 +58,5 @@ struct NextElement;
 
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator
 

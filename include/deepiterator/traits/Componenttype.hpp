@@ -21,7 +21,7 @@
 
 #pragma once
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace details
 {
@@ -31,7 +31,7 @@ namespace traits
 {
 /**
  * \struct ComponentType
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief The ComponentType trait gives information about the type of the 
  * components of a container. You need to implement a specialication such that,
  * <b> typedef ComponentType< ContainerType >::type YourComponentType;</b>
@@ -44,4 +44,4 @@ template<typename TContainer>
 struct ComponentType;
 
 }//traits
-}//hzdr
+}//deepiterator

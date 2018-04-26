@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace hzdr
+namespace deepiterator
 {
 namespace details
 {
@@ -30,7 +30,7 @@ namespace traits
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used to decide the indextype. The indextype is used to 
  * specify the position to get the current component out of the container.
  * @tparam TContainer: type of the container
@@ -44,4 +44,4 @@ struct IndexType;
 
 } // namespace traits
 
-} // namespace hzdr
+} // namespace deepiterator

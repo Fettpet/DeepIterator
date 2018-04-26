@@ -29,7 +29,7 @@
 #include <sstream>
 #include <typeinfo>
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace details 
 {
@@ -110,7 +110,7 @@ constructors has five parameters:
     TNavigator && navigator,
     TChild && child,
     details::constructorType::__
-If your container has no interleaved layer, use \b hzdr::NoChild as child.
+If your container has no interleaved layer, use \b deepiterator::NoChild as child.
 A ReverseDeepIterator is bidirectional if the flag isBidirectionalSelf is set to true 
 and all childs are bidirectional. The same applies to random accessablity.
 
@@ -161,7 +161,7 @@ public:
     using Navigator = TNavigator;
     
 // child things
-    using ComponentType = typename hzdr::traits::ComponentType<
+    using ComponentType = typename deepiterator::traits::ComponentType<
         ContainerType
     >::type;
     
@@ -226,9 +226,9 @@ public:
     ):
         containerPtr(nullptr),
         index(static_cast<IndexType>(0)),
-        childIterator(hzdr::forward<TChild_>(child)),
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
+        childIterator(deepiterator::forward<TChild_>(child)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor))
     {}
     
     
@@ -256,9 +256,9 @@ public:
     ):
         containerPtr(container),
         index(static_cast<IndexType>(0)),
-        childIterator(hzdr::forward<TChild_>(child)),
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
+        childIterator(deepiterator::forward<TChild_>(child)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor))
     {
         setToRbegin(container);
     }
@@ -276,11 +276,11 @@ public:
         containerPtr(container),
         index(static_cast<IndexType>(0)),
         childIterator(
-            hzdr::forward<TPrescription>(prescription).child, 
+            deepiterator::forward<TPrescription>(prescription).child, 
             details::constructorType::rbegin()
         ),
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor)
+        navigator(deepiterator::forward<TPrescription>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription>(prescription).accessor)
     {
         setToRbegin(container);
     }
@@ -295,11 +295,11 @@ public:
         containerPtr(nullptr),
         index(0),
         childIterator(
-            hzdr::forward<TPrescription_>(prescription).child,
+            deepiterator::forward<TPrescription_>(prescription).child,
             details::constructorType::rbegin()
         ),
-        navigator(hzdr::forward<TPrescription_>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription_>(prescription).accessor)
+        navigator(deepiterator::forward<TPrescription_>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription_>(prescription).accessor)
     {}
     
     
@@ -327,9 +327,9 @@ public:
     ):
         containerPtr(container),
         index(static_cast<IndexType>(0)),
-        childIterator(hzdr::forward<TChild_>(child)),
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor))
+        childIterator(deepiterator::forward<TChild_>(child)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor))
         
     {
         setToRend(container);
@@ -348,11 +348,11 @@ public:
         containerPtr(container),
         index(static_cast<IndexType>(0)),
         childIterator(
-            hzdr::forward<TPrescription>(prescription).child, 
+            deepiterator::forward<TPrescription>(prescription).child, 
             details::constructorType::rend()
         ),
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor)
+        navigator(deepiterator::forward<TPrescription>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription>(prescription).accessor)
     {
         setToRend(container);
     }
@@ -367,11 +367,11 @@ public:
         containerPtr(nullptr),
         index(0),
         childIterator(
-            hzdr::forward<TPrescription_>(prescription).child,
+            deepiterator::forward<TPrescription_>(prescription).child,
             details::constructorType::rend()
         ),
-        navigator(hzdr::forward<TPrescription_>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription_>(prescription).accessor)
+        navigator(deepiterator::forward<TPrescription_>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription_>(prescription).accessor)
     {}
     
     
@@ -1201,7 +1201,7 @@ struct ReverseDeepIterator<
     TContainer,     
     TAccessor, 
     TNavigator,
-    hzdr::NoChild,
+    deepiterator::NoChild,
     TIndexType,
     hasConstantSizeSelf,
     isBidirectionalSelf,
@@ -1219,12 +1219,12 @@ public:
     using Navigator = TNavigator;
     
 // child things
-    using ComponentType = typename hzdr::traits::ComponentType<
+    using ComponentType = typename deepiterator::traits::ComponentType<
         ContainerType
     >::type;
     using ComponentPtr = ComponentType*;
     using ComponentReference = ComponentType&;
-    using ChildIterator = hzdr::NoChild;
+    using ChildIterator = deepiterator::NoChild;
     using ReturnType = ComponentReference;
 
 // container stuff
@@ -1235,7 +1235,7 @@ public:
 protected:   
     Navigator navigator;
     Accessor accessor;
-    hzdr::NoChild childIterator;
+    deepiterator::NoChild childIterator;
     
 
     ContainerType* containerPtr;
@@ -1287,8 +1287,8 @@ public:
             TChild_ const &,
             details::constructorType::rbegin
     ):
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor)),
         childIterator(),
         containerPtr(container),
         index(static_cast<IndexType>(0))
@@ -1306,8 +1306,8 @@ public:
             TPrescription&& prescription,
             details::constructorType::rbegin 
     ):
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor),
+        navigator(deepiterator::forward<TPrescription>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription>(prescription).accessor),
         childIterator(),
         containerPtr(container),
         index(static_cast<IndexType>(0))
@@ -1333,8 +1333,8 @@ public:
             TPrescription_&& prescription, 
             details::constructorType::rbegin 
     ):
-        navigator(hzdr::forward<TPrescription_>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription_>(prescription).accessor),
+        navigator(deepiterator::forward<TPrescription_>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription_>(prescription).accessor),
         childIterator(),
         containerPtr(nullptr),
         index(static_cast<IndexType>(0))
@@ -1362,8 +1362,8 @@ public:
         TNavigator_ && navi,
         TChild_ && 
     ):
-        navigator(hzdr::forward<TNavigator_>(navi)),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
+        navigator(deepiterator::forward<TNavigator_>(navi)),
+        accessor(deepiterator::forward<TAccessor_>(accessor)),
         childIterator()
     {}
     
@@ -1390,8 +1390,8 @@ public:
             TChild_ const &,
             details::constructorType::rend
     ):
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor)),
         containerPtr(container),
         index(static_cast<IndexType>(0))
     {
@@ -1408,8 +1408,8 @@ public:
             TPrescription&& prescription,
             details::constructorType::rend 
     ):
-        navigator(hzdr::forward<TPrescription>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription>(prescription).accessor),
+        navigator(deepiterator::forward<TPrescription>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription>(prescription).accessor),
         childIterator(),
         containerPtr(container),
         index(static_cast<IndexType>(0))
@@ -1435,8 +1435,8 @@ public:
             TPrescription_&& prescription, 
             details::constructorType::rend
     ):
-        navigator(hzdr::forward<TPrescription_>(prescription).navigator),
-        accessor(hzdr::forward<TPrescription_>(prescription).accessor),
+        navigator(deepiterator::forward<TPrescription_>(prescription).navigator),
+        accessor(deepiterator::forward<TPrescription_>(prescription).accessor),
         childIterator(),
         containerPtr(nullptr),
         index(0)
@@ -1448,7 +1448,7 @@ public:
      * The container must be set with setToBegin or setToRbegin.
      * @param accessor The accessor
      * @param navigator The navigator, needs a specified offset and a jumpsize.
-     * @param child use hzdr::NoChild()
+     * @param child use deepiterator::NoChild()
      */
     template<
         typename TAccessor_, 
@@ -1457,10 +1457,10 @@ public:
     ReverseDeepIterator(
             TAccessor_ && accessor, 
             TNavigator_ && navigator,
-            hzdr::NoChild const &
+            deepiterator::NoChild const &
     ):
-        navigator(hzdr::forward<TNavigator_>(navigator)),
-        accessor(hzdr::forward<TAccessor_>(accessor)),
+        navigator(deepiterator::forward<TNavigator_>(navigator)),
+        accessor(deepiterator::forward<TAccessor_>(accessor)),
         containerPtr(nullptr),
         index(0)
     {}
@@ -2115,7 +2115,7 @@ namespace details
     
 /**
  * @brief This function is used in makeView. The function is a identity function
- * for hzdr::NoChild
+ * for deepiterator::NoChild
  */
 template<
     typename TContainer,
@@ -2125,7 +2125,7 @@ template<
     typename = typename std::enable_if<
         std::is_same<
             TChildNoRef,
-            hzdr::NoChild
+            deepiterator::NoChild
         >::value
     >::type
 >
@@ -2133,10 +2133,10 @@ HDINLINE
 auto
 makeReverseIterator( TChild &&)
 ->
-hzdr::NoChild
+deepiterator::NoChild
 {
 
-    return hzdr::NoChild();
+    return deepiterator::NoChild();
 }
 
 
@@ -2155,22 +2155,22 @@ template<
     typename ContainerCategoryType = typename traits::ContainerCategory<
         TContainerNoRef
     >::type,
-    typename IndexType = typename hzdr::traits::IndexType<
+    typename IndexType = typename deepiterator::traits::IndexType<
         TContainerNoRef,
         ContainerCategoryType
     >::type,
-    bool isBidirectional = hzdr::traits::IsBidirectional<
+    bool isBidirectional = deepiterator::traits::IsBidirectional<
         TContainer, 
         ContainerCategoryType
     >::value,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+    bool isRandomAccessable = deepiterator::traits::IsRandomAccessable<
         TContainer, 
         ContainerCategoryType
     >::value,
     bool hasConstantSize = traits::HasConstantSize<TContainer>::value,
     typename = typename std::enable_if<not std::is_same<
         TContainerNoRef, 
-        hzdr::NoChild
+        deepiterator::NoChild
     >::value>::type
 >
 HDINLINE
@@ -2182,14 +2182,14 @@ makeReverseIterator (
 ReverseDeepIterator<
         TContainer,
         decltype(makeAccessor<TContainer>(
-            hzdr::forward<TPrescription>(concept).accessor
+            deepiterator::forward<TPrescription>(concept).accessor
         )),
         decltype(makeNavigator<TContainer>(
-            hzdr::forward<TPrescription>(concept).navigator
+            deepiterator::forward<TPrescription>(concept).navigator
         )),
         decltype(makeReverseIterator<
             typename traits::ComponentType<TContainer>::type>(
-                hzdr::forward<TPrescription>(concept).child
+                deepiterator::forward<TPrescription>(concept).child
             )
         ),
         IndexType,
@@ -2200,17 +2200,17 @@ ReverseDeepIterator<
     using ContainerType = TContainer;
     using AccessorType =  decltype(
         makeAccessor<ContainerType>(
-            hzdr::forward<TPrescription>(concept).accessor
+            deepiterator::forward<TPrescription>(concept).accessor
         )
     );
     using NavigatorType = decltype(
         makeNavigator<ContainerType>(
-            hzdr::forward<TPrescription>(concept).navigator
+            deepiterator::forward<TPrescription>(concept).navigator
         )
     );
     using ChildType = decltype(
         makeReverseIterator<typename traits::ComponentType<TContainer>::type>(
-            hzdr::forward<TPrescription>(concept).child
+            deepiterator::forward<TPrescription>(concept).child
         )
     );
 
@@ -2228,13 +2228,13 @@ ReverseDeepIterator<
  
     return Iterator(
         makeAccessor<ContainerType>(
-            hzdr::forward<TPrescription>(concept).accessor
+            deepiterator::forward<TPrescription>(concept).accessor
         ),
         makeNavigator<ContainerType>(
-            hzdr::forward<TPrescription>(concept).navigator
+            deepiterator::forward<TPrescription>(concept).navigator
         ),
         makeReverseIterator<typename traits::ComponentType<TContainer>::type>(
-            hzdr::forward<TPrescription>(concept).child
+            deepiterator::forward<TPrescription>(concept).child
         )
     );
 }
@@ -2258,14 +2258,14 @@ template<
     typename ContainerCategoryType = typename traits::ContainerCategory<
         TContainerNoRef
     >::type,
-    typename IndexType = typename hzdr::traits::IndexType<
+    typename IndexType = typename deepiterator::traits::IndexType<
         TContainerNoRef
     >::type,
-    bool isBidirectional = hzdr::traits::IsBidirectional<
+    bool isBidirectional = deepiterator::traits::IsBidirectional<
         TContainerNoRef, 
         ContainerCategoryType
     >::value,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+    bool isRandomAccessable = deepiterator::traits::IsRandomAccessable<
         TContainerNoRef, 
         ContainerCategoryType
     >::value,
@@ -2276,7 +2276,7 @@ HDINLINE
 auto
 makeReverseIterator(
     TContainer && container,
-    hzdr::details::IteratorPrescription<
+    deepiterator::details::IteratorPrescription<
         TAccessor,
         TNavigator,
         TChild> && concept)
@@ -2334,7 +2334,7 @@ ReverseDeepIterator<
         details::makeReverseIterator<ComponentType>(concept.childIterator));
 }
 
-} // namespace hzdr
+} // namespace deepiterator
 
 template<
     typename TContainer, 
@@ -2347,7 +2347,7 @@ template<
     bool isRandomAccessableSelf>
 std::ostream& operator<<(
     std::ostream& out, 
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2372,11 +2372,11 @@ template<
     bool isRandomAccessableSelf>
 std::ostream& operator<<(
     std::ostream& out, 
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
@@ -2403,21 +2403,21 @@ template<
 HDINLINE 
 auto
 operator==(
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
@@ -2446,21 +2446,21 @@ template<
 HDINLINE 
 auto
 operator==(
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
@@ -2485,21 +2485,21 @@ template<
 HDINLINE 
 auto
 operator!=(
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
@@ -2528,21 +2528,21 @@ template<
 HDINLINE 
 auto
 operator!=(
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
-        hzdr::NoChild,
+        deepiterator::NoChild,
         TIndexType,
         hasConstantSizeSelf,
         isBidirectionalSelf,
@@ -2573,7 +2573,7 @@ template<
 HDINLINE 
 auto
 operator==(
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2583,7 +2583,7 @@ operator==(
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2617,7 +2617,7 @@ template<
 HDINLINE 
 auto
 operator==(
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2627,7 +2627,7 @@ operator==(
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2657,7 +2657,7 @@ template<
 HDINLINE 
 auto
 operator!=(
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2667,7 +2667,7 @@ operator!=(
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2701,7 +2701,7 @@ template<
 HDINLINE 
 auto
 operator!=(
-    hzdr::ReverseDeepIterator<
+    deepiterator::ReverseDeepIterator<
         TContainer,
         TAccessor,
         TNavigator,
@@ -2711,7 +2711,7 @@ operator!=(
         isBidirectionalSelf,
         isRandomAccessableSelf
     > const & lhs,
-    hzdr::DeepIterator<
+    deepiterator::DeepIterator<
         TContainer,
         TAccessor,
         TNavigator,

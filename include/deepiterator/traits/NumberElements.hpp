@@ -19,7 +19,7 @@
 
 /**
  * \struct NumberElements
- * @author Sebastian Hahn t.hahn@hzdr.de
+ * @author Sebastian Hahn t.hahn@deepiterator.de
  * @brief This is a helper class to get the number of elements within
  * a container. This helper class has one function, size(const containertype&), 
  * which determine the size of the container. If it is not possible, for example
@@ -29,7 +29,7 @@
 
 #pragma once
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits
 {
@@ -39,4 +39,4 @@ struct NumberElements;
     
 } // namespace traits
 
-}// namespace hzdr
+}// namespace deepiterator

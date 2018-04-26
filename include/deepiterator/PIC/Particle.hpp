@@ -1,5 +1,5 @@
 /**
- * @author Sebastian Hahn ( t.hahn@hzdr.de )
+ * @author Sebastian Hahn ( t.hahn@deepiterator.de )
  * 
  * @brief A PIConGPU like datastructure. It has a position_type and a dimension.
  */
@@ -10,7 +10,7 @@
 #include "deepiterator/iterator/Categorie.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/traits/Traits.hpp"
-namespace hzdr 
+namespace deepiterator 
 {
 template<typename TPosition, int_fast32_t dim>
 struct Particle;
@@ -192,13 +192,13 @@ struct ComponentType<Particle<TProperty, maxParticles> >
 template<typename TProperty, int_fast32_t nb>
 struct ContainerCategory<Particle<TProperty, nb> >
 {
-    typedef hzdr::container::categorie::ArrayLike type;
+    typedef deepiterator::container::categorie::ArrayLike type;
 };
 
 template<typename TPos, int_fast32_t nb>
-struct NumberElements<hzdr::Particle<TPos, nb> >
+struct NumberElements<deepiterator::Particle<TPos, nb> >
 {
-    typedef hzdr::Particle<TPos, nb> Particle;
+    typedef deepiterator::Particle<TPos, nb> Particle;
     
     HDINLINE
     int_fast32_t 
@@ -235,4 +235,4 @@ int_fast32_t Particle<TPos, 2>::currentValue = 0;
 
 template<typename TPos>
 int_fast32_t Particle<TPos, 1>::currentValue = 0;
-} // namespace hzdr
+} // namespace deepiterator

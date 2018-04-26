@@ -21,7 +21,7 @@
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 
-namespace hzdr
+namespace deepiterator
 {
 namespace container
 {
@@ -155,7 +155,7 @@ template<
 >
 struct IsBidirectional<
     TContainer, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     static const bool value = true;
@@ -167,7 +167,7 @@ template<
 >
 struct IsRandomAccessable<
     TContainer, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     static const bool value = true;
@@ -189,7 +189,7 @@ struct Get<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     HDINLINE
@@ -217,7 +217,7 @@ struct Equal<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     HDINLINE
@@ -248,7 +248,7 @@ struct Ahead<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     HDINLINE
@@ -260,7 +260,7 @@ struct Ahead<
         TIndex const & idx2
     )
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         return (idxndToInt<Dim>(
             idx1,
             con1->extent()) 
@@ -285,7 +285,7 @@ struct Behind<
     TContainer, 
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     HDINLINE
@@ -296,7 +296,7 @@ struct Behind<
         TContainer * con2, 
         TIndex const & idx2)
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         return (idxndToInt<Dim>(
             idx1,
             con1->extent()) 
@@ -327,7 +327,7 @@ template<
 struct FirstElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> 
+    deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
 {
     HDINLINE
@@ -337,7 +337,7 @@ struct FirstElement<
         TIndex& idx
     )
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         idx = intToIdxnd<Dim>(
             0,
             con->extent()
@@ -360,7 +360,7 @@ struct NextElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<
         typename TContainerSize,
@@ -373,7 +373,7 @@ struct NextElement<
         TIndex_ const & range,
         TContainerSize& size)
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         auto newIdxInt = idxndToInt<Dim>(idx, container->extent())
                        + idxndToInt<Dim>(range, container->extent());
 
@@ -407,7 +407,7 @@ template<
 struct AfterLastElement<
     TContainer, 
     TIndex, 
-    hzdr::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -419,7 +419,7 @@ struct AfterLastElement<
     )
     const
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         return idxndToInt<Dim>(
                 idx,
                 conPtr->extent()
@@ -432,7 +432,7 @@ struct AfterLastElement<
     set(TContainer* conPtr, TIndex & idx, TSizeFunction const & size)
     const
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         idx = intToIdxnd<Dim>(
             size(conPtr),
             conPtr->extent()
@@ -453,7 +453,7 @@ template<
 struct LastElement<
     TContainer,
     TIndex,
-    hzdr::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -464,7 +464,7 @@ struct LastElement<
         TSizeFunction& size
     )
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         index = intToIdxnd<Dim>(
             size(conPtr) - 1,
             conPtr->extent()
@@ -487,7 +487,7 @@ struct PreviousElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<
         typename T,
@@ -501,7 +501,7 @@ struct PreviousElement<
         T const &
     )
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         
         auto const newIdxInt = idxndToInt<Dim>(
             idx,
@@ -546,7 +546,7 @@ struct BeforeFirstElement<
     TContainer, 
     TIndex,
     TOffset,
-    hzdr::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<typename TSizeFunction>
     HDINLINE
@@ -557,7 +557,7 @@ struct BeforeFirstElement<
         TSizeFunction&)
     const
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         
         return idxndToInt<Dim>(
             idx, 
@@ -576,7 +576,7 @@ struct BeforeFirstElement<
     )
     const
     {
-        using namespace hzdr::detail;
+        using namespace deepiterator::detail;
         idx = intToIdxnd<Dim>(
             -1,
             container->extent()
@@ -589,4 +589,4 @@ struct BeforeFirstElement<
 }// namespace navigator
 } // namespace traits
     
-}// namespace hzdr
+}// namespace deepiterator

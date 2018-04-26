@@ -27,12 +27,12 @@
 #include "deepiterator/definitions/forward.hpp"
 
 
-namespace hzdr
+namespace deepiterator
 {
 /**
  * \struct Accessor
  * 
- * @author Sebastian Hahn (t.hahn[at]hzdr.de) 
+ * @author Sebastian Hahn (t.hahn[at]deepiterator.de) 
  * 
  * @brief The Accesor is used to describe the current position of the iterator. 
  * The Accessor use several functions: 
@@ -48,25 +48,25 @@ namespace hzdr
  * accessable. 
  * To use the default Accessor you need to spezify the following traits for 
  * each function:
- * 1. get: hzdr::traits::accessor::Get<
+ * 1. get: deepiterator::traits::accessor::Get<
  *      TContainer, 
  *      TComponent, 
  *      TIndex, 
  *      TContainerCategory
  * >
- * 2. ahead: hzdr::traits::accessor::Ahead<
+ * 2. ahead: deepiterator::traits::accessor::Ahead<
  *      TContainer, 
  *      TComponent, 
  *      TIndex, 
  *      TContainerCategory
  * >
- * 3. equal: hzdr::traits::accessor::Equal<
+ * 3. equal: deepiterator::traits::accessor::Equal<
  *      TContainer, 
  *      TComponent, 
  *      TIndex,
  *      TContainerCategory
  * >
- * 4. behind: hzdr::traits::accessor::Behind<
+ * 4. behind: deepiterator::traits::accessor::Behind<
  *      TContainer, 
  *      TComponent, 
  *      TIndex,
@@ -290,35 +290,35 @@ template<
         TContainerNoRef,
         TContainerCategory
     >::type,
-    typename TComponent = typename hzdr::traits::ComponentType<
+    typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = hzdr::traits::accessor::Get<
+    typename TGet = deepiterator::traits::accessor::Get<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,                                          
-    typename TAhead = hzdr::traits::accessor::Ahead<
+    typename TAhead = deepiterator::traits::accessor::Ahead<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TEqual = hzdr::traits::accessor::Equal<
+    typename TEqual = deepiterator::traits::accessor::Equal<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TBehind = hzdr::traits::accessor::Behind<
+    typename TBehind = deepiterator::traits::accessor::Behind<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >, 
     typename TAccessor,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+    bool isRandomAccessable = deepiterator::traits::IsRandomAccessable<
         TContainerNoRef,
         TContainerCategory
     >::value
@@ -326,7 +326,7 @@ template<
 HDINLINE
 auto 
 makeAccessor(TAccessor&&)
--> hzdr::Accessor<
+-> deepiterator::Accessor<
     TContainerNoRef,
     TComponent,
     TIndex,
@@ -338,7 +338,7 @@ makeAccessor(TAccessor&&)
     isRandomAccessable
 >
 {
-    using AccessorType =  hzdr::Accessor<
+    using AccessorType =  deepiterator::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
@@ -377,34 +377,34 @@ template<
         TContainerNoRef,
         TContainerCategory
     >::type,    
-    typename TComponent = typename hzdr::traits::ComponentType<
+    typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = hzdr::traits::accessor::Get<
+    typename TGet = deepiterator::traits::accessor::Get<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TAhead = hzdr::traits::accessor::Ahead<
+    typename TAhead = deepiterator::traits::accessor::Ahead<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TEqual = hzdr::traits::accessor::Equal<
+    typename TEqual = deepiterator::traits::accessor::Equal<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TBehind = hzdr::traits::accessor::Behind<
+    typename TBehind = deepiterator::traits::accessor::Behind<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+    bool isRandomAccessable = deepiterator::traits::IsRandomAccessable<
         TContainer,
         TContainerCategory
     >::value
@@ -413,7 +413,7 @@ auto
 HDINLINE
 makeAccessor()
 -> 
-hzdr::Accessor<
+deepiterator::Accessor<
     TContainerNoRef,
     TComponent,
     TIndex,
@@ -425,7 +425,7 @@ hzdr::Accessor<
     isRandomAccessable
 >
 {
-    using ResultType = hzdr::Accessor<
+    using ResultType = deepiterator::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
@@ -467,34 +467,34 @@ template<
         TContainerCategory
     >::type,
     
-    typename TComponent = typename hzdr::traits::ComponentType<
+    typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = hzdr::traits::accessor::Get<
+    typename TGet = deepiterator::traits::accessor::Get<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,                                          
-    typename TAhead = hzdr::traits::accessor::Ahead<
+    typename TAhead = deepiterator::traits::accessor::Ahead<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TEqual = hzdr::traits::accessor::Equal<
+    typename TEqual = deepiterator::traits::accessor::Equal<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    typename TBehind = hzdr::traits::accessor::Behind<
+    typename TBehind = deepiterator::traits::accessor::Behind<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
         TContainerCategory
     >,
-    bool isRandomAccessable = hzdr::traits::IsRandomAccessable<
+    bool isRandomAccessable = deepiterator::traits::IsRandomAccessable<
         TContainer,
         TContainerCategory
     >::value
@@ -502,7 +502,7 @@ template<
 auto 
 HDINLINE
 makeAccessor(TContainer&&)
--> hzdr::Accessor<
+-> deepiterator::Accessor<
     TContainerNoRef,
     TComponent,
     TIndex,
@@ -514,7 +514,7 @@ makeAccessor(TContainer&&)
     isRandomAccessable
 >
 {
-    using ResultType = hzdr::Accessor<
+    using ResultType = deepiterator::Accessor<
         TContainerNoRef,
         TComponent,
         TIndex,
@@ -536,26 +536,26 @@ makeAccessor(TContainer&&)
 auto 
 HDINLINE
 makeAccessor()
--> hzdr::Accessor<
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
-    hzdr::details::UndefinedType,
+-> deepiterator::Accessor<
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
+    deepiterator::details::UndefinedType,
     false>
 {
-    using ResultType = hzdr::Accessor<
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
-        hzdr::details::UndefinedType,
+    using ResultType = deepiterator::Accessor<
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
+        deepiterator::details::UndefinedType,
         false
     >;
     return ResultType();
@@ -573,9 +573,9 @@ HDINLINE
 auto
 makeAccessor(TAccessor && accessor)
 ->
-decltype(hzdr::forward<TAccessor>(accessor))
+decltype(deepiterator::forward<TAccessor>(accessor))
 {
-    return hzdr::forward<TAccessor>(accessor);
+    return deepiterator::forward<TAccessor>(accessor);
 }
 
-}// namespace hzdr
+}// namespace deepiterator

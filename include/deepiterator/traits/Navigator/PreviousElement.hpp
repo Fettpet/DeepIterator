@@ -20,7 +20,7 @@
 #pragma once
 
 
-namespace hzdr
+namespace deepiterator
 {
 namespace traits
 {
@@ -28,7 +28,7 @@ namespace navigator
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief This trait is used to set the index to the previous element. The trait need
  * the operator() with five arguments:
  * 1. A pointer to the container
@@ -60,6 +60,6 @@ struct PreviousElement;
 
 } // namespace traits
     
-} // namespace hzdr
+} // namespace deepiterator
 
 

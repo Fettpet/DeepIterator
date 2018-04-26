@@ -159,7 +159,7 @@ std::ostream& operator<<(std::ostream& out, Container3d<T, TIndex> const & con)
 /**
  * Now we define some traits to be able to work with the Container3d.
  */
-namespace hzdr 
+namespace deepiterator 
 {
 
 // traits
@@ -228,7 +228,7 @@ struct ContainerCategory<Container3d<
     TIndex
 > >
 {
-    typedef hzdr::container::categorie::ArrayNDLike<3> type;
+    typedef deepiterator::container::categorie::ArrayNDLike<3> type;
 };
 
 template<
@@ -287,7 +287,7 @@ struct NumberElements<Container3d<
 
 } // namespace traits
 
-}// namespace hzdr
+}// namespace deepiterator
 
 
 /**
@@ -337,9 +337,9 @@ BOOST_AUTO_TEST_CASE(Index3d)
                         for(int k=0; k<c; ++k)
                         {
                             std::array<int, 3> idx{i, j, k}; 
-                            auto result = hzdr::detail::idxndToInt<3>(idx, containerSize);
-                            auto idx2 = hzdr::detail::intToIdxnd<3>(result, containerSize);
-                            auto result2 = hzdr::detail::idxndToInt<3>(idx2, containerSize);
+                            auto result = deepiterator::detail::idxndToInt<3>(idx, containerSize);
+                            auto idx2 = deepiterator::detail::intToIdxnd<3>(result, containerSize);
+                            auto result2 = deepiterator::detail::idxndToInt<3>(idx2, containerSize);
                             BOOST_TEST( idx == idx2 );
                             BOOST_TEST( result == result2);
                         }
@@ -365,9 +365,9 @@ BOOST_AUTO_TEST_CASE(Index4d)
                                 {
                                     std::array<int, 4> idx{i, j, k, l}; 
                                     
-                                    auto result = hzdr::detail::idxndToInt<4>(idx, containerSize);
-                                    auto idx2 = hzdr::detail::intToIdxnd<4>(result, containerSize);
-                                    auto result2 = hzdr::detail::idxndToInt<4>(idx2, containerSize);
+                                    auto result = deepiterator::detail::idxndToInt<4>(idx, containerSize);
+                                    auto idx2 = deepiterator::detail::intToIdxnd<4>(result, containerSize);
+                                    auto result2 = deepiterator::detail::idxndToInt<4>(idx2, containerSize);
                                     BOOST_TEST( idx == idx2 );
                                     BOOST_TEST( result == result2);
                                 }
@@ -386,16 +386,16 @@ BOOST_AUTO_TEST_CASE(UNNESTED_LAYER)
                 Container3d<int, TIndex<int> > container(TIndex<int>{a,b,c});
                 
 
-                typedef hzdr::SelfValue<uint_fast32_t> Offset;
-                typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+                typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+                typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
                 // 0. We create a concept
-                auto && concept = hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                auto && concept = deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(0u),
                         Jumpsize(1u)));
                 
-                auto && view = hzdr::makeView(
+                auto && view = deepiterator::makeView(
                     container,
                     concept
                 );
@@ -428,29 +428,29 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
         for(auto b=1; b< numberElementsInTest; ++b)
             for(auto c=1; c < numberElementsInTest; ++c)
             {
-                Container3d<hzdr::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
+                Container3d<deepiterator::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
                 
 
-                typedef hzdr::SelfValue<uint_fast32_t> Offset;
-                typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+                typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+                typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
 
                 // 0. We create a concept
-                auto && concept = hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                auto && concept = deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(0u),
                         Jumpsize(1u)
                     ),
-                    hzdr::makeIteratorPrescription(
-                        hzdr::makeAccessor(),
-                        hzdr::makeNavigator(
+                    deepiterator::makeIteratorPrescription(
+                        deepiterator::makeAccessor(),
+                        deepiterator::makeNavigator(
                             Offset(0u),
                             Jumpsize(1u)
                         )
                     )
                 );
                 
-                auto && view = hzdr::makeView(
+                auto && view = deepiterator::makeView(
                     container,
                     concept
                 );
@@ -475,29 +475,29 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
         for(auto b=1; b< numberElementsInTest; ++b)
             for(auto c=1; c < numberElementsInTest; ++c)
             {
-                Container3d<hzdr::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
+                Container3d<deepiterator::Particle<int, 2u>, TIndex<int> > container(TIndex<int>{a,b,c});
                 
 
-                typedef hzdr::SelfValue<uint_fast32_t> Offset;
-                typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+                typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+                typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
 
                 // 0. We create a concept
-                auto && concept = hzdr::makeIteratorPrescription(
-                    hzdr::makeAccessor(),
-                    hzdr::makeNavigator(
+                auto && concept = deepiterator::makeIteratorPrescription(
+                    deepiterator::makeAccessor(),
+                    deepiterator::makeNavigator(
                         Offset(0u),
                         Jumpsize(1u)
                     ),
-                    hzdr::makeIteratorPrescription(
-                        hzdr::makeAccessor(),
-                        hzdr::makeNavigator(
+                    deepiterator::makeIteratorPrescription(
+                        deepiterator::makeAccessor(),
+                        deepiterator::makeNavigator(
                             Offset(0u),
                             Jumpsize(1u)
                         )
                     )
                 );
                 
-                auto && view = hzdr::makeView(
+                auto && view = deepiterator::makeView(
                     container,
                     concept
                 );
@@ -521,30 +521,30 @@ BOOST_AUTO_TEST_CASE(Nested_Layer_First)
 
 BOOST_AUTO_TEST_CASE(Nested_Layer_Second)
 {
-    hzdr::Particle<Container3d<int, TIndex<int> >, 2 > container;
+    deepiterator::Particle<Container3d<int, TIndex<int> >, 2 > container;
     
     std::cout << container;
 
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
 
     // 0. We create a concept
-    auto && concept = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && concept = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)
         ),
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u)
             )
         )
     );
     
-    auto && view = hzdr::makeView(
+    auto && view = deepiterator::makeView(
         container,
         concept
     );

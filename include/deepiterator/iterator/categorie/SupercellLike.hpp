@@ -35,7 +35,7 @@ the linked list. The following conditions must hold
 
 #include "deepiterator/traits/Traits.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
-namespace hzdr
+namespace deepiterator
 {
 
 namespace container 
@@ -55,7 +55,7 @@ namespace traits
 template<typename TContainer>
 struct IsBidirectional<
     TContainer, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     static const bool value = true;
@@ -64,7 +64,7 @@ struct IsBidirectional<
 template<typename TContainer>
 struct IsRandomAccessable<
     TContainer, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     static const bool value = true;
@@ -84,7 +84,7 @@ struct Get<
     TContainer,
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
@@ -107,7 +107,7 @@ struct Equal<
     TContainer,
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
@@ -135,7 +135,7 @@ struct Ahead<
     TContainer,
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
@@ -176,7 +176,7 @@ struct Behind<
     TContainer,
     TComponent, 
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
@@ -216,7 +216,7 @@ template<
 struct FirstElement<
     TContainer,
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
@@ -242,7 +242,7 @@ struct NextElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
 
@@ -278,7 +278,7 @@ template<
 struct AfterLastElement<
     TContainer,
     TIndex, 
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     template<typename TRangeFunction>
@@ -318,7 +318,7 @@ template<
 struct LastElement<
     TContainer,
     TIndex,
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     template<typename TSizeFunction>
@@ -347,7 +347,7 @@ struct PreviousElement<
     TContainer,
     TIndex,
     TRange,
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     
@@ -386,7 +386,7 @@ struct BeforeFirstElement<
     TContainer,
     TIndex, 
     TRange,
-    hzdr::container::categorie::SupercellLike
+    deepiterator::container::categorie::SupercellLike
 >
 {
     
@@ -421,5 +421,5 @@ struct BeforeFirstElement<
     
 } // namespace traits
 
-}// namespace hzdr
+}// namespace deepiterator
 

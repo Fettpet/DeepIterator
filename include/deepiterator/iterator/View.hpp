@@ -27,14 +27,14 @@
 #include "deepiterator/traits/Traits.hpp"
 
 #include <type_traits>
-namespace hzdr 
+namespace deepiterator 
 {
 
 
 
 /**
  * \struct View
- * @author Sebastian Hahn (t.hahn@hzdr.de )
+ * @author Sebastian Hahn (t.hahn@deepiterator.de )
  * 
  * @brief The View is a composition of a Prescription and a datastructure. It is
  * used to generate the DeepIterator. The View has four ways to create a Deep -
@@ -127,7 +127,7 @@ public:
          TPrescription_ && prescription
     ):
         containerPtr(&container),
-        prescription(hzdr::forward<TPrescription_>(prescription))
+        prescription(deepiterator::forward<TPrescription_>(prescription))
     {}
 
 
@@ -229,7 +229,7 @@ template<
     typename ContainerCategoryType = typename traits::ContainerCategory<
         TContainerNoRef
     >::type,    
-    bool isBidirectional = hzdr::traits::IsBidirectional<
+    bool isBidirectional = deepiterator::traits::IsBidirectional<
         TContainerNoRef, 
         ContainerCategoryType
     >::value
@@ -243,21 +243,21 @@ makeView(
 ->
     View<
         TContainerNoRef,
-        decltype(hzdr::details::makeIteratorPrescription<
+        decltype(deepiterator::details::makeIteratorPrescription<
             TContainerNoRef
         >(concept)),
         decltype(details::makeIterator<TContainerNoRef>(
-            hzdr::forward<TPrescription>(concept)
+            deepiterator::forward<TPrescription>(concept)
         )),
         decltype(details::makeReverseIterator<TContainerNoRef>(
-            hzdr::forward<TPrescription>(concept)
+            deepiterator::forward<TPrescription>(concept)
         )),
         isBidirectional
     >
 {
     using ContainerType = TContainerNoRef;
     
-    using Prescription = decltype(hzdr::details::makeIteratorPrescription<
+    using Prescription = decltype(deepiterator::details::makeIteratorPrescription<
             TContainerNoRef
         >(concept));
         
@@ -265,20 +265,20 @@ makeView(
         ContainerType,
         Prescription,
         decltype(details::makeIterator<ContainerType>(
-            hzdr::forward<TPrescription>(concept)
+            deepiterator::forward<TPrescription>(concept)
         )),
         decltype(details::makeReverseIterator<ContainerType>(
-            hzdr::forward<TPrescription>(concept)
+            deepiterator::forward<TPrescription>(concept)
         )),
         isBidirectional
     >;
      
 
     return ResultType(
-        hzdr::forward<TContainer>(con), 
-        hzdr::details::makeIteratorPrescription<TContainerNoRef>(concept)
+        deepiterator::forward<TContainer>(con), 
+        deepiterator::details::makeIteratorPrescription<TContainerNoRef>(concept)
     );
     
 }
 
-} // namespace hzdr
+} // namespace deepiterator

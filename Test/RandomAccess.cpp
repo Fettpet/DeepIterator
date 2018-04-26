@@ -1,6 +1,6 @@
 
 /**
- * @author Sebastian Hahn t.hahn <at> hzdr.de
+ * @author Sebastian Hahn t.hahn <at> deepiterator.de
  * @brief Within these test collection we need to test the following operations:
  * 1. it+=n // done
  * 2. it-=n // done
@@ -20,10 +20,10 @@
 #include "deepiterator/PIC/SupercellContainer.hpp"
 #include "deepiterator/PIC/Particle.hpp"
 #include "deepiterator/DeepIterator.hpp"
-typedef hzdr::Particle<int_fast32_t, 2u> Particle;
-typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 2u> Particle;
+typedef deepiterator::Frame<Particle, 10u> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
 /**
  * @brief We use this test to verify the random access iterator for unnested 
@@ -32,16 +32,16 @@ typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
 BOOST_AUTO_TEST_CASE(ParticleInFrame)
 {
     
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
         
     
     Frame test;
     
     
-    auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                             hzdr::makeAccessor(),
-                             hzdr::makeNavigator(
+    auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                             deepiterator::makeAccessor(),
+                             deepiterator::makeNavigator(
                                  Offset(0),
                                  Jumpsize(1)));
     
@@ -109,9 +109,9 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     BOOST_TEST(not (it1 > it2 + 8));
 
     
-    auto  childPrescriptionJump3 = hzdr::makeIteratorPrescription(
-                             hzdr::makeAccessor(),
-                             hzdr::makeNavigator(
+    auto  childPrescriptionJump3 = deepiterator::makeIteratorPrescription(
+                             deepiterator::makeAccessor(),
+                             deepiterator::makeNavigator(
                                  Offset(0),
                                  Jumpsize(3)));
 
@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
      * 1. += -= 
      * 2. different offsets and jumpsizes and n
      */
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     auto nbFrames = 5u;
     auto nbParticleInLastFrame = 5u;
@@ -181,14 +181,14 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
             for(auto  n : ns)
             {
                 
-                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+                auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jump)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1))));
                 
@@ -232,14 +232,14 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
             for(auto  n : ns)
             {
 //                 std::cout << "Offset " << off << " Jumpsize " << jump << " n " << n << std::endl;
-                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+                auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(off),
                                                     Jumpsize(jump))));
                 
@@ -283,8 +283,8 @@ BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
      * 1. += -= 
      * 2. different offsets and jumpsizes and n
      */
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     auto nbFrames = 5u;
     auto nbParticleInLastFrame = 5u;
@@ -301,19 +301,19 @@ BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
             for(auto  n : ns)
             {
                 
-                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+                auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jump)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1)))));
                 
@@ -357,8 +357,8 @@ BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
 
 BOOST_AUTO_TEST_CASE(CompareOperators)
 {
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     auto nbFrames = 5u;
     auto nbParticleInLastFrame = 5u;
@@ -373,22 +373,22 @@ BOOST_AUTO_TEST_CASE(CompareOperators)
         for(auto off : offsets)
             for(auto  n : ns)
             {
-                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+                auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jump)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1)),
-                                            hzdr::makeIteratorPrescription(
-                                                hzdr::makeAccessor(),
-                                                hzdr::makeNavigator(
+                                            deepiterator::makeIteratorPrescription(
+                                                deepiterator::makeAccessor(),
+                                                deepiterator::makeNavigator(
                                                     Offset(0),
                                                     Jumpsize(1)))));
-                auto && view = hzdr::makeView(supercell, childPrescriptionJump1);
+                auto && view = deepiterator::makeView(supercell, childPrescriptionJump1);
                 
                 auto && it1 = view.begin();
                 

@@ -22,14 +22,14 @@
 #pragma once
 
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits
 {
 
 /**
  * \struct HasConstantSize
- * @author Sebastian Hahn (t.hahn < at > hzdr) 
+ * @author Sebastian Hahn (t.hahn < at > deepiterator) 
  * @brief This trait decide whether a container has a constant size, or not. A 
  * size of a container is constant, if number of elements within the container
  * doesn't change while runtime. This allow some optimizations.
@@ -41,5 +41,5 @@ struct HasConstantSize;
 
 }// namespace traits
     
-}// namespace hzdr
+}// namespace deepiterator
 

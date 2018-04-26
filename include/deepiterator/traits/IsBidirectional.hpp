@@ -18,7 +18,7 @@
  */
 
 /**
- * @author Sebastian Hahn t.hahn < at > hzdr.de
+ * @author Sebastian Hahn t.hahn < at > deepiterator.de
  * @brief A container is bidirectional it is possible to go to the previous element.
  * The deepiterator has the functions --it and it-- if it is bidirectional.
  * @tparam TContainer: type of the container
@@ -26,7 +26,7 @@
  */
 #pragma once
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits
 {
@@ -37,6 +37,6 @@ template<
 struct IsBidirectional;
 
 }// namespace traits
-}// namespace hzdr
+}// namespace deepiterator
 
 

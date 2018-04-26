@@ -11,9 +11,9 @@
 
 using namespace boost::unit_test;
 typedef int_fast32_t ParticleProperty; 
-typedef hzdr::Particle<ParticleProperty, 2> Particle;
-typedef hzdr::Frame<Particle, 10> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
+typedef deepiterator::Particle<ParticleProperty, 2> Particle;
+typedef deepiterator::Frame<Particle, 10> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
 
 /**
  * @brief This test iterate over all Positions in a Particle
@@ -30,17 +30,17 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
  *@brief 1. test: Forward with jumpsize 1
  */ 
 
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     // over each element                          
-    auto view = hzdr::makeView(particle1, 
-                               hzdr::makeIteratorPrescription(   
-                                    hzdr::makeAccessor(), 
-                                    hzdr::makeNavigator(
+    auto view = deepiterator::makeView(particle1, 
+                               deepiterator::makeIteratorPrescription(   
+                                    deepiterator::makeAccessor(), 
+                                    deepiterator::makeNavigator(
                                         Offset(0u),
                                         Jumpsize(1u))));
 
-  //  hzdr::View<Particle, hzdr::Direction::Forward<1>> con(&test1);
+  //  deepiterator::View<Particle, deepiterator::Direction::Forward<1>> con(&test1);
     auto it = view.begin();
     
 
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
 BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
 {
 
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     uint_fast32_t const nbFrames = 5u;
     uint_fast32_t const nbParticlesInLastFrame = 2u;
@@ -98,10 +98,10 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     ********************/
 
     // the 2 is the number of elements in Last Frame
-    auto && view = hzdr::makeView(*(supercell.firstFrame), 
-                                  hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+    auto && view = deepiterator::makeView(*(supercell.firstFrame), 
+                                  deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0u),
                                             Jumpsize(1u))));
 
@@ -127,10 +127,10 @@ We implement a own collectivity class
         
     }
     
-    auto && viewJump3 = hzdr::makeView(*(supercell.firstFrame), 
-                                hzdr::makeIteratorPrescription(
-                                    hzdr::makeAccessor(),
-                                    hzdr::makeNavigator(
+    auto && viewJump3 = deepiterator::makeView(*(supercell.firstFrame), 
+                                deepiterator::makeIteratorPrescription(
+                                    deepiterator::makeAccessor(),
+                                    deepiterator::makeNavigator(
                                         Offset(0u),
                                         Jumpsize(3u))));
     auto counterJump3 = 0;
@@ -174,8 +174,8 @@ We implement a own collectivity class
  */
 BOOST_AUTO_TEST_CASE(FramesInSupercells)
 {
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     // Supercell with 5 frames. In the last frame are 2 particles
     uint_fast32_t const nbFrames = 5u;
     uint_fast32_t const nbParticlesInLastFrame = 2u;
@@ -183,11 +183,11 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
 
     
     
-    auto && view = hzdr::makeView(
+    auto && view = deepiterator::makeView(
         supercell,
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u))));
     
@@ -209,11 +209,11 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     
     // we count each second frame
     
-    auto && viewJump2 = hzdr::makeView(
+    auto && viewJump2 = deepiterator::makeView(
         supercell,
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(2u))));
     

@@ -12,17 +12,17 @@ The project delivers some make functions. We use the functions to iterate over e
 
     #include "deepiterator/DeepIterator.hpp"
     // create the prescription to get all int's out of std::vector<int>
-    auto && prescriptionSingleLayer = hzdr::makeIteratorPrescription 
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator( 
+    auto && prescriptionSingleLayer = deepiterator::makeIteratorPrescription 
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator( 
             Offset(0),
             Jumpsize(1)
         )
     );
     // create the prescription to get all ints out of std::vector<std::vector<int >>
-    auto && prescriptionDoubleLayer = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && prescriptionDoubleLayer = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0),
             Jumpsize(1)
         ),

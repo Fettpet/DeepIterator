@@ -9,9 +9,9 @@
 #include "deepiterator/DeepIterator.hpp"
 
 
-typedef hzdr::Particle<int32_t, 2> Particle;
-typedef hzdr::Frame<Particle, 256> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
+typedef deepiterator::Particle<int32_t, 2> Particle;
+typedef deepiterator::Frame<Particle, 256> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
 /***************************************************************
  * first Test case: Add a one to all particles first attribute
  * ******************************************************************/
@@ -22,20 +22,20 @@ FrameInSuperCell(Supercell *supercell, const int nbParticleInLastFrame)
 {
    
     typedef typename Supercell::FrameType Frame;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    typedef hzdr::SelfValue<uint_fast32_t, 256> Jumpsize_256;
-    auto prescription = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t, 256> Jumpsize_256;
+    auto prescription = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)),
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(threadIdx.x),
                 Jumpsize_256())));
-    auto view = hzdr::makeView(*supercell, prescription);
+    auto view = deepiterator::makeView(*supercell, prescription);
                                             
 
      for(auto it=view.begin(); it != view.end(); ++it)
@@ -81,17 +81,17 @@ void
 addParticle(Supercell & supercell, int *value)
 {
 
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    typedef hzdr::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
-    auto prescriptionParticle = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
+    auto prescriptionParticle = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0),
             Jumpsize(1)),
-        hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(threadIdx.x),
                     Jumpsize_256())));
 
@@ -116,32 +116,32 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
 {
     const int nbSupercellAdd = 2;
     // define all needed types 
-    typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+    typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
     typedef typename Supercell::FrameType Frame;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
-    typedef hzdr::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t, 256u> Jumpsize_256;
     // define shared variables
     
     SupercellContainer supercellContainer(supercell, nbSupercells);  
-    auto prescriptionSupercell = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto prescriptionSupercell = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
             
-    auto prescriptionParticle = hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+    auto prescriptionParticle = deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u)),
-            hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(threadIdx.x),
                     Jumpsize_256())));
     
-    auto viewSupercellContainer = hzdr::makeView(supercellContainer, prescriptionSupercell);
+    auto viewSupercellContainer = deepiterator::makeView(supercellContainer, prescriptionSupercell);
     auto test = viewSupercellContainer.begin();
     
     // Add all the particles where enough supercell are there
@@ -167,7 +167,7 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
         __syncthreads();
         
        
-        auto viewParticle = hzdr::makeView(*it, prescriptionParticle);
+        auto viewParticle = deepiterator::makeView(*it, prescriptionParticle);
         
         for(auto itParticle = viewParticle.begin();
             itParticle != viewParticle.end();
@@ -201,7 +201,7 @@ addAllParticlesInSupercell(Supercell *supercell, const uint nbSupercells)
         __syncthreads();
         
 
-        auto viewParticle = hzdr::makeView(*it, prescriptionParticle);
+        auto viewParticle = deepiterator::makeView(*it, prescriptionParticle);
         
         for(auto itParticle = viewParticle.begin();
             itParticle != viewParticle.end();

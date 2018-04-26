@@ -6,7 +6,7 @@
 #include "deepiterator/iterator/Categorie.hpp"
 #include "deepiterator/definitions/hdinline.hpp"
 #include "deepiterator/traits/Traits.hpp"
-namespace hzdr
+namespace deepiterator
 {
 template<typename TSupercell>
 struct SupercellContainer
@@ -90,9 +90,9 @@ protected:
 namespace traits 
 {
 template<typename Supercell>
-struct NumberElements<hzdr::SupercellContainer<Supercell> >
+struct NumberElements<deepiterator::SupercellContainer<Supercell> >
 {
-    typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+    typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
     
     HDINLINE
     int_fast32_t
@@ -145,10 +145,10 @@ struct ContainerCategory;
 template<typename TSupercell>
 struct ContainerCategory<SupercellContainer<TSupercell> >
 {
-    typedef hzdr::container::categorie::ArrayLike type;
+    typedef deepiterator::container::categorie::ArrayLike type;
 };
 
 } // namespace traits
 
 
-}// namespace hzdr
+}// namespace deepiterator

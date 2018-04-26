@@ -22,27 +22,27 @@
 
 using namespace boost::unit_test;
 
-typedef hzdr::Particle<int_fast32_t, 2u> Particle;
-typedef hzdr::Frame<Particle, 10u> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
-typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
+typedef deepiterator::Particle<int_fast32_t, 2u> Particle;
+typedef deepiterator::Frame<Particle, 10u> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
+typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
 
 BOOST_AUTO_TEST_CASE(SingleLayer)
 {
 
     Frame container;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     // forward 0
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()));
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 1>()));
             
             auto view = makeView(
                 container, 
@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 2>()));
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()));
             
             auto view = makeView(
                 container, 
@@ -96,12 +96,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()));
+                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()));
             
            
             auto view = makeView(
@@ -130,12 +130,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()));
+                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()));
             
             
             auto view = makeView(
@@ -164,12 +164,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 1>()));
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 1>()));
             
             
             auto view = makeView(
@@ -191,12 +191,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 2>()));
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()));
             
             
             auto view = makeView(
@@ -222,12 +222,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
         for(int off=0; off<9; ++off)
             for(int jumpsize=1; jumpsize<9; ++jumpsize)
             {
-                auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()));
+                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()));
                 
                 
                 auto view = makeView(
@@ -254,12 +254,12 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto  childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto  childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            hzdr::Slice<hzdr::slice::IgnoreLastElements, 2>()));
+                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 2>()));
             
             
             auto view = makeView(
@@ -289,23 +289,23 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
 BOOST_AUTO_TEST_CASE(TWOLAYER)
 {
     Frame container;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     // forward 0
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 2>()
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize)
                                             )
@@ -338,16 +338,16 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<8; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 2>()
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize)
                                             )
@@ -380,16 +380,16 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            hzdr::Slice<hzdr::slice::NumberElements, 2>()
+                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize)
                                             )
@@ -420,18 +420,18 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::NumberElements, 2>()
+                                                deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
                                             )
                                         )
             );
@@ -459,18 +459,18 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<1; ++off)
         for(int jumpsize=1; jumpsize<2; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 0>()
+                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()
                                             )
                                         )
             );
@@ -498,18 +498,18 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<1; ++off)
         for(int jumpsize=1; jumpsize<2; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -538,18 +538,18 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );
@@ -578,18 +578,18 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
-            auto childPrescriptionJump1 = hzdr::makeIteratorPrescription(
-                                        hzdr::makeAccessor(),
-                                        hzdr::makeNavigator(
+            auto childPrescriptionJump1 = deepiterator::makeIteratorPrescription(
+                                        deepiterator::makeAccessor(),
+                                        deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1)
                                         ),
-                                        hzdr::makeIteratorPrescription(
-                                            hzdr::makeAccessor(),
-                                            hzdr::makeNavigator(
+                                        deepiterator::makeIteratorPrescription(
+                                            deepiterator::makeAccessor(),
+                                            deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                hzdr::Slice<hzdr::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
                                             )
                                         )
             );

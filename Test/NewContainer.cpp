@@ -26,7 +26,7 @@
  * 5. NumberElements
  * <b> This is in each case needed </b>. 
  */
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits 
 {
@@ -436,7 +436,7 @@ struct BeforeFirstElement<
 
 } // namespace traits
 
-} // namespace hzdr
+} // namespace deepiterator
 
 
 /**
@@ -446,21 +446,21 @@ struct BeforeFirstElement<
 BOOST_AUTO_TEST_CASE(SimpleTest)
 {
     typedef boost::container::vector<int> MyContainerType;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     
     
-    auto && concept = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && concept = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0),
             Jumpsize(1))
     );
     
     MyContainerType container{0,1,2,3,4,5,6,7,8,9,10};
     
-    auto && view = hzdr::makeView(container, concept);
+    auto && view = deepiterator::makeView(container, concept);
     int counter = 0;
     for(auto && it=view.begin(); it != view.end(); ++it)
     {
@@ -483,8 +483,8 @@ BOOST_AUTO_TEST_CASE(ComplexTest)
 {
     // define the needed datatypes
     typedef int_fast32_t ParticleProperty;
-    typedef hzdr::Particle<ParticleProperty, 2u> Particle;
-    typedef hzdr::Frame<Particle, 10u> Frame;
+    typedef deepiterator::Particle<ParticleProperty, 2u> Particle;
+    typedef deepiterator::Frame<Particle, 10u> Frame;
     typedef boost::container::vector<Frame> MyContainerType;
     
     // set the test data
@@ -498,26 +498,26 @@ BOOST_AUTO_TEST_CASE(ComplexTest)
     container.push_back(Frame(particleLastFrame));
     
     // define offset and jumpsize types
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto && concept = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto && concept = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)),
-        hzdr::makeIteratorPrescription(
-            hzdr::makeAccessor(),
-            hzdr::makeNavigator(
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u)),
-            hzdr::makeIteratorPrescription(
-                hzdr::makeAccessor(),
-                hzdr::makeNavigator(
+            deepiterator::makeIteratorPrescription(
+                deepiterator::makeAccessor(),
+                deepiterator::makeNavigator(
                     Offset(0u),
                     Jumpsize(1u)))));
     
-    auto && view = hzdr::makeView(container, concept);
+    auto && view = deepiterator::makeView(container, concept);
     
     uint counter = 0u;
     for(auto && it = view.begin(); it != view.end(); ++it)

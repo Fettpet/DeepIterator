@@ -21,34 +21,34 @@
 
 #pragma once
 
-namespace hzdr 
+namespace deepiterator 
 {
 namespace traits
 {
 
 /**
  * \struct ContainerCategory
- * @author Sebastian Hahn (t.hahn < at > hzdr) 
+ * @author Sebastian Hahn (t.hahn < at > deepiterator) 
  * @brief This trait is used to specify a categorie of a container. A categorie
  * needs  
  * The first four are needed for the accesor:
- * 1. hzdr::traits::accessor::Ahead
- * 2. hzdr::traits::accessor::Behind
- * 3. hzdr::traits::accessor::Equal
- * 4. hzdr::traits::accessor::Get
+ * 1. deepiterator::traits::accessor::Ahead
+ * 2. deepiterator::traits::accessor::Behind
+ * 3. deepiterator::traits::accessor::Equal
+ * 4. deepiterator::traits::accessor::Get
  
  * The next six are needed for the navigator
- * 5. hzdr::traits::navigator::AfterLastElement
- * 6. hzdr::traits::navigator::BeforeFirstElement
- * 7. hzdr::traits::navigator::FirstElement
- * 8. hzdr::traits::navigator::LastElement 
- * 9. hzdr::traits::navigator::NextElement
- * 10. hzdr::traits::navigator::PreviousElement 
+ * 5. deepiterator::traits::navigator::AfterLastElement
+ * 6. deepiterator::traits::navigator::BeforeFirstElement
+ * 7. deepiterator::traits::navigator::FirstElement
+ * 8. deepiterator::traits::navigator::LastElement 
+ * 9. deepiterator::traits::navigator::NextElement
+ * 10. deepiterator::traits::navigator::PreviousElement 
  
  * The rest:
- * 11. hzdr::traits::IndexType
- * 12. hzdr::traits::IsBidirectional
- * 13. hzdr::traits::IsRandomAccessable 
+ * 11. deepiterator::traits::IndexType
+ * 12. deepiterator::traits::IsBidirectional
+ * 13. deepiterator::traits::IsRandomAccessable 
  
  * @tparam TContainer: type of the container
  */ 
@@ -60,4 +60,4 @@ struct ContainerCategory
 
 }// namespace traits
     
-}// namespace hzdr
+}// namespace deepiterator

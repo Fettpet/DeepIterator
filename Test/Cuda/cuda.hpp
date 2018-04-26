@@ -10,9 +10,9 @@
 #include "deepiterator/DeepIterator.hpp"
 
 
-typedef hzdr::Particle<int32_t, 2> Particle;
-typedef hzdr::Frame<Particle, 256> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
+typedef deepiterator::Particle<int32_t, 2> Particle;
+typedef deepiterator::Frame<Particle, 256> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
 
 /**
  * @brief within this test, we add 1 to the first variable of each particle. 

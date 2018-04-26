@@ -1,6 +1,6 @@
 
 /**
- * @author Sebastian Hahn < t.hahn@hzdr.de >
+ * @author Sebastian Hahn < t.hahn@deepiterator.de >
  * @brief Within this file we test the cuda implementation of the DeepIterator. 
  * Because there are problems with BOOST::TEST and Cuda, we need three files to test 
  * the CUDA Implementation:
@@ -19,9 +19,9 @@
 #include "deepiterator/PIC/Particle.hpp"
 #include "deepiterator/DeepIterator.hpp"
 #include "deepiterator/../../Test/Cuda/cuda.hpp"
-typedef hzdr::Particle<int32_t, 2> Particle;
-typedef hzdr::Frame<Particle, 256> Frame;
-typedef hzdr::Supercell<Frame> Supercell;
+typedef deepiterator::Particle<int32_t, 2> Particle;
+typedef deepiterator::Frame<Particle, 256> Frame;
+typedef deepiterator::Supercell<Frame> Supercell;
 
 // 
 // /**
@@ -33,21 +33,21 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
     auto nbParticleInLastFrame = 100u;
     auto nbFrames = 5u;
     callSupercellAddOne(&supercell, nbFrames, nbParticleInLastFrame);
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
-    auto concept = hzdr::makeIteratorPrescription(
-                            hzdr::makeAccessor(),
-                            hzdr::makeNavigator(
+    auto concept = deepiterator::makeIteratorPrescription(
+                            deepiterator::makeAccessor(),
+                            deepiterator::makeNavigator(
                                 Offset(0u),
                                 Jumpsize(1u)),
-                            hzdr::makeIteratorPrescription(
-                                hzdr::makeAccessor(),
-                                hzdr::makeNavigator(
+                            deepiterator::makeIteratorPrescription(
+                                deepiterator::makeAccessor(),
+                                deepiterator::makeNavigator(
                                     Offset(0u),
                                     Jumpsize(1u))));
     
-    auto view = hzdr::makeView(*supercell, concept);
+    auto view = deepiterator::makeView(*supercell, concept);
 
                                
 
@@ -66,9 +66,9 @@ BOOST_AUTO_TEST_CASE(PositionsInFrames)
 BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
 {
 
-    typedef hzdr::SupercellContainer<Supercell> SupercellContainer;
-    typedef hzdr::SelfValue<uint_fast32_t> Offset;
-    typedef hzdr::SelfValue<uint_fast32_t> Jumpsize;
+    typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
+    typedef deepiterator::SelfValue<uint_fast32_t> Offset;
+    typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
     const uint nbSupercells = 3u;
     Supercell** super;
@@ -87,28 +87,28 @@ BOOST_AUTO_TEST_CASE(AddAllParticlesInOne)
          nbSupercells
     );  
     
-    auto concept = hzdr::makeIteratorPrescription(
-        hzdr::makeAccessor(),
-        hzdr::makeNavigator(
+    auto concept = deepiterator::makeIteratorPrescription(
+        deepiterator::makeAccessor(),
+        deepiterator::makeNavigator(
             Offset(0u),
             Jumpsize(1u)));
     std::cout << supercellContainer[2] << std::endl;                         
  
-     auto view = hzdr::makeView(supercellContainer, concept);
+     auto view = deepiterator::makeView(supercellContainer, concept);
  
      for(auto it=view.begin(); it!=view.end(); ++it)
      {
-         auto conceptParticle = hzdr::makeIteratorPrescription(
-             hzdr::makeAccessor(),
-             hzdr::makeNavigator(
+         auto conceptParticle = deepiterator::makeIteratorPrescription(
+             deepiterator::makeAccessor(),
+             deepiterator::makeNavigator(
                  Offset(0u),
                  Jumpsize(1u)),
-             hzdr::makeIteratorPrescription(
-                 hzdr::makeAccessor(),
-                 hzdr::makeNavigator(
+             deepiterator::makeIteratorPrescription(
+                 deepiterator::makeAccessor(),
+                 deepiterator::makeNavigator(
                      Offset(0u),
                      Jumpsize(1u))));
-         auto viewParticle = hzdr::makeView(*it, conceptParticle);
+         auto viewParticle = deepiterator::makeView(*it, conceptParticle);
          auto itParticle = viewParticle.begin();
          auto value = (*itParticle).data[0u];
          BOOST_TEST((value > 0));
