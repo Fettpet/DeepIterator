@@ -42,7 +42,7 @@ The project delivers some make functions. We use the functions to iterate over e
       std::cout << *it;
     }
     // outputs all int's reverse
-    for(auto && it=view.rbegin(); it != view.rend(); --it)
+    for(auto && it=view.rbegin(); it != view.rend(); ++it)
     {
       std::cout << *it;
     }
@@ -50,7 +50,29 @@ The project delivers some make functions. We use the functions to iterate over e
 More examples are in the Test directory.    
 
 ## Installation
-The DeepIterator Library is a header only library. You need to add the following lines to your cmake project.
+Currently we support the building from sources. DeepIterator can then be installed using CMake:
+
+    git clone https://github.com/Fettpet/DeepIterator.git
+
+    mkdir -p deepiterator-build
+    cd deepiterator-build
+
+    # for own install prefix append: -DCMAKE_INSTALL_PREFIX=$HOME/somepath
+    cmake ../DeepIterator
+
+    make -j
+
+    # optional
+    make test
+
+    # sudo is only required for system paths
+    sudo make install
+
+## Linking
+You need to add the following lines to your cmake project.
+
+    # optional: only needed if installed outside of system paths
+    export CMAKE_PREFIX_PATH=$HOME/somepath:$CMAKE_PREFIX_PATH
 
     find_package(DeepIterator REQUIRED HINTS)
     if(DeepIterator_FOUND)
