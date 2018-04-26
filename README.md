@@ -52,6 +52,8 @@ More examples are in the Test directory.
 ## Installation
 The DeepIterator Library is a header only library. You need to add the following lines to your cmake project.
 
-    find_package(DeepIterator)
-    include_directories(SYSTEM ${DeepIterator_INCLUDE_DIRS})
+    find_package(DeepIterator REQUIRED HINTS)
+    if(DeepIterator_FOUND)
+        target_link_libraries(includedeepiterator PRIVATE DeepIterator::DeepIterator)
+    endif()
 

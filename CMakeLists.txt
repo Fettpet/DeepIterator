@@ -98,7 +98,8 @@ append_recursive_files_add_to_src_group(
 
 # install  #####################################################################
 #
-add_library(DeepIteratorLib INTERFACE)
+add_library(DeepIterator INTERFACE)
+
 configure_file(
     ${_DEEPITERATOR_ROOT_DIR}/DeepIteratorConfig.cmake.in
     ${DeepIterator_BINARY_DIR}/DeepIteratorConfig.cmake
@@ -111,12 +112,19 @@ write_basic_package_version_file("DeepIteratorConfigVersion.cmake"
     COMPATIBILITY SameMajorVersion # actually: SameMinorVersion
 )
 
-target_include_directories(DeepIteratorLib INTERFACE  
+set_property(TARGET DeepIterator APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<INSTALL_INTERFACE:include/>
 )
 
-install(TARGETS DeepIteratorLib EXPORT DeepIterator
+target_include_directories(DeepIterator INTERFACE  
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include/>
+)
+
+install(TARGETS DeepIterator EXPORT DeepIteratorTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
     PUBLIC_HEADER DESTINATION include
     INCLUDES DESTINATION include
 )
@@ -125,7 +133,7 @@ install(
     DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX}
 )
 
-install(EXPORT DeepIterator DESTINATION lib/cmake/DeepIterator)
+#install(EXPORT DeepIteratorTargets DESTINATION lib/cmake/DeepIterator)
 
 install(
     FILES
@@ -134,7 +142,7 @@ install(
     DESTINATION lib/cmake/DeepIterator
 )
 
-install(EXPORT DeepIterator
+install(EXPORT DeepIteratorTargets
     FILE DeepIteratorTargets.cmake
     NAMESPACE DeepIterator::
     DESTINATION lib/cmake/DeepIterator
