@@ -298,11 +298,13 @@ struct Behind<
     {
         using namespace deepiterator::detail;
         return (idxndToInt<Dim>(
-            idx1,
-            con1->extent()) 
-        < idxndToInt<Dim>(
-            idx2,
-            con2->extent()))
+                idx1,
+                con1->extent()) 
+            < idxndToInt<Dim>(
+                idx2,
+                con2->extent()
+            )
+        )
         && con1 == con2;
     }
     
@@ -317,14 +319,14 @@ namespace navigator
 {
 /**
  * @brief implementation to get the first element within a container. For further
- * details \see FirstElement.hpp
+ * details \see BeginElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex,
     unsigned int Dim
 >
-struct FirstElement<
+struct BeginElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::ArrayNDLike<Dim> 
@@ -404,7 +406,7 @@ template<
     typename TIndex,
     unsigned int Dim
 >
-struct AfterLastElement<
+struct EndElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::ArrayNDLike<Dim> >
@@ -534,7 +536,7 @@ struct PreviousElement<
 
 /**
  * @brief Implmentation to get check whether the iterator is on the element 
- * before the first one. \see BeforeFirstElement.hpp
+ * before the first one. \see REndElement.hpp
  */
 template<
     typename TContainer,
@@ -542,7 +544,7 @@ template<
     typename TOffset,
     unsigned int Dim
 >
-struct BeforeFirstElement<
+struct REndElement<
     TContainer, 
     TIndex,
     TOffset,

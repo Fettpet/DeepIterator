@@ -65,7 +65,7 @@ position.
 @tparam T_ContainerSize Trait to specify the size of a container. It need the 
 function operator()(T_Container*). T_Container is a pointer to the container 
 instance over which the iterator walks.
-@tparam T_FirstElement Trait to set the index to the first element. It need the 
+@tparam T_BeginElement Trait to set the index to the first element. It need the 
 function operator()(T_Container*, T_Index&, const T_Range). T_Range is the result 
 type of T_Offset's (). T_Container is a pointer to the container 
 instance over which the iterator walks. T_Index is used to describe the position.
@@ -76,7 +76,7 @@ parameter is used to handle the jumpsize. The result of this function is the
 remaining jumpsize. A little example. Your container has 10 elements and your
 iterator is the the 8 element. Your jumpsize is 5. This means the new position
 would be 13. So the result of the function is 3, the remaining jumpsize.
-@tparam T_AfterLastElement This Trait is used to check whether the iteration is 
+@tparam T_EndElement This Trait is used to check whether the iteration is 
 after the last element. The function header is 
 bool operator()(T_Container*, T_Index&). It returns true, if the end is reached, 
 and false otherwise.
@@ -88,7 +88,7 @@ needed if the navigator is bidirectional.
 trait need the function T_Range operator()(T_Container*, T_Index&, T_Range). This 
 trait is only needed if the navigator is bidirectional. For fourther 
 informations see T_NextElement.
-@tparam T_BeforeFirstElement Used to check whether the iterator is before the
+@tparam T_REndElement Used to check whether the iterator is before the
 first element. The function header is bool operator()(T_Container*, T_Index&). 
 It returns true, if the end is reached, and false otherwise.
 @tparam isBidirectional Set the navigator to bidirectional (true) or to forward
@@ -100,14 +100,14 @@ template<
     typename T_Offset,
     typename T_Jumpsize,
     typename T_Index,
-    typename T_ContainerSize,
+    typename T_Size,
     typename T_Range,
-    typename T_FirstElement,
+    typename T_BeginElement,
     typename T_NextElement,
-    typename T_AfterLastElement,
+    typename T_EndElement,
     typename T_LastElement = deepiterator::details::UndefinedType,
     typename T_PreviousElement = deepiterator::details::UndefinedType,
-    typename T_BeforeFirstElement = deepiterator::details::UndefinedType,
+    typename T_REndElement = deepiterator::details::UndefinedType,
     bool isBidirectional = false
 >
 struct Navigator
@@ -122,13 +122,13 @@ struct Navigator
     using OffsetType = T_Offset;
     using IndexType = T_Index;
     using RangeType = T_Range;
-    using NumberElements = T_ContainerSize;
-    using FirstElement = T_FirstElement;
+    using Size = T_Size;
+    using BeginElement = T_BeginElement;
     using NextElement = T_NextElement;
-    using AfterLastElement = T_AfterLastElement;
+    using EndElement = T_EndElement;
     using LastElement = T_LastElement;
     using PreviousElement = T_PreviousElement;
-    using BeforeFirstElement = T_BeforeFirstElement;
+    using REndElement = T_REndElement;
 
     
 public:
@@ -154,12 +154,12 @@ public:
         offset(deepiterator::forward<OffsetType>(offset)),
         jumpsize(deepiterator::forward<JumpsizeType>(jumpsize)),
         containerSize(),
-        firstElement(),
+        beginElement(),
         nextElement(),
-        afterLastElement(),
+        endElement(),
         lastElement(),
         previousElement(),
-        beforeFirstElement()
+        beforeBeginElement()
     {}
     
     
@@ -276,7 +276,7 @@ public:
     -> void
     {
         assert(containerPtr != nullptr); // containerptr should be valid
-        firstElement(
+        beginElement(
             containerPtr,
             index
         );
@@ -359,7 +359,7 @@ public:
     -> 
     void
     {
-        afterLastElement.set(
+        endElement.set(
             containerPtr,
             index,
             containerSize
@@ -383,7 +383,7 @@ public:
     ->    
     typename std::enable_if<T==true>::type
     {
-        beforeFirstElement.set(
+        beforeBeginElement.set(
             containerPtr,
             index,
             containerSize
@@ -406,7 +406,7 @@ public:
     const
     -> bool
     {
-        return afterLastElement.test(
+        return endElement.test(
             containerPtr,
             index,
             containerSize
@@ -435,7 +435,7 @@ public:
     {
         IndexType indexCopy(index);
         PreviousElement prev(previousElement);
-        return beforeFirstElement.test(
+        return beforeBeginElement.test(
             containerPtr, 
             index, 
             containerSize
@@ -497,13 +497,13 @@ public:
 protected:
     OffsetType offset;
     JumpsizeType jumpsize;
-    NumberElements containerSize;
-    FirstElement firstElement;
+    Size containerSize;
+    BeginElement beginElement;
     NextElement nextElement;
-    AfterLastElement afterLastElement;
+    EndElement endElement;
     LastElement lastElement;
     PreviousElement previousElement;
-    BeforeFirstElement beforeFirstElement;
+    REndElement beforeBeginElement;
 } ;
 
 
@@ -540,13 +540,13 @@ struct Navigator<
     using OffsetType = T_Offset;
     using IndexType = deepiterator::details::UndefinedType ;
     using RangeType = deepiterator::details::UndefinedType ;
-    using NumberElements = deepiterator::details::UndefinedType ;
-    using FirstElement = deepiterator::details::UndefinedType ;
+    using Size = deepiterator::details::UndefinedType ;
+    using BeginElement = deepiterator::details::UndefinedType ;
     using NextElement = deepiterator::details::UndefinedType ;
-    using AfterLastElement = deepiterator::details::UndefinedType ;
+    using EndElement = deepiterator::details::UndefinedType ;
     using LastElement = deepiterator::details::UndefinedType ;
     using PreviousElement = deepiterator::details::UndefinedType ;
-    using BeforeFirstElement = deepiterator::details::UndefinedType ;
+    using REndElement = deepiterator::details::UndefinedType ;
     // the default constructors
     HDINLINE Navigator() = default;
     HDINLINE Navigator(Navigator const &) = default;
@@ -644,13 +644,13 @@ namespace details
         typename TJumpsizeType = typename _T::JumpsizeType,
         typename TIndexType = typename _T::IndexType,
         typename TRangeType= typename _T::RangeType,
-        typename TNumberElements= typename _T::NumberElements,
-        typename TFirstElement= typename _T::FirstElement,
+        typename TSize= typename _T::Size,
+        typename TBeginElement= typename _T::BeginElement,
         typename TNextElement= typename _T::NextElement,
-        typename TAfterLastElement= typename _T::AfterLastElement,
+        typename TEndElement= typename _T::EndElement,
         typename TLastElement= typename _T::LastElement,
         typename TPreviousElement= typename _T::PreviousElement,
-        typename TBeforeFirstElement= typename _T::BeforeFirstElement
+        typename TREndElement= typename _T::REndElement
     >
     struct NavigatorTemplates
     {
@@ -659,13 +659,13 @@ namespace details
         using JumpsizeType = TJumpsizeType;
         using IndexType = TIndexType ;
         using RangeType = TRangeType;
-        using NumberElements = TNumberElements;
-        using FirstElement = TFirstElement;
+        using Size = TSize;
+        using BeginElement = TBeginElement;
         using NextElement = TNextElement;
-        using AfterLastElement = TAfterLastElement;
+        using EndElement = TEndElement;
         using LastElement = TLastElement;
         using PreviousElement = TPreviousElement;
-        using BeforeFirstElement = TBeforeFirstElement;
+        using REndElement = TREndElement;
     };
 
 
@@ -685,7 +685,7 @@ template<
     typename T_ContainerCategorie = typename deepiterator::traits::ContainerCategory<
         T_ContainerNoRef
     >::type,
-    typename T_ContainerSize = typename deepiterator::traits::NumberElements<
+    typename T_ContainerSize = typename deepiterator::traits::Size<
         T_ContainerNoRef
     >,
     typename T_Index = typename deepiterator::traits::IndexType<
@@ -696,12 +696,12 @@ template<
         T_ContainerNoRef,
         T_ContainerCategorie
     >::type,
-    typename T_FirstElement = typename deepiterator::traits::navigator::FirstElement<
+    typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
         T_ContainerNoRef, 
         T_Index, 
         T_ContainerCategorie
     >,
-    typename T_AfterLastElement = typename deepiterator::traits::navigator::AfterLastElement<
+    typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
         T_ContainerNoRef, 
         T_Index, 
         T_ContainerCategorie
@@ -722,7 +722,7 @@ template<
         T_Range, 
         T_ContainerCategorie
     >,
-    typename T_BeforeFirstElement = typename deepiterator::traits::navigator::BeforeFirstElement<
+    typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
         T_ContainerNoRef, 
         T_Index, 
         T_Range, 
@@ -767,12 +767,12 @@ deepiterator::Navigator<
     T_Index,
     T_ContainerSize,
     T_Range,
-    T_FirstElement,
+    T_BeginElement,
     T_NextElement,
-    T_AfterLastElement,
+    T_EndElement,
     T_LastElement,
     T_PreviousElement,
-    T_BeforeFirstElement,
+    T_REndElement,
     isBidirectional
 >
 
@@ -785,12 +785,12 @@ deepiterator::Navigator<
         T_Index,
         T_ContainerSize,
         T_Range,
-        T_FirstElement,
+        T_BeginElement,
         T_NextElement,
-        T_AfterLastElement,
+        T_EndElement,
         T_LastElement,
         T_PreviousElement,
-        T_BeforeFirstElement,
+        T_REndElement,
         isBidirectional
     > ;
         
@@ -827,7 +827,7 @@ template<
         T_ContainerNoRef
     >::type ,
     
-    typename T_ContainerSize = typename deepiterator::traits::NumberElements<
+    typename T_ContainerSize = typename deepiterator::traits::Size<
         T_ContainerNoRef
     >::type,
     typename T_Index = typename deepiterator::traits::IndexType<
@@ -838,12 +838,12 @@ template<
         T_ContainerNoRef,
         T_ContainerCategorie
     >::type,
-    typename T_FirstElement = typename deepiterator::traits::navigator::FirstElement<
+    typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
         T_ContainerNoRef, 
         T_Index, 
         T_ContainerCategorie
     >::type,
-    typename T_AfterLastElement = typename deepiterator::traits::navigator::AfterLastElement<
+    typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
         T_ContainerNoRef, 
         T_Index, 
         T_ContainerCategorie
@@ -865,7 +865,7 @@ template<
         T_Range, 
         T_ContainerCategorie
     >::type,
-    typename T_BeforeFirstElement = typename deepiterator::traits::navigator::BeforeFirstElement<
+    typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
         T_ContainerNoRef, 
         T_Index, 
         T_Range, 
@@ -892,12 +892,12 @@ makeNavigator(
         T_Index,
         T_ContainerSize,
         T_Range,
-        T_FirstElement,
+        T_BeginElement,
         T_NextElement,
-        T_AfterLastElement,
+        T_EndElement,
         T_LastElement,
         T_PreviousElement,
-        T_BeforeFirstElement,
+        T_REndElement,
         isBidirectional
     >
 
@@ -910,12 +910,12 @@ makeNavigator(
         T_Index,
         T_ContainerSize,
         T_Range,
-        T_FirstElement,
+        T_BeginElement,
         T_NextElement,
-        T_AfterLastElement,
+        T_EndElement,
         T_LastElement,
         T_PreviousElement,
-        T_BeforeFirstElement,
+        T_REndElement,
         isBidirectional
     > ;
     auto && result = ResultType(

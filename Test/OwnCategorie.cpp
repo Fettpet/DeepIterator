@@ -42,10 +42,10 @@ struct MapLike;
  * Six for the navigator Behaviour
  * 7. firstElement
  * 8. nextElement
- * 9. afterLastElement
+ * 9. EndElement
  * 10. lastElement 
  * 11. previousElement
- * 12. beforeFIrstElement
+ * 12. REndElement
  * We use the std iterator to iterate over the data struc
  */
 
@@ -100,7 +100,7 @@ struct HasConstantSize<boost::container::vector<T> >
 
 template< 
     typename T>
-struct NumberElements<boost::container::vector<T>>
+struct Size<boost::container::vector<T>>
 {
     typedef boost::container::vector<T> Container;
     
@@ -236,13 +236,13 @@ namespace navigator
 {
 /**
  * @brief implementation to get the first element within a container. For further
- * details \see FirstElement.hpp
+ * details \see BeginElement.hpp
  */
 template<
     typename TComponent,
     typename TIndex,
     typename TCategorie>
-struct FirstElement<
+struct BeginElement<
     boost::container::vector<TComponent>, 
     TIndex, 
     TCategorie>
@@ -297,7 +297,7 @@ template<
     typename TComponent,
     typename TIndex,
     typename TCategorie>
-struct AfterLastElement<
+struct EndElement<
     boost::container::vector<TComponent>, 
     TIndex, 
     TCategorie>
@@ -385,14 +385,14 @@ struct PreviousElement<
 
 /**
  * @brief Implmentation to get check whether the iterator is on the element 
- * before the first one. \see BeforeFirstElement.hpp
+ * before the first one. \see REndElement.hpp
  */
 template<
     typename TComponent,
     typename TIndex,
     typename TOffset,
     typename TCategorie>
-struct BeforeFirstElement<
+struct REndElement<
     boost::container::vector<TComponent>, 
     TIndex,
     TOffset,

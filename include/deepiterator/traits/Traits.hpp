@@ -25,7 +25,7 @@
 #include "deepiterator/traits/IsRandomAccessable.hpp"
 #include "deepiterator/traits/RangeType.hpp"
 #include "deepiterator/traits/HasConstantSize.hpp"
-#include "deepiterator/traits/NumberElements.hpp"
+#include "deepiterator/traits/Size.hpp"
 #include "deepiterator/traits/IndexType.hpp"
 // accessor
 #include "deepiterator/traits/Accessor/Ahead.hpp"
@@ -34,11 +34,11 @@
 #include "deepiterator/traits/Accessor/At.hpp"
 
 // navigator
-#include "deepiterator/traits/Navigator/AfterLastElement.hpp"
-#include "deepiterator/traits/Navigator/BeforeFirstElement.hpp"
+#include "deepiterator/traits/Navigator/EndElement.hpp"
+#include "deepiterator/traits/Navigator/REndElement.hpp"
 #include "deepiterator/traits/Navigator/LastElement.hpp"
 #include "deepiterator/traits/Navigator/NextElement.hpp"
 #include "deepiterator/traits/Navigator/PreviousElement.hpp"
-#include "deepiterator/traits/Navigator/FirstElement.hpp"
+#include "deepiterator/traits/Navigator/BeginElement.hpp"
 
 

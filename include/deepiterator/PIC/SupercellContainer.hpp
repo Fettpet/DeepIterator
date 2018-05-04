@@ -90,7 +90,7 @@ protected:
 namespace traits 
 {
 template<typename Supercell>
-struct NumberElements<deepiterator::SupercellContainer<Supercell> >
+struct Size<deepiterator::SupercellContainer<Supercell> >
 {
     typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
     

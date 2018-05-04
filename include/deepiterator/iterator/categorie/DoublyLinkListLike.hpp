@@ -182,12 +182,12 @@ namespace navigator
 {
 
 /**
- * @brief Implementation to get the first element. \see FirstElement.hpp
+ * @brief Implementation to get the first element. \see BeginElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex>
-struct FirstElement<
+struct BeginElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::DoublyLinkListLike>
@@ -236,12 +236,13 @@ struct NextElement<
 } ;   
 /**
  * @brief Implementation to check whether the iterator is after the last element.
- * \see AfterLastElement.hpp
+ * \see EndElement.hpp
  */
 template<
     typename TContainer,
-    typename TIndex>
-struct AfterLastElement<
+    typename TIndex
+>
+struct EndElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::DoublyLinkListLike>
@@ -249,7 +250,11 @@ struct AfterLastElement<
     template<typename TRangeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TRangeFunction const &)
+    test (
+        TContainer*, 
+        TIndex const & idx,
+        TRangeFunction const &
+    )
     const
     {
         return idx == nullptr;
@@ -326,13 +331,13 @@ struct PreviousElement<
 
 /**
  * @brief Implementation to check whether the iterator is before the fist 
- * element. \see BeforeFirstElement.hpp
+ * element. \see REndElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex,
     typename TRange>
-struct BeforeFirstElement<
+struct REndElement<
     TContainer, 
     TIndex, 
     TRange,

@@ -34,7 +34,7 @@ namespace deepiterator
 namespace traits
 {
 template<typename T>
-struct NumberElements;
+struct Size;
 
     
 } // namespace traits

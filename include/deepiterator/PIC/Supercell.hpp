@@ -159,13 +159,13 @@ struct ComponentType<Supercell<TFrame> >
 
 
 template<typename TFrame>
-struct NumberElements<Supercell<TFrame> >
+struct Size<Supercell<TFrame> >
 {  
     typedef Supercell<TFrame> Container;
     
-    NumberElements() = default;
-    NumberElements(NumberElements const &) = default;
-    NumberElements(NumberElements &&) = default;
+    Size() = default;
+    Size(Size const &) = default;
+    Size(Size &&) = default;
     
     HDINLINE
     int_fast32_t 
@@ -182,7 +182,7 @@ struct NumberElements<Supercell<TFrame> >
         return result;
     }
     
-} ; // NumberElements
+} ; // Size
 } // namespace traits
 
 
@@ -370,14 +370,14 @@ namespace navigator
 {
 
 /**
- * @brief Implementation to get the first element. \see FirstElement.hpp
+ * @brief Implementation to get the first element. \see BeginElement.hpp
  */
 template<
     typename TFrame,
     typename SFIANE,
     typename TIndex
 >
-struct FirstElement<
+struct BeginElement<
     deepiterator::Supercell<TFrame>,
     TIndex, 
     SFIANE
@@ -434,14 +434,14 @@ struct NextElement<
 } ;
 /**
  * @brief Implementation to check whether the iterator is after the last element.
- * \see AfterLastElement.hpp
+ * \see EndElement.hpp
  */
 template<
     typename TFrame,
     typename SFIANE,
     typename TIndex
 >
-struct AfterLastElement<
+struct EndElement<
     deepiterator::Supercell<TFrame>,
     TIndex, 
     SFIANE
@@ -544,7 +544,7 @@ struct PreviousElement<
 
 /**
  * @brief Implementation to check whether the iterator is before the fist 
- * element. \see BeforeFirstElement.hpp
+ * element. \see REndElement.hpp
  */
 template<
     typename TFrame,
@@ -552,7 +552,7 @@ template<
     typename TIndex,
     typename TRange
 >
-struct BeforeFirstElement<
+struct REndElement<
     deepiterator::Supercell<TFrame>,
     TIndex, 
     TRange,

@@ -265,7 +265,7 @@ template<
     typename T,
     typename TIndex 
 >
-struct NumberElements<Container3d<
+struct Size<Container3d<
     T, 
     TIndex
 > >
@@ -283,7 +283,7 @@ struct NumberElements<Container3d<
     {
         return f->extent()[0] * f->extent()[1] * f->extent()[2];    
     }
-} ;// struct NumberElements
+} ;// struct Size
 
 } // namespace traits
 

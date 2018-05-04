@@ -54,7 +54,7 @@ template<
     typename TIndex,
     typename TOffset,
     typename TContainerCategory>
-struct BeforeFirstElement;
+struct REndElement;
 
 }// namespace navigator
 

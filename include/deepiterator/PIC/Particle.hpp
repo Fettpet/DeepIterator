@@ -196,7 +196,7 @@ struct ContainerCategory<Particle<TProperty, nb> >
 };
 
 template<typename TPos, int_fast32_t nb>
-struct NumberElements<deepiterator::Particle<TPos, nb> >
+struct Size<deepiterator::Particle<TPos, nb> >
 {
     typedef deepiterator::Particle<TPos, nb> Particle;
     

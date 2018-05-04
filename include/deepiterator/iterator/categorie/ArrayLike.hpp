@@ -190,12 +190,12 @@ namespace navigator
 {
 /**
  * @brief implementation to get the first element within a container. For further
- * details \see FirstElement.hpp
+ * details \see BeginElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex>
-struct FirstElement<
+struct BeginElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::ArrayLike>
@@ -241,12 +241,12 @@ struct NextElement<
 
 /**
  * @brief Implementation to check whether the end is reached. For further 
- * informations \see AfterLastElement.hpp
+ * informations \see EndElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex>
-struct AfterLastElement<
+struct EndElement<
     TContainer, 
     TIndex, 
     deepiterator::container::categorie::ArrayLike>
@@ -331,13 +331,13 @@ struct PreviousElement<
 
 /**
  * @brief Implmentation to get check whether the iterator is on the element 
- * before the first one. \see BeforeFirstElement.hpp
+ * before the first one. \see REndElement.hpp
  */
 template<
     typename TContainer,
     typename TIndex,
     typename TOffset>
-struct BeforeFirstElement<
+struct REndElement<
     TContainer, 
     TIndex,
     TOffset,

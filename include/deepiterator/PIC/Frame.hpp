@@ -183,7 +183,7 @@ struct ContainerCategory<deepiterator::Frame<TParticle, nb> >
 };
 
 template<typename TParticle, int_fast32_t nb>
-struct NumberElements<deepiterator::Frame<TParticle, nb> >
+struct Size<deepiterator::Frame<TParticle, nb> >
 {
     typedef deepiterator::Frame<TParticle, nb> Frame;
     
