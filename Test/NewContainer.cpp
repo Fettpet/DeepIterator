@@ -83,7 +83,7 @@ struct NumberElements<boost::container::vector<T> >
  * 1. IndexType,
  * 2. RangeType,
  * Four for the accessor Behaviour
- * 3. get
+ * 3. At
  * 4. equal
  * 5. ahead
  * 6. behind
@@ -127,7 +127,7 @@ template<
     typename TComponent,
     typename TCategorie,
     typename TIndex>
-struct Get<
+struct At<
     boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 
@@ -413,7 +413,8 @@ struct BeforeFirstElement<
     test (
         TContainer*, 
         TIndex const & idx,
-        TSizeFunction&)
+        TSizeFunction&
+    )
     const
     ->
     bool
@@ -424,7 +425,11 @@ struct BeforeFirstElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TSizeFunction&)
+    set (
+        TContainer*, 
+        TIndex & idx, 
+        TSizeFunction&
+    )
     const
     {
         idx = static_cast<TIndex>(-1);

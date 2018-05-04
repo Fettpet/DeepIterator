@@ -35,7 +35,7 @@ struct MapLike;
  * 1. IndexType,
  * 2. RangeType,
  * Four for the accessor Behaviour
- * 3. get
+ * 3. at
  * 4. equal
  * 5. ahead
  * 6. behind
@@ -117,13 +117,13 @@ namespace accessor
 {
 /**
  * @brief Get the value out of the container at the current iterator position.
- * \see Get.hpp
+ * \see At.hpp
  */
 template<
     typename TComponent,
     typename TCategorie,
     typename TIndex>
-struct Get<
+struct At<
     boost::container::vector<TComponent> , 
     TComponent, 
     TIndex, 

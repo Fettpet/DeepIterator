@@ -80,7 +80,7 @@ template<
     typename TComponent,
     typename TIndex
 >
-struct Get<
+struct At<
     TContainer,
     TComponent, 
     TIndex, 

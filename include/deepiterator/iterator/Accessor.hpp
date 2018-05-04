@@ -36,7 +36,7 @@ namespace deepiterator
  * 
  * @brief The Accesor is used to describe the current position of the iterator. 
  * The Accessor use several functions: 
- * 1. TComponent& get(TContaier*, TIndex&): returns the current value at the 
+ * 1. TComponent& at(TContaier*, TIndex&): returns the current value at the 
  * iterator position
  * 2. bool equal(TContainer*, TIndex&, TContainer*, TIndex&): returns true,
  * if the iterator is at the same position
@@ -48,7 +48,7 @@ namespace deepiterator
  * accessable. 
  * To use the default Accessor you need to spezify the following traits for 
  * each function:
- * 1. get: deepiterator::traits::accessor::Get<
+ * 1. at: deepiterator::traits::accessor::At<
  *      TContainer, 
  *      TComponent, 
  *      TIndex, 
@@ -77,7 +77,7 @@ namespace deepiterator
  * @tparam TIndex Type of the index to get access to the value of the iterator 
  * position.
  * @tparam TContainerCategory Type of default access parameter
- * @tparam TGet Trait to define, how to get the first element 
+ * @tparam TAt Trait to define, how to get the current element
  * @tparam TEqual Trait to define, when two iterators are at the same position
  * @tparam TAhead Trait to define, when the first iterator is ahead the second 
  * one. Only needed if the iterator is random accessable.
@@ -91,7 +91,7 @@ template<
     typename TComponent,
     typename TIndex,
     typename TContainerCategory,
-    typename TGet,
+    typename TAt,
     typename TAhead,
     typename TEqual,
     typename TBehind,
@@ -124,7 +124,7 @@ struct Accessor
      */
     HDINLINE 
     auto
-    get(
+    at(
         ContainerPtr containerPtr,
         IndexType & idx
     )
@@ -132,7 +132,7 @@ struct Accessor
     ComponentRef
     {
         assert(containerPtr != nullptr);
-        return _get(
+        return _at(
             containerPtr, 
             idx
         );
@@ -234,7 +234,7 @@ struct Accessor
     
     
     
-     TGet _get;
+     TAt _at;
      TAhead _ahead;
      TEqual _equal;
      TBehind _behind;
@@ -272,7 +272,7 @@ namespace details
  * 1. IndexType
  * 2. ContainerCategory
  * 3. ComponentType
- * 4. Get
+ * 4. at
  * 5. Ahead
  * 6. Equal
  * 7. Behind
@@ -293,7 +293,7 @@ template<
     typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = deepiterator::traits::accessor::Get<
+    typename TAt = deepiterator::traits::accessor::At<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
@@ -331,7 +331,7 @@ makeAccessor(TAccessor&&)
     TComponent,
     TIndex,
     TContainerCategory,
-    TGet,
+    TAt,
     TAhead,
     TEqual,
     TBehind,
@@ -343,7 +343,7 @@ makeAccessor(TAccessor&&)
         TComponent,
         TIndex,
         TContainerCategory,
-        TGet,
+        TAt,
         TAhead,
         TEqual,
         TBehind,
@@ -360,7 +360,7 @@ makeAccessor(TAccessor&&)
  * 1. IndexType
  * 2. ContainerCategory
  * 3. ComponentType
- * 4. Get
+ * 4. At
  * 5. Ahead
  * 6. Equal
  * 7. Behind
@@ -380,7 +380,7 @@ template<
     typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = deepiterator::traits::accessor::Get<
+    typename TAt = deepiterator::traits::accessor::At<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
@@ -418,7 +418,7 @@ deepiterator::Accessor<
     TComponent,
     TIndex,
     TContainerCategory,
-    TGet,
+    TAt,
     TAhead,
     TEqual,
     TBehind,
@@ -430,7 +430,7 @@ deepiterator::Accessor<
         TComponent,
         TIndex,
         TContainerCategory,
-        TGet,
+        TAt,
         TAhead,
         TEqual,
         TBehind,
@@ -449,7 +449,7 @@ deepiterator::Accessor<
  * 1. IndexType
  * 2. ContainerCategory
  * 3. ComponentType
- * 4. Get
+ * 4. At
  * 5. Ahead
  * 6. Equal
  * 7. Behind
@@ -470,7 +470,7 @@ template<
     typename TComponent = typename deepiterator::traits::ComponentType<
         TContainerNoRef
     >::type,
-    typename TGet = deepiterator::traits::accessor::Get<
+    typename TAt = deepiterator::traits::accessor::At<
         TContainerNoRef, 
         TComponent, 
         TIndex, 
@@ -507,7 +507,7 @@ makeAccessor(TContainer&&)
     TComponent,
     TIndex,
     TContainerCategory,
-    TGet,
+    TAt,
     TAhead,
     TEqual,
     TBehind,
@@ -519,7 +519,7 @@ makeAccessor(TContainer&&)
         TComponent,
         TIndex,
         TContainerCategory,
-        TGet,
+        TAt,
         TAhead,
         TEqual,
         TBehind,

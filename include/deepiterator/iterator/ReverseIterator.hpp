@@ -588,7 +588,7 @@ public:
         if((result == static_cast<ResultType_t>(0)) && (overjump > 0))
         {
 
-                childIterator.setToRbegin(accessor.get(
+                childIterator.setToRbegin(accessor.at(
                     containerPtr, 
                     index
                 ));
@@ -652,7 +652,7 @@ public:
                     1u
                 );
                 if(not isBeforeFirst())
-                    childIterator.setToRbegin(accessor.get(
+                    childIterator.setToRbegin(accessor.at(
                         containerPtr, 
                         index
                     ));
@@ -751,7 +751,7 @@ public:
         // overjump > 0 means we change the datastructure
         if((result == 0) && (overjump > 0))
         {
-            childIterator.setToBegin(accessor.get(
+            childIterator.setToBegin(accessor.at(
                 containerPtr, 
                 index
             ));
@@ -808,7 +808,7 @@ public:
                 navigator.next(containerPtr, index, 1u);
                 // only valid, if it contains enough elements
                 if(not isAfterLast())
-                    childIterator.setToBegin(accessor.get(containerPtr, index));
+                    childIterator.setToBegin(accessor.at(containerPtr, index));
             }
         }
         return remaining;
@@ -958,7 +958,7 @@ public:
         // check whether the iterator is at a valid element
         while(not isAfterLast())
         {
-            childIterator.setToBegin((accessor.get(
+            childIterator.setToBegin((accessor.at(
                 containerPtr, 
                 index
             )));
@@ -1059,7 +1059,7 @@ public:
         // check whether the iterator is at a valid element
         while(not isBeforeFirst())
         {
-            childIterator.setToRbegin((accessor.get(
+            childIterator.setToRbegin((accessor.at(
                 containerPtr, 
                 index
             )));
@@ -1521,7 +1521,7 @@ public:
     -> 
     ComponentReference
     {
-        return accessor.get(
+        return accessor.at(
             containerPtr, 
             index
         );
@@ -1539,7 +1539,7 @@ public:
     -> 
     ComponentReference
     {
-        return accessor.get(
+        return accessor.at(
             containerPtr, 
             index
         );
@@ -1821,7 +1821,7 @@ public:
         ComponentReference
     >::type
     {
-        return accessor.get(
+        return accessor.at(
             containerPtr, 
             index
         );

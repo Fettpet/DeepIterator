@@ -240,7 +240,7 @@ template<
     typename TComponent,
     typename TIndex
 >
-struct Get<
+struct At<
     deepiterator::Supercell<TFrame>,
     TComponent, 
     TIndex, 
