@@ -25,28 +25,16 @@
 #include <type_traits>
 #include <cassert>
 #include "deepiterator/traits/Traits.hpp"
+#include <limits>
 
 namespace deepiterator 
 {
-namespace slice
-{
-    struct NumberElements;
-    struct IgnoreLastElements;
-}
+
  
 template<
-    typename _start_begin,
     int_fast32_t _distance
 >
-struct Slice;
-
-template<
-    int_fast32_t _distance
->
-struct Slice<
-    deepiterator::slice::NumberElements,
-    _distance
->
+struct Slice
 {
 public:
     
@@ -57,7 +45,18 @@ public:
     ->
     int_fast32_t
     {
-        return _distance;
+        if(_distance > 0)
+        {
+            return _distance;
+        }
+        else if(_distance == 0)
+        {
+            return std::numeric_limits< int >::max( );
+        }
+        else
+        {
+            return -1 * _distance;
+        }
     }
     
     constexpr 
@@ -67,44 +66,10 @@ public:
     ->
     bool
     {
-        return true;
+        return _distance >= 0;
     }
     
 };
-
-
-template<
-    int_fast32_t _distance
->
-struct Slice<
-    deepiterator::slice::IgnoreLastElements,
-    _distance
->
-{
-public:
-    
-    constexpr
-    auto 
-    distance()
-    const
-    ->
-    int_fast32_t
-    {
-        return _distance;
-    }
-    
-    constexpr 
-    auto 
-    from_start()
-    const
-    ->
-    bool
-    {
-        return false;
-    }
-    
-};
-
 
 /**
  * \struct SliceNavigator

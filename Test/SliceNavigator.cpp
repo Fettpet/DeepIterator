@@ -42,22 +42,22 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 1>()));
-            
+                                            deepiterator::Slice<1>()));
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
-            
+
             int counter=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
                 ++counter;
             }
-            
+
             BOOST_TEST(counter == 1);
         }
-        
+
     // forward 1
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -67,10 +67,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()));
-            
+                                            deepiterator::Slice<2>()));
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             auto pos = off;
@@ -81,17 +81,17 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 counter++;
             }
             counter = std::min(2, counter);
-            
+
             int counter2=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
                 counter2++;
             }
-            
+
             BOOST_TEST(counter == counter2);
         }
-        
-        
+
+
             // Backward 0
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -101,14 +101,14 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()));
-            
-           
+                                            deepiterator::Slice<-0>()));
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
-            
+
             int counter=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
@@ -122,10 +122,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 counter2++;
             }
             //counter = std::min(2, counter);
-            
+
             BOOST_TEST(counter == counter2);
         }
-        
+
     // backward 1
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -135,11 +135,11 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()));
-            
-            
+                                            deepiterator::Slice<-1>()));
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
 
@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 pos += jumpsize;
                 counter2++;
             }
-            
+
             BOOST_TEST(counter == counter2);
         }
-        
+
     // Now the complete thing with rbegin and rend
     // forward 0
     for(int off=0; off<9; ++off)
@@ -169,11 +169,11 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 1>()));
-            
-            
+                                            deepiterator::Slice<1>()));
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
             }
 
             //counter = std::min(2, counter);
-            
+
             BOOST_TEST(counter == 1);
         }
     // forward 1
@@ -196,11 +196,11 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()));
-            
-            
+                                            deepiterator::Slice<2>()));
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int counter=0;
@@ -208,16 +208,16 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
             {
                 ++counter;
             }
-            
+
             int counter2 = 0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
                 ++counter2;
             }
-            
+
             BOOST_TEST(counter == counter2);
         }
-        
+
     // Backward 0
         for(int off=0; off<9; ++off)
             for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -227,11 +227,11 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()));
-                
-                
+                                                deepiterator::Slice<-0>()));
+
+
                 auto view = makeView(
-                    container, 
+                    container,
                     childPrescriptionJump1
                 );
                 int counter=0;
@@ -246,10 +246,10 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                 }
 
 
-                
+
                 BOOST_TEST(counter == counter2);
             }
-        
+
     // forward
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -259,11 +259,11 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 2>()));
-            
-            
+                                            deepiterator::Slice<-2>()));
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int counter=0;
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
 }
 
 /**
- * @brief This test is used to check whether the slice naviagatror and the 
+ * @brief This test is used to check whether the slice naviagatror and the
  * navigator are compatile to each other
  */
 BOOST_AUTO_TEST_CASE(TWOLAYER)
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
     Frame container;
     typedef deepiterator::SelfValue<uint_fast32_t> Offset;
     typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
-    
+
     // forward 0
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
+                                            deepiterator::Slice<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -311,10 +311,10 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             for(int i=0; i<2; ++i)
             {
@@ -331,10 +331,10 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                     checksum += container[i][j];
                 }
             }
-            
+
             BOOST_TEST(sum == checksum);
         }
-        
+
     for(int off=0; off<8; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
+                                            deepiterator::Slice<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -353,10 +353,10 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
 
@@ -366,7 +366,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
+                                            deepiterator::Slice<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -395,10 +395,10 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
@@ -415,8 +415,8 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
 
             BOOST_TEST(checksum == sum);
         }
-        
-      
+
+
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
@@ -431,14 +431,14 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::NumberElements, 2>()
+                                                deepiterator::Slice<2>()
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                 sum += *it;
 
             }
-            
+
             int checksum=0;
             for(auto it=view.begin(); it!=view.end(); ++it)
             {
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             BOOST_TEST(checksum == sum);
         }
-  
+
     for(int off=0; off<1; ++off)
         for(int jumpsize=1; jumpsize<2; ++jumpsize)
         {
@@ -470,14 +470,14 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 0>()
+                                                deepiterator::Slice<-0>()
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -485,7 +485,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             for(int i=0; i<10; ++i)
             {
@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             }
             BOOST_TEST(sum == checksum);
         }
-        
+
     for(int off=0; off<1; ++off)
         for(int jumpsize=1; jumpsize<2; ++jumpsize)
         {
@@ -509,14 +509,14 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<-1>()
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -524,7 +524,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             for(int i=0; i<10; ++i)
             {
@@ -533,7 +533,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
 
             BOOST_TEST(checksum == sum);
         }
-        
+
     // forward
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
@@ -549,14 +549,14 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<-1>()
                                             )
                                         )
             );
-            
-            
+
+
             auto view = makeView(
-                container, 
+                container,
                 childPrescriptionJump1
             );
             int sum=0;
@@ -564,17 +564,17 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
             {
                 sum += *it;
             }
-            
+
             int checksum=0;
             if(off == 0)
                 for(int i=0; i<10; ++i)
                 {
                     checksum += container[i][0];
                 }
-                
+
                 BOOST_TEST(checksum == sum);
         }
-        
+
     for(int off=0; off<9; ++off)
         for(int jumpsize=1; jumpsize<9; ++jumpsize)
         {
@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<deepiterator::slice::IgnoreLastElements, 1>()
+                                                deepiterator::Slice<-1>()
                                             )
                                         )
             );
