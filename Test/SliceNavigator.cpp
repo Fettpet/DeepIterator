@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<-0>()));
+                                            deepiterator::Slice<0>()));
 
 
             auto view = makeView(
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<-0>()));
+                                                deepiterator::Slice<0>()));
 
 
                 auto view = makeView(
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<-0>()
+                                                deepiterator::Slice<0>()
                                             )
                                         )
             );
