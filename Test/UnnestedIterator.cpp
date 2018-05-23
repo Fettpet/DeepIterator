@@ -21,7 +21,7 @@ typedef deepiterator::Supercell<Frame> Supercell;
 
 BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
 {
-    
+
     // We particle with two properties
     ParticleProperty property1 = static_cast<ParticleProperty>(1);
     ParticleProperty property2 = static_cast<ParticleProperty>(4);
@@ -42,13 +42,13 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
 
   //  deepiterator::View<Particle, deepiterator::Direction::Forward<1>> con(&test1);
     auto it = view.begin();
-    
+
 
     BOOST_TEST(*it == property1);
 
     ++it;
     // check wheter ++ and == work
-    
+
 
     
     BOOST_TEST(*it == property2);
@@ -60,10 +60,10 @@ BOOST_AUTO_TEST_CASE(PositionsInParticlesNotCollectiv)
 
 /**
  *@brief 2. test: Backward 
-*/   
-   
+*/
+
     auto it2 = view.rbegin();
-     
+
     BOOST_TEST(*it2 == property2);
     ++it2;
     BOOST_TEST(*it2 == property1);
@@ -98,12 +98,16 @@ BOOST_AUTO_TEST_CASE(ParticleInFrameNotCollectiv)
     ********************/
 
     // the 2 is the number of elements in Last Frame
-    auto && view = deepiterator::makeView(*(supercell.firstFrame), 
-                                  deepiterator::makeIteratorPrescription(
-                                        deepiterator::makeAccessor(),
-                                        deepiterator::makeNavigator(
-                                            Offset(0u),
-                                            Jumpsize(1u))));
+    auto && view = deepiterator::makeView(
+        *(supercell.firstFrame),
+        deepiterator::makeIteratorPrescription(
+            deepiterator::makeAccessor(),
+            deepiterator::makeNavigator(
+                Offset(0u),
+                Jumpsize(1u)
+            )
+        )
+    );
 
     int_fast32_t counter(0);
     for(auto && it = view.begin(); it != view.end(); ++it)
@@ -140,7 +144,7 @@ We implement a own collectivity class
         
     }
     BOOST_TEST((counter == counterJump3));
-  
+
     /** ******************
     @brief 3. Test backward with Jumpsize 3 nonCollectiv. We can not test 
     whether counterBackwardJump3 == counter, since they iterate over different 
@@ -166,6 +170,7 @@ We implement a own collectivity class
     }
     // the first particle (0, 1), fourth ( 6, 7) seventh ( 12, 13) and last (18, 19) add together
     BOOST_TEST(counter == counterBackwardJump3);
+
 }
 
 /**
@@ -174,6 +179,7 @@ We implement a own collectivity class
  */
 BOOST_AUTO_TEST_CASE(FramesInSupercells)
 {
+
     typedef deepiterator::SelfValue<uint_fast32_t> Offset;
     typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     // Supercell with 5 frames. In the last frame are 2 particles
@@ -190,7 +196,7 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
             deepiterator::makeNavigator(
                 Offset(0u),
                 Jumpsize(1u))));
-    
+
     // we count the number of frames
     auto counter = 0u;
     for(auto it=view.begin(); it!=view.end(); ++it)
@@ -208,7 +214,7 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
     BOOST_TEST(counterReverse == nbFrames);
     
     // we count each second frame
-    
+
     auto && viewJump2 = deepiterator::makeView(
         supercell,
         deepiterator::makeIteratorPrescription(

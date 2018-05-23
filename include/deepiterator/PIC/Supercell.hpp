@@ -125,7 +125,7 @@ struct IndexType<
     SFIANE
 >
 {
-    typedef TFrame* type; 
+    typedef int type;
 } ;
 
 template<
@@ -237,21 +237,24 @@ namespace accessor
 template<
     typename TFrame,
     typename SFIANE,
-    typename TComponent,
     typename TIndex
 >
 struct At<
     deepiterator::Supercell<TFrame>,
-    TComponent, 
+    TFrame,
     TIndex, 
     SFIANE
 >
 {
     HDINLINE
-    TComponent&
-    operator() (deepiterator::Supercell<TFrame>*, TIndex& idx)
+        TFrame&
+    operator() (
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
+        TIndex&
+    )
     {
-        return *idx;
+        return *framePtr;
     }
 } ;    
 
@@ -261,12 +264,11 @@ struct At<
 template<
     typename TFrame,
     typename SFIANE,
-    typename TComponent,
     typename TIndex
 >
 struct Equal<
     deepiterator::Supercell<TFrame>,
-    TComponent, 
+    TFrame,
     TIndex, 
     SFIANE
 >
@@ -274,13 +276,15 @@ struct Equal<
     HDINLINE
     bool
     operator() (
-        deepiterator::Supercell<TFrame>* con1, 
-        TIndex const & idx1, 
-        deepiterator::Supercell<TFrame>* con2, 
-        TIndex const & idx2
+        deepiterator::Supercell<TFrame>* con1,
+        TFrame* framePtr1,
+        TIndex const & ,
+        deepiterator::Supercell<TFrame>* con2,
+        TFrame* framePtr2,
+        TIndex const &
     )
     {
-        return con1 == con2 && idx1 == idx2;
+        return con1 == con2 && framePtr1 == framePtr2;
     }
 } ;
 
@@ -290,12 +294,11 @@ struct Equal<
 template<
     typename TFrame,
     typename SFIANE,
-    typename TComponent,
     typename TIndex
 >
 struct Ahead<
     deepiterator::Supercell<TFrame>,
-    TComponent, 
+    TFrame,
     TIndex, 
     SFIANE
 >
@@ -303,20 +306,22 @@ struct Ahead<
     HDINLINE
     bool
     operator() (
-        deepiterator::Supercell<TFrame>* con1, 
+        deepiterator::Supercell<TFrame>* con1,
+        TFrame* framePtr1,
         TIndex const & idx1, 
-        deepiterator::Supercell<TFrame>* con2, 
+        deepiterator::Supercell<TFrame>* con2,
+        TFrame* framePtr2,
         TIndex const & idx2
     )
     {
         if(con1 != con2)
             return false;
         
-        TIndex tmp = idx1;
+        TFrame tmp = framePtr1;
         while(tmp != nullptr)
         {
             tmp = tmp->previousFrame;
-            if(tmp == idx2) 
+            if(tmp == framePtr2)
                 return true;
            
         }
@@ -332,30 +337,31 @@ struct Ahead<
 template<
     typename TFrame,
     typename SFIANE,
-    typename TComponent,
     typename TIndex
 >
 struct Behind<
     deepiterator::Supercell<TFrame>,
-    TComponent, 
-    TIndex, 
+    TFrame,
+    TIndex,
     SFIANE
 >
 {
     HDINLINE
     bool
     operator() (
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr1,
         TIndex const & idx1, 
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr2,
         TIndex const & idx2
     )
     {
-        TIndex tmp = idx1;
+        TFrame tmp = framePtr1;
         while(tmp != nullptr)
         {
             tmp = tmp->nextFrame;
-            if(tmp == idx2) 
+            if(tmp == framePtr2)
                 return true;
             
         }
@@ -379,6 +385,7 @@ template<
 >
 struct BeginElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex, 
     SFIANE
 >
@@ -386,11 +393,13 @@ struct BeginElement<
     HDINLINE
     void
     operator() (
-        deepiterator::Supercell<TFrame>* container, 
+        deepiterator::Supercell<TFrame>* container,
+        TFrame* framePtr,
         TIndex & idx
     )
     {
-        idx = container->firstFrame;
+        framePtr = container->firstFrame;
+        //idx = static_cast<TIndex>(0);
     }
 } ;
 /**
@@ -405,6 +414,7 @@ template<
 >
 struct NextElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex,
     TRange,
     SFIANE
@@ -417,18 +427,20 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        deepiterator::Supercell<TFrame>*, 
-        TIndex& idx, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
+        TIndex& idx,
         TRange const & range,
         TContainerSize &)
     {
         TRange i = 0;
         for(i = 0; i<range; ++i)
         {
-            idx = idx->nextFrame;
-            if(idx == nullptr)
+            framePtr = framePtr->nextFrame;
+            if(framePtr == nullptr)
                 break;
         }
+        //idx += range;
         return range - i;
     }
 } ;
@@ -443,6 +455,7 @@ template<
 >
 struct EndElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex, 
     SFIANE
 >
@@ -451,26 +464,28 @@ struct EndElement<
     HDINLINE
     bool
     test(
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
         TIndex const & idx, 
         TRangeFunction const &
     )
     const
     {
-        return idx == nullptr;
+        return framePtr == nullptr;
     }
     
     template<typename TRangeFunction>
     HDINLINE
     void
     set(
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
         TIndex & idx,
         TRangeFunction const &
     )
     const
     {
-        idx = nullptr;
+        framePtr = nullptr;
     }
 } ;
 
@@ -484,6 +499,7 @@ template<
 >
 struct LastElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex,
     SFIANE
 >
@@ -492,13 +508,14 @@ struct LastElement<
     HDINLINE
     void
     operator() (
-        deepiterator::Supercell<TFrame>* containerPtr, 
+        deepiterator::Supercell<TFrame>* containerPtr,
+        TFrame* framePtr,
         TIndex& index, 
-        TSizeFunction &&
+        TSizeFunction && size
     )
     {
-        index = containerPtr->lastFrame;
-
+        framePtr = containerPtr->lastFrame;
+        index = size(containerPtr) -1;
     }
 } ;
 
@@ -514,6 +531,7 @@ template<
 >
 struct PreviousElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex,
     TRange,
     SFIANE
@@ -525,7 +543,8 @@ struct PreviousElement<
     HDINLINE
     TRange
     operator() (
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
         TIndex& idx, 
         TRange const & jumpsize,
         TContainerSize&)
@@ -533,11 +552,11 @@ struct PreviousElement<
         TRange i = 0;
         for(i = 0; i<jumpsize; ++i)
         {
-            idx = idx->previousFrame;
-            if(idx == nullptr)
+            framePtr = framePtr->previousFrame;
+            if(framePtr == nullptr)
                 return jumpsize - i;
         }
-
+        idx -= jumpsize;
         return jumpsize - i;
     }
 } ;
@@ -554,6 +573,7 @@ template<
 >
 struct REndElement<
     deepiterator::Supercell<TFrame>,
+    TFrame,
     TIndex, 
     TRange,
     SFIANE
@@ -564,13 +584,14 @@ struct REndElement<
     HDINLINE
     bool
     test(
-        deepiterator::Supercell<TFrame>*, 
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
         TIndex const & idx,
         TRangeFunction&
     )
     const
     {
-        return idx == nullptr ;
+        return framePtr == nullptr ;
     }
     
 
@@ -578,13 +599,14 @@ struct REndElement<
     HDINLINE
     void
     set(
-        deepiterator::Supercell<TFrame>*, 
-        TIndex & idx,
+        deepiterator::Supercell<TFrame>*,
+        TFrame* framePtr,
+        TIndex &,
         TRangeFunction&
     )
     const
     {
-        idx = nullptr;
+        framePtr = nullptr;
     }
 } ;
 }

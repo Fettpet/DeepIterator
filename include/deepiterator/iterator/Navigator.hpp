@@ -175,7 +175,8 @@ public:
     HDINLINE
     auto
     next(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index,
         RangeType const & distance
     )
@@ -184,7 +185,8 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         RangeType remainingJumpsize = nextElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,  
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
@@ -213,7 +215,8 @@ public:
     HDINLINE
     auto
     previous(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index,
         RangeType distance
     )
@@ -225,7 +228,8 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         auto remainingJumpsize = previousElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,
             static_cast<RangeType>(jumpsize())  * distance,
             containerSize
@@ -234,7 +238,8 @@ public:
         {
             auto indexCopy = index;
             remainingJumpsize = previousElement(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 indexCopy,
                 static_cast<RangeType>(offset()) ,
                 containerSize
@@ -270,7 +275,8 @@ public:
     HDINLINE 
     auto
     begin(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index
     )
     -> void
@@ -278,10 +284,12 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         beginElement(
             containerPtr,
+            componentPtr,
             index
         );
         nextElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,  
             static_cast<RangeType>(offset()),
             containerSize
@@ -298,7 +306,8 @@ public:
     HDINLINE 
     auto
     rbegin(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index
     )
     -> void
@@ -325,17 +334,20 @@ public:
 
         lastElement(
             containerPtr,
+            componentPtr,
             index,
             containerSize
         );
 
         if(not isBeforeFirst(
             containerPtr,
+            componentPtr,
             index
         ))
         {
             previousElement(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 neededJumps,
                 containerSize
@@ -353,7 +365,8 @@ public:
     HDINLINE 
     auto
     end(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index
     )
     -> 
@@ -361,6 +374,7 @@ public:
     {
         endElement.set(
             containerPtr,
+            componentPtr,
             index,
             containerSize
         );
@@ -377,7 +391,8 @@ public:
     HDINLINE
     auto
     rend(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & index
     )
     ->    
@@ -385,6 +400,7 @@ public:
     {
         beforeBeginElement.set(
             containerPtr,
+            componentPtr,
             index,
             containerSize
         );
@@ -400,7 +416,8 @@ public:
     HDINLINE 
     auto
     isAfterLast(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType const & index
     )
     const
@@ -408,6 +425,7 @@ public:
     {
         return endElement.test(
             containerPtr,
+            componentPtr,
             index,
             containerSize
         );
@@ -424,7 +442,8 @@ public:
     HDINLINE 
     auto
     isBeforeFirst(
-        ContainerPtr containerPtr,   
+        ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType const & index
     )
     const
@@ -435,13 +454,17 @@ public:
     {
         IndexType indexCopy(index);
         PreviousElement prev(previousElement);
+        ComponentPtr componentPtrBuffer(componentPtr);
+        // The first check is the trait. The second is for jumpsite
         return beforeBeginElement.test(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             containerSize
         ) || (
             prev(
-                containerPtr, 
+                containerPtr,
+                componentPtrBuffer,
                 indexCopy,
                 static_cast<RangeType>(offset()),
                 containerSize
@@ -697,33 +720,39 @@ template<
         T_ContainerCategorie
     >::type,
     typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_NextElement = typename deepiterator::traits::navigator::NextElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >,
     typename T_LastElement = typename deepiterator::traits::navigator::LastElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie>,
     typename T_PreviousElement = typename deepiterator::traits::navigator::PreviousElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >,
     typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
@@ -839,34 +868,40 @@ template<
         T_ContainerCategorie
     >::type,
     typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >::type,
     typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >::type,
     typename T_NextElement = typename deepiterator::traits::navigator::NextElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >::type,
     typename T_LastElement = typename deepiterator::traits::navigator::LastElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >::type,
     typename T_PreviousElement = typename deepiterator::traits::navigator::PreviousElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >::type,
     typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie

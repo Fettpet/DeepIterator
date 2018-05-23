@@ -84,9 +84,13 @@ struct At<
 {
     HDINLINE
     TComponent&
-    operator() (TContainer*, TIndex& idx)
+    operator()(
+        TContainer*,
+        TComponent* componentPtr,
+        TIndex&
+    )
     {
-        return *idx;
+        return *componentPtr;
     }
     
 } ;       
@@ -107,9 +111,17 @@ struct Equal<
 {
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator() (
+        TContainer * con1,
+        TComponent const * const,
+        TIndex & idx1,
+        TContainer * con2,
+        TComponent const * const,
+        TIndex & idx2
+    )
     {
-        return con1 == con2 && idx1 == idx2;
+        return con1 == con2 &&
+                idx1 == idx2;
     }
 } ;   
 
@@ -128,19 +140,19 @@ struct Ahead<
 {
     HDINLINE
     bool
-    operator() (TContainer* con1, TIndex& idx1, TContainer* con2, TIndex& idx2)
+    operator()(
+        TContainer * con1,
+        TComponent * componentPtr1,
+        TIndex& idx1,
+        TContainer* con2,
+        TComponent* componentPtr2,
+        TIndex& idx2
+    )
     {
         if(con1 != con2)
             return false;
-        
-        TIndex tmp = idx1;
-        while(tmp != nullptr)
-        {
-            if(tmp == idx2) 
-                return true;
-            tmp = tmp->previous;
-        }
-        return false;
+
+        return idx1 > idx2;
     }
 } ;   
 
@@ -162,16 +174,19 @@ struct Behind<
 {
     HDINLINE
     bool
-    operator() (TContainer*, TIndex& idx1, TContainer*, TIndex& idx2)
+    operator() (
+        TContainer* con1,
+        TComponent * componentPtr1,
+        TIndex& idx1,
+        TContainer* con2,
+        TComponent * componentPtr2,
+        TIndex& idx2
+    )
     {
-        TIndex tmp = idx1;
-        while(tmp != nullptr)
-        {
-            if(tmp == idx2) 
-                return true;
-            tmp = tmp->next;
-        }
-        return false;
+        if(con1 != con2)
+            return false;
+
+        return idx2 > idx1;
     }
 } ;   
 
@@ -186,18 +201,23 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex>
 struct BeginElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     deepiterator::container::categorie::DoublyLinkListLike>
 {
     HDINLINE
     void
-    operator() (TContainer* container, TIndex& idx)
+    operator() (
+        TContainer * container,
+        TComponent * component,
+        TIndex& idx)
     {
-        idx = container->first;
-
+        component = container->first;
+        idx = static_cast<TIndex>(0);
     }
 } ;   
 /**
@@ -206,10 +226,12 @@ struct BeginElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange>
 struct NextElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::DoublyLinkListLike>
@@ -219,7 +241,8 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        TContainer* container, 
+        TContainer* container,
+        TComponent* component,
         TIndex& idx, 
         TRange const & range,
         TContainerSize& size)
@@ -227,10 +250,11 @@ struct NextElement<
         TRange i = 0;
         for(i = 0; i<range; ++i)
         {
-            idx = idx->next;
-            if(idx == nullptr)
+            component = component->next;
+            if(component == nullptr)
                 break;
         }
+        idx += range - i;
         return range - i;
     }
 } ;   
@@ -240,10 +264,12 @@ struct NextElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex
 >
 struct EndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     deepiterator::container::categorie::DoublyLinkListLike>
 {
@@ -251,22 +277,28 @@ struct EndElement<
     HDINLINE
     bool
     test (
-        TContainer*, 
-        TIndex const & idx,
+        TContainer*,
+        TComponent* component,
+        TIndex const &,
         TRangeFunction const &
     )
     const
     {
-        return idx == nullptr;
+        return component == nullptr;
     }
     
     template<typename TRangeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex const & idx, TRangeFunction const &)
+    set (
+        TContainer*,
+        TComponent* component,
+        TIndex const &,
+        TRangeFunction const &
+    )
     const
     {
-        idx = nullptr;
+        component = nullptr;
     }
 } ;   
 
@@ -275,22 +307,27 @@ struct EndElement<
  */
 template<
     typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex
+>
 struct LastElement<
     TContainer,
+    TComponent,
     TIndex,
-    deepiterator::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike
+>
 {
     template<typename TSizeFunction>
     HDINLINE
     void
     operator() (
-        TContainer* containerPtr, 
+        TContainer* containerPtr,
+        TComponent* component,
         TIndex& index, 
         TSizeFunction& size)
     {
-        index = containerPtr->last;
-
+        component = containerPtr->last;
+        index = size(containerPtr) - 1;
     }
 } ;   
 
@@ -300,10 +337,13 @@ struct LastElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TRange>
+    typename TRange
+>
 struct PreviousElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::DoublyLinkListLike>
@@ -313,7 +353,8 @@ struct PreviousElement<
     HDINLINE
     TRange
     operator() (
-        TContainer*, 
+        TContainer*,
+        TComponent* component,
         TIndex& idx, 
         TRange const & range,
         TContainerSize&)
@@ -321,10 +362,11 @@ struct PreviousElement<
         TRange i = 0;
         for(i = 0; i<range; ++i)
         {
-            idx = idx->PreviousElement;
-            if(idx == nullptr)
+            component = component->PreviousElement;
+            if(component == nullptr)
                 break;
         }
+        idx -= range - i;
         return range - i;
     }
 } ;   
@@ -335,19 +377,23 @@ struct PreviousElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange>
 struct REndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     TRange,
-    deepiterator::container::categorie::DoublyLinkListLike>
+    deepiterator::container::categorie::DoublyLinkListLike
+>
 {
     template<typename TRangeFunction>
     HDINLINE
     auto
     test (
-        TContainer*, 
+        TContainer*,
+        TComponent*,
         TIndex const & idx,
         TRangeFunction&
     )
@@ -362,7 +408,12 @@ struct REndElement<
     template<typename TRangeFunction>
     HDINLINE
     auto
-    set (TContainer*, TIndex const & idx, TRangeFunction const &)
+    set (
+        TContainer*,
+        TComponent*,
+        TIndex const & idx,
+        TRangeFunction const &
+    )
     const
     ->
     void

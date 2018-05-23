@@ -126,6 +126,7 @@ struct Accessor
     auto
     at(
         ContainerPtr containerPtr,
+        ComponentPtr componentPtr,
         IndexType & idx
     )
     ->
@@ -133,7 +134,8 @@ struct Accessor
     {
         assert(containerPtr != nullptr);
         return _at(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             idx
         );
     }
@@ -151,8 +153,10 @@ struct Accessor
     auto
     equal(
         ContainerPtr const containerPtr1,
+        ComponentPtr const componentPtr1,
         IndexType const & index1,
         ContainerPtr const containerPtr2,
+        ComponentPtr const componentPtr2,
         IndexType const & index2
     )
     ->
@@ -162,8 +166,10 @@ struct Accessor
         assert(containerPtr2 != nullptr);
         return _equal(
             containerPtr1,
+            componentPtr1,
             index1, 
-            containerPtr2, 
+            containerPtr2,
+            componentPtr2,
             index2
         );
     }
@@ -183,8 +189,10 @@ struct Accessor
     auto
     greater(
         ContainerPtr const containerPtr1,
+        ComponentPtr const componentPtr1,
         IndexType const & index1,
         ContainerPtr const containerPtr2,
+        ComponentPtr const componentPtr2,
         IndexType const & index2
     )
     ->
@@ -193,9 +201,11 @@ struct Accessor
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
         return _ahead(
-            containerPtr1, 
+            containerPtr1,
+            componentPtr1,
             index1, 
-            containerPtr2, 
+            containerPtr2,
+            componentPtr2,
             index2
         );
     }
@@ -215,8 +225,10 @@ struct Accessor
     auto
     lesser(
         ContainerPtr const containerPtr1,
+        ComponentPtr const componentPtr1,
         IndexType const & index1,
         ContainerPtr const containerPtr2,
+        ComponentPtr const componentPtr2,
         IndexType const & index2
     )
     ->
@@ -225,9 +237,11 @@ struct Accessor
         assert(containerPtr1 != nullptr);
         assert(containerPtr2 != nullptr);
         return _behind(
-            containerPtr1, 
+            containerPtr1,
+            componentPtr1,
             index1, 
-            containerPtr2, 
+            containerPtr2,
+            componentPtr2,
             index2
         );
     }

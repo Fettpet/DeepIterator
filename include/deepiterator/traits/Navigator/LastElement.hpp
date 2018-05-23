@@ -45,8 +45,10 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TContainerCategory>
+    typename TContainerCategory
+>
 struct LastElement;
 
 

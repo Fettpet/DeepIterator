@@ -42,6 +42,7 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TContainerCategory>
 struct BeginElement;

@@ -195,7 +195,8 @@ struct At<
     HDINLINE
     TComponent&
     operator() (
-        TContainer* con, 
+        TContainer* con,
+        TComponent *,
         TIndex & idx
     )
     {
@@ -223,10 +224,13 @@ struct Equal<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent const * const,
         TIndex const & idx1, 
-        TContainer * const con2, 
-        TIndex const & idx2)
+        TContainer * const con2,
+        TComponent const * const,
+        TIndex const & idx2
+    )
     {
         // is not implemented. Specify the trait
         return con1 == con2 && idx1 == idx2;
@@ -254,9 +258,11 @@ struct Ahead<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent const * const,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent const * const,
         TIndex const & idx2
     )
     {
@@ -291,9 +297,11 @@ struct Behind<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent const * const,
         TIndex const & idx1, 
-        TContainer * con2, 
+        TContainer * con2,
+        TComponent const * const,
         TIndex const & idx2)
     {
         using namespace deepiterator::detail;
@@ -323,11 +331,13 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     unsigned int Dim
 >
 struct BeginElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     deepiterator::container::categorie::ArrayNDLike<Dim> 
 >
@@ -335,7 +345,8 @@ struct BeginElement<
     HDINLINE
     void
     operator() (
-        TContainer* con, 
+        TContainer* con,
+        TComponent *,
         TIndex& idx
     )
     {
@@ -354,12 +365,14 @@ struct BeginElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange,
     unsigned int Dim
 >
 struct NextElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::ArrayNDLike<Dim> >
@@ -370,7 +383,8 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        TContainer* container, 
+        TContainer * container,
+        TComponent * ,
         TIndex& idx, 
         TIndex_ const & range,
         TContainerSize& size)
@@ -403,19 +417,22 @@ struct NextElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     unsigned int Dim
 >
 struct EndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     deepiterator::container::categorie::ArrayNDLike<Dim> >
 {
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (
-        TContainer* conPtr, 
+    test(
+        TContainer * conPtr,
+        TComponent *,
         TIndex const & idx, 
         TSizeFunction const & size
     )
@@ -431,7 +448,12 @@ struct EndElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set(TContainer* conPtr, TIndex & idx, TSizeFunction const & size)
+    set(
+        TContainer * conPtr,
+        TComponent *,
+        TIndex & idx,
+        TSizeFunction const & size
+    )
     const
     {
         using namespace deepiterator::detail;
@@ -449,19 +471,23 @@ struct EndElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     unsigned int Dim
 >
 struct LastElement<
     TContainer,
+    TComponent,
     TIndex,
-    deepiterator::container::categorie::ArrayNDLike<Dim> >
+    deepiterator::container::categorie::ArrayNDLike<Dim>
+>
 {
     template<typename TSizeFunction>
     HDINLINE
     void
     operator() (
-        TContainer* conPtr, 
+        TContainer * conPtr,
+        TComponent *,
         TIndex& index, 
         TSizeFunction& size
     )
@@ -481,12 +507,14 @@ struct LastElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange,
     unsigned int Dim
 >
 struct PreviousElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::ArrayNDLike<Dim> >
@@ -497,8 +525,9 @@ struct PreviousElement<
     HDINLINE
     TRange
     operator() (
-        TContainer* container, 
-        TIndex& idx, 
+        TContainer * container,
+        TComponent *,
+        TIndex & idx,
         TRange_ const & jumpsize,
         T const &
     )
@@ -540,12 +569,14 @@ struct PreviousElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TOffset,
     unsigned int Dim
 >
 struct REndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex,
     TOffset,
     deepiterator::container::categorie::ArrayNDLike<Dim> >
@@ -554,7 +585,8 @@ struct REndElement<
     HDINLINE
     bool
     test (
-        TContainer* container, 
+        TContainer* container,
+        TComponent*,
         TIndex const & idx, 
         TSizeFunction&)
     const
@@ -572,7 +604,8 @@ struct REndElement<
     HDINLINE
     void
     set (
-        TContainer* container, 
+        TContainer* container,
+        TComponent*,
         TIndex & idx, 
         TSizeFunction&
     )

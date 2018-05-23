@@ -89,7 +89,11 @@ struct At<
 {
     HDINLINE
     TComponent&
-    operator() (TContainer* con, TIndex const & idx)
+    operator() (
+        TContainer* con,
+        TComponent*,
+        TIndex const & idx
+    )
     {
         // is not implemented. Specify the trait
         return (*con)[idx];
@@ -114,9 +118,11 @@ struct Equal<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent * const,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent * const,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -142,9 +148,11 @@ struct Ahead<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent * const,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent * const,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -170,9 +178,11 @@ struct Behind<
     HDINLINE
     bool
     operator() (
-        TContainer * const, 
+        TContainer * const,
+        TComponent * const,
         TIndex const & idx1, 
-        TContainer *, 
+        TContainer *,
+        TComponent * const,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -194,16 +204,22 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex>
 struct BeginElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
     deepiterator::container::categorie::ArrayLike>
 {
     HDINLINE
     void
-    operator() (TContainer*, TIndex& idx)
+    operator() (
+        TContainer * ,
+        TComponent * componentPtr,
+        TIndex& idx)
     {
+        componentPtr = nullptr;
         idx = static_cast<TIndex>(0);
     }
     
@@ -215,10 +231,12 @@ struct BeginElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange>
 struct NextElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::ArrayLike>
@@ -228,10 +246,11 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        TContainer* container, 
-        TIndex& idx, 
+        TContainer * container,
+        TComponent *,
+        TIndex & idx,
         TRange const & range,
-        TContainerSize& size)
+        TContainerSize & size)
     {
         idx += range;
         return (idx >= static_cast<TRange>(size(container))) * (idx - (static_cast<TRange>(size(container))-1) );
@@ -245,17 +264,22 @@ struct NextElement<
  */
 template<
     typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex
+>
 struct EndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex, 
-    deepiterator::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike
+>
 {
     template<typename TSizeFunction>
     HDINLINE
     bool
     test (
-        TContainer* conPtr, 
+        TContainer * conPtr,
+        TComponent *,
         TIndex const & idx, 
         TSizeFunction const & size)
     const
@@ -266,7 +290,11 @@ struct EndElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set(TContainer* conPtr, TIndex & idx, TSizeFunction const & size)
+    set(
+        TContainer* conPtr,
+        TComponent *,
+        TIndex & idx,
+        TSizeFunction const & size)
     const
     {
         idx = size(conPtr);
@@ -280,18 +308,24 @@ struct EndElement<
  */
 template<
     typename TContainer,
-    typename TIndex>
+    typename TComponent,
+    typename TIndex
+>
 struct LastElement<
     TContainer,
+    TComponent,
     TIndex,
     deepiterator::container::categorie::ArrayLike>
 {
     template<typename TSizeFunction>
     HDINLINE
     void
-    operator() (TContainer* conPtr, 
-                TIndex& index, 
-                TSizeFunction& size)
+    operator() (
+        TContainer * conPtr,
+        TComponent *,
+        TIndex& index,
+        TSizeFunction& size
+    )
     {
         index = size(conPtr) - 1;
     }
@@ -304,23 +338,28 @@ struct LastElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TRange>
+    typename TRange
+>
 struct PreviousElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
-    deepiterator::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike
+>
 {
     template<typename T>
     HDINLINE
     int
     operator() (
-        TContainer*, 
+        TContainer *,
+        TComponent *,
         TIndex& idx, 
         TRange const & jumpsize,
         T const &
-               )
+    )
     {
         idx -= jumpsize;
 
@@ -335,18 +374,27 @@ struct PreviousElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TOffset>
+    typename TOffset
+>
 struct REndElement<
-    TContainer, 
+    TContainer,
+    TComponent,
     TIndex,
     TOffset,
-    deepiterator::container::categorie::ArrayLike>
+    deepiterator::container::categorie::ArrayLike
+>
 {
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TSizeFunction&)
+    test(
+        TContainer*,
+        TComponent*,
+        TIndex const & idx,
+        TSizeFunction&
+    )
     const
     {
         return static_cast<int>(idx) < static_cast<int>(0);
@@ -355,7 +403,12 @@ struct REndElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TSizeFunction&)
+    set(
+        TContainer*,
+        TComponent*,
+        TIndex & idx,
+        TSizeFunction&
+    )
     const
     {
         idx = static_cast<TIndex>(-1);

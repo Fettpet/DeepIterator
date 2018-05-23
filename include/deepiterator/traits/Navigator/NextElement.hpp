@@ -38,6 +38,7 @@ namespace navigator
  * @result If the jumpsize is greater than the remaining elements in the container,
  * the result is the "unjumped" elements. i.e Hypotetical positon - size(container)
  * @tparam TContainer The container over which the iteartor walks.
+ * @tparam TComponent The type of the component
  * @tparam TIndex The type of the index to get a component out of the container.
  * @tparam TContainerCategory An SFINAE type for categories.
  * @tparam TJumpsize Type of the offset. This is a template of the function, not
@@ -48,6 +49,7 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TRange = void,
     typename TContainerCategory = void>

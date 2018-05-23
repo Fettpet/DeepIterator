@@ -51,9 +51,11 @@ namespace navigator
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
     typename TOffset,
-    typename TContainerCategory>
+    typename TContainerCategory
+>
 struct REndElement;
 
 }// namespace navigator

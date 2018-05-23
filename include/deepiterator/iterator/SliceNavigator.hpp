@@ -877,34 +877,40 @@ template<
         T_ContainerCategorie
     >::type,
     typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_NextElement = typename deepiterator::traits::navigator::NextElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >,
     typename T_LastElement = typename deepiterator::traits::navigator::LastElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_PreviousElement = typename deepiterator::traits::navigator::PreviousElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range,
         T_ContainerCategorie
     >,
     typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
@@ -1016,34 +1022,40 @@ template<
         T_ContainerCategorie
     >::type,
     typename T_BeginElement = typename deepiterator::traits::navigator::BeginElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_EndElement = typename deepiterator::traits::navigator::EndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_NextElement = typename deepiterator::traits::navigator::NextElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie
     >,
     typename T_LastElement = typename deepiterator::traits::navigator::LastElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_ContainerCategorie
     >,
     typename T_PreviousElement = typename deepiterator::traits::navigator::PreviousElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range,
         T_ContainerCategorie
     >,
     typename T_REndElement = typename deepiterator::traits::navigator::REndElement<
-        T_ContainerNoRef, 
+        T_ContainerNoRef,
+        T_Component,
         T_Index, 
         T_Range, 
         T_ContainerCategorie

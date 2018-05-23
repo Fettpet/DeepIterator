@@ -17,20 +17,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-/**
-* @brief This file contains traits for a supercell like datatype. A supercell is 
-a double linked list. It has two public variables firstFrame and lastFrame. Both
-are pointer. Both variables are class like data structures and have two public 
-variables: nextFrame and previousFrame. Both are pointer. These are the nodes of
-the linked list. The following conditions must hold
-1. container.firstFrame->previousFrame == nullptr
-2. container.lastFrame->nextFrame == nullptr
-3. frame->nextFrame->previousFrame == frame, if frame != nullptr and frame->nextFrame
- != nullptr
-4. frame->previousFrame->nextFrame == frame, if frame != nullptr and frame->previousFrame
- != nullptr
-*/
 #pragma once
 
 #include "deepiterator/traits/Traits.hpp"
@@ -38,7 +24,7 @@ the linked list. The following conditions must hold
 namespace deepiterator
 {
 
-namespace container 
+namespace container
 {
 namespace categorie
 {
@@ -48,27 +34,37 @@ struct SupercellLike;
 
 } // namespace categorie
 
-} // namespace container
+} // namespace contaienr
 
-namespace traits 
+namespace traits
 {
+
 template<typename TContainer>
 struct IsBidirectional<
-    TContainer, 
-    deepiterator::container::categorie::SupercellLike
->
-{
-    static const bool value = true;
-} ;    
-
-template<typename TContainer>
-struct IsRandomAccessable<
-    TContainer, 
-    deepiterator::container::categorie::SupercellLike
->
+    TContainer,
+    deepiterator::container::categorie::SupercellLike>
 {
     static const bool value = true;
 } ;
+
+template<typename TContainer>
+struct IsRandomAccessable<
+    TContainer,
+    deepiterator::container::categorie::SupercellLike>
+{
+    static const bool value = true;
+} ;
+
+template<typename TContainer>
+struct RangeType<
+    TContainer,
+    deepiterator::container::categorie::SupercellLike
+>
+{
+    typedef int_fast32_t type;
+};
+
+
 namespace accessor
 {
 
@@ -78,22 +74,26 @@ namespace accessor
 template<
     typename TContainer,
     typename TComponent,
-    typename TIndex
->
+    typename TIndex>
 struct At<
     TContainer,
-    TComponent, 
-    TIndex, 
+    TComponent,
+    TIndex,
     deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
-    TComponent&
-    operator() (TContainer*, TIndex& idx)
+        TComponent&
+    operator()(
+        TContainer*,
+        TComponent* componentPtr,
+        TIndex&
+    )
     {
-        return *idx;
+        return *componentPtr;
     }
-} ;    
+
+} ;
 
 /**
  * @brief check if both iterators are at the same element. \see Equal.hpp
@@ -101,64 +101,58 @@ struct At<
 template<
     typename TContainer,
     typename TComponent,
-    typename TIndex
->
+    typename TIndex>
 struct Equal<
     TContainer,
-    TComponent, 
-    TIndex, 
+    TComponent,
+    TIndex,
     deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
     bool
     operator() (
-        TContainer* con1, 
-        TIndex const & idx1, 
-        TContainer* con2, 
-        TIndex const & idx2
+        TContainer * con1,
+        TComponent const * const,
+        TIndex & idx1,
+        TContainer * con2,
+        TComponent const * const,
+        TIndex & idx2
     )
     {
-        return con1 == con2 && idx1 == idx2;
+        return con1 == con2 &&
+               idx1 == idx2;
     }
 } ;
 
- /**
- * @brief Check if the iterator one is ahead the second one. \see Ahead.hpp
- */
+/**
+* @brief Check if the iterator one is ahead the second one. \see Ahead.hpp
+*/
 template<
     typename TContainer,
     typename TComponent,
-    typename TIndex
->
+    typename TIndex>
 struct Ahead<
     TContainer,
-    TComponent, 
-    TIndex, 
-    deepiterator::container::categorie::SupercellLike
->
+    TComponent,
+    TIndex,
+    deepiterator::container::categorie::SupercellLike>
 {
     HDINLINE
     bool
-    operator() (
-        TContainer* con1, 
-        TIndex const & idx1, 
-        TContainer* con2, 
-        TIndex const & idx2
+    operator()(
+        TContainer * con1,
+        TComponent * componentPtr1,
+        TIndex& idx1,
+        TContainer* con2,
+        TComponent* componentPtr2,
+        TIndex& idx2
     )
     {
         if(con1 != con2)
             return false;
-        
-        TIndex tmp = idx1;
-        while(tmp != nullptr)
-        {
-            tmp = tmp->previousFrame.ptr;
-            if(tmp == idx2) 
-                return true;
-           
-        }
-        return false;
+
+        return idx1 > idx2;
     }
 } ;
 
@@ -170,39 +164,35 @@ struct Ahead<
 template<
     typename TContainer,
     typename TComponent,
-    typename TIndex
->
+    typename TIndex>
 struct Behind<
     TContainer,
-    TComponent, 
-    TIndex, 
+    TComponent,
+    TIndex,
     deepiterator::container::categorie::SupercellLike
 >
 {
     HDINLINE
     bool
     operator() (
-        TContainer*, 
-        TIndex const & idx1, 
-        TContainer*, 
-        TIndex const & idx2
+        TContainer* con1,
+        TComponent * componentPtr1,
+        TIndex& idx1,
+        TContainer* con2,
+        TComponent * componentPtr2,
+        TIndex& idx2
     )
     {
-        TIndex tmp = idx1;
-        while(tmp != nullptr)
-        {
-            tmp = tmp->nextFrame.ptr;
-            if(tmp == idx2) 
-                return true;
-            
-        }
-        return false;
+        if(con1 != con2)
+            return false;
+
+        return idx2 > idx1;
     }
 } ;
 
 } // namespace accessor
-    
-    
+
+
 namespace navigator
 {
 
@@ -211,59 +201,59 @@ namespace navigator
  */
 template<
     typename TContainer,
-    typename TIndex
->
+    typename TComponent,
+    typename TIndex>
 struct BeginElement<
     TContainer,
-    TIndex, 
-    deepiterator::container::categorie::SupercellLike
->
+    TComponent,
+    TIndex,
+    deepiterator::container::categorie::SupercellLike>
 {
     HDINLINE
     void
     operator() (
-        TContainer* container, 
-        TIndex & idx
-    )
+        TContainer * container,
+        TComponent * component,
+        TIndex& idx)
     {
-        idx = container->firstFramePtr;
+        component = container->firstFramePtr;
+        idx = static_cast<TIndex>(0);
     }
 } ;
 /**
- * @brief Implementation to get the next element. For futher details \see 
+ * @brief Implementation to get the next element. For futher details \see
  * NExtElement.hpp
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex,
-    typename TRange
->
+    typename TRange>
 struct NextElement<
     TContainer,
+    TComponent,
     TIndex,
     TRange,
-    deepiterator::container::categorie::SupercellLike
->
+    deepiterator::container::categorie::SupercellLike>
 {
-
     template<
-        typename TContainerSize
-    >
-    HDINLINE
-    TRange
+        typename TContainerSize>
+    HDINLINE TRange
     operator() (
-        TContainer*, 
-        TIndex& idx, 
+        TContainer* container,
+        TComponent* component,
+        TIndex& idx,
         TRange const & range,
-        TContainerSize&)
+        TContainerSize& size)
     {
         TRange i = 0;
         for(i = 0; i<range; ++i)
         {
-            idx = idx->nextFrame.ptr;
-            if(idx == nullptr)
+            component = component->nextFrame.ptr;
+            if(component == nullptr)
                 break;
         }
+        idx += range - i;
         return range - i;
     }
 } ;
@@ -273,38 +263,41 @@ struct NextElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex
 >
 struct EndElement<
     TContainer,
-    TIndex, 
-    deepiterator::container::categorie::SupercellLike
->
+    TComponent,
+    TIndex,
+    deepiterator::container::categorie::SupercellLike>
 {
     template<typename TRangeFunction>
     HDINLINE
     bool
-    test(
-        TContainer*, 
-        TIndex const & idx, 
+    test (
+        TContainer*,
+        TComponent* component,
+        TIndex const &,
         TRangeFunction const &
     )
     const
     {
-        return idx == nullptr || idx.ptr == nullptr;
+        return component == nullptr;
     }
-    
+
     template<typename TRangeFunction>
     HDINLINE
     void
-    set(
-        TContainer*, 
-        TIndex & idx,
+    set (
+        TContainer*,
+        TComponent* component,
+        TIndex const &,
         TRangeFunction const &
     )
     const
     {
-        idx = nullptr;
+        component = nullptr;
     }
 } ;
 
@@ -313,10 +306,12 @@ struct EndElement<
  */
 template<
     typename TContainer,
+    typename TComponent,
     typename TIndex
 >
 struct LastElement<
     TContainer,
+    TComponent,
     TIndex,
     deepiterator::container::categorie::SupercellLike
 >
@@ -325,101 +320,108 @@ struct LastElement<
     HDINLINE
     void
     operator() (
-        TContainer* containerPtr, 
-        TIndex& index, 
-        TSizeFunction &&
-    )
+        TContainer* containerPtr,
+        TComponent* component,
+        TIndex& index,
+        TSizeFunction& size)
     {
-        index = containerPtr->lastFramePtr;
+        component = containerPtr->lastFramePtr;
+        index = size(containerPtr) - 1;
     }
 } ;
 
 /**
- * @brief Implementation to get the next element. For futher details \see 
+ * @brief Implementation to get the next element. For futher details \see
  * NExtElement.hpp
  */
 template<
-    typename TIndex,
     typename TContainer,
+    typename TComponent,
+    typename TIndex,
     typename TRange
 >
 struct PreviousElement<
     TContainer,
+    TComponent,
+    TIndex,
+    TRange,
+    deepiterator::container::categorie::SupercellLike>
+{
+    template<
+        typename TContainerSize>
+    HDINLINE
+        TRange
+    operator() (
+        TContainer*,
+        TComponent* component,
+        TIndex& idx,
+        TRange const & range,
+        TContainerSize&)
+    {
+        TRange i = 0;
+        for(i = 0; i<range; ++i)
+        {
+            component = component->previousFrame.ptr;
+            if(component == nullptr)
+                break;
+        }
+        idx -= range - i;
+        return range - i;
+    }
+} ;
+
+/**
+ * @brief Implementation to check whether the iterator is before the fist
+ * element. \see REndElement.hpp
+ */
+template<
+    typename TContainer,
+    typename TComponent,
+    typename TIndex,
+    typename TRange>
+struct REndElement<
+    TContainer,
+    TComponent,
     TIndex,
     TRange,
     deepiterator::container::categorie::SupercellLike
 >
 {
-    
-    template<
-        typename TContainerSize>
-    HDINLINE
-    TRange
-    operator() (
-        TContainer*, 
-        TIndex& idx, 
-        TRange const & jumpsize,
-        TContainerSize&)
-    {
-        TRange i = 0;
-        for(i = 0; i<jumpsize; ++i)
-        {
-            idx = idx->previousFrame.ptr;
-            if(idx == nullptr)
-                return jumpsize - i;
-        }
-
-        return jumpsize - i;
-    }
-} ;
-
-/**
- * @brief Implementation to check whether the iterator is before the fist 
- * element. \see REndElement.hpp
- */
-template<
-    typename TContainer,
-    typename TIndex,
-    typename TRange
->
-struct REndElement<
-    TContainer,
-    TIndex, 
-    TRange,
-    deepiterator::container::categorie::SupercellLike
->
-{
-    
     template<typename TRangeFunction>
     HDINLINE
-    bool
-    test(
-        TContainer*, 
+    auto
+    test (
+        TContainer*,
+        TComponent*,
         TIndex const & idx,
         TRangeFunction&
     )
     const
+    ->
+    bool
     {
-        return idx == nullptr || idx.ptr == nullptr;
+
+        return idx == nullptr;
     }
-    
 
     template<typename TRangeFunction>
     HDINLINE
-    void
-    set(
-        TContainer*, 
-        TIndex & idx,
-        TRangeFunction&
+    auto
+    set (
+        TContainer*,
+        TComponent*,
+        TIndex const & idx,
+        TRangeFunction const &
     )
     const
+    ->
+    void
     {
         idx = nullptr;
     }
 } ;
 }
-    
+
 } // namespace traits
 
 }// namespace deepiterator
-

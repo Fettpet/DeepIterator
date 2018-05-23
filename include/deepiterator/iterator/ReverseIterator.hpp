@@ -164,6 +164,7 @@ public:
     using ComponentType = typename deepiterator::traits::ComponentType<
         ContainerType
     >::type;
+    using ComponentPtr = ComponentType*;
     
     using ChildIterator = TChild;
     using ReturnType = typename ChildIterator::ReturnType;
@@ -173,6 +174,7 @@ public:
     
 protected:
     ContainerPtr containerPtr = nullptr;
+    ComponentPtr componentPtr = nullptr;
     IndexType index;
     ChildIterator childIterator;
     Navigator navigator;
@@ -180,6 +182,7 @@ protected:
     
 public:
     using RangeType = decltype(((Navigator*)nullptr)->next(
+        nullptr,
         nullptr,
         index,
         0
@@ -225,6 +228,7 @@ public:
             TChild_ && child
     ):
         containerPtr(nullptr),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0)),
         childIterator(deepiterator::forward<TChild_>(child)),
         navigator(deepiterator::forward<TNavigator_>(navigator)),
@@ -255,6 +259,7 @@ public:
             details::constructorType::rbegin
     ):
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0)),
         childIterator(deepiterator::forward<TChild_>(child)),
         navigator(deepiterator::forward<TNavigator_>(navigator)),
@@ -274,6 +279,7 @@ public:
             details::constructorType::rbegin
     ):
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0)),
         childIterator(
             deepiterator::forward<TPrescription>(prescription).child, 
@@ -293,7 +299,8 @@ public:
             details::constructorType::rbegin
     ):
         containerPtr(nullptr),
-        index(0),
+        componentPtr(nullptr),
+        index(static_cast<IndexType>(0)),
         childIterator(
             deepiterator::forward<TPrescription_>(prescription).child,
             details::constructorType::rbegin()
@@ -326,6 +333,7 @@ public:
             details::constructorType::rend
     ):
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0)),
         childIterator(deepiterator::forward<TChild_>(child)),
         navigator(deepiterator::forward<TNavigator_>(navigator)),
@@ -346,6 +354,7 @@ public:
             details::constructorType::rend 
     ):
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0)),
         childIterator(
             deepiterator::forward<TPrescription>(prescription).child, 
@@ -365,6 +374,7 @@ public:
             details::constructorType::rend
     ):
         containerPtr(nullptr),
+        componentPtr(nullptr),
         index(0),
         childIterator(
             deepiterator::forward<TPrescription_>(prescription).child,
@@ -562,6 +572,7 @@ public:
         using SizeChild_t = decltype(childIterator.nbElements());
         using ResultType_t = decltype(navigator.previous(
             containerPtr,
+            componentPtr,
             index, 
             0u
         ));
@@ -581,7 +592,8 @@ public:
 
         
         ResultType_t const result{navigator.previous(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             overjump
         )};
@@ -589,7 +601,8 @@ public:
         {
 
                 childIterator.setToRbegin(accessor.at(
-                    containerPtr, 
+                    containerPtr,
+                    componentPtr,
                     index
                 ));
                 childIterator.gotoPrevious(
@@ -647,13 +660,15 @@ public:
             while(childIterator.isBeforeFirst() && not isBeforeFirst())
             {
                 navigator.previous(
-                    containerPtr, 
+                    containerPtr,
+                    componentPtr,
                     index, 
                     1u
                 );
                 if(not isBeforeFirst())
                     childIterator.setToRbegin(accessor.at(
-                        containerPtr, 
+                        containerPtr,
+                        componentPtr,
                         index
                     ));
             }
@@ -746,13 +761,19 @@ public:
         auto && overjump = (remaining - 1 + childNbElements) / childNbElements;
         int childJumps = ((remaining - 1) % childNbElements);
         
-        int && result = navigator.next(containerPtr, index, overjump);
+        int && result = navigator.next(
+            containerPtr,
+            componentPtr,
+            index,
+            overjump
+        );
         // result == 0 means the point lays within this data structure
         // overjump > 0 means we change the datastructure
         if((result == 0) && (overjump > 0))
         {
             childIterator.setToBegin(accessor.at(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index
             ));
             childIterator.gotoNext(childJumps);
@@ -808,7 +829,11 @@ public:
                 navigator.next(containerPtr, index, 1u);
                 // only valid, if it contains enough elements
                 if(not isAfterLast())
-                    childIterator.setToBegin(accessor.at(containerPtr, index));
+                    childIterator.setToBegin(accessor.at(
+                        containerPtr,
+                        componentPtr,
+                        index
+                    ));
             }
         }
         return remaining;
@@ -829,17 +854,21 @@ public:
     >::type
     {
         if(accessor.lesser(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             )
         )
            return true;
         if( accessor.equal(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             ) && childIterator < other.childIterator
         )
@@ -862,18 +891,21 @@ public:
     >::type
     {
         if(accessor.greater(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
-            )
-        )
+        ))
            return true;
         
         if(accessor.equal(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             ) 
             &&
@@ -952,14 +984,16 @@ public:
     void
     {
         navigator.begin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
         // check whether the iterator is at a valid element
         while(not isAfterLast())
         {
             childIterator.setToBegin((accessor.at(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index
             )));
             if(not childIterator.isAfterLast())
@@ -1036,6 +1070,7 @@ public:
         containerPtr = ptr;
         navigator.rend(
             containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1060,7 +1095,8 @@ public:
         while(not isBeforeFirst())
         {
             childIterator.setToRbegin((accessor.at(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index
             )));
             if(not childIterator.isBeforeFirst())
@@ -1115,7 +1151,8 @@ public:
     bool
     {
         return navigator.isAfterLast(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1132,7 +1169,8 @@ public:
     bool
     {
         return navigator.isBeforeFirst(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1239,10 +1277,12 @@ protected:
     
 
     ContainerType* containerPtr;
+    ComponentPtr componentPtr = nullptr;
     IndexType index;
 // another data types
 public:
     using RangeType = decltype(((Navigator*)nullptr)->next(
+        nullptr,
         nullptr,
         index,
         0
@@ -1291,6 +1331,7 @@ public:
         accessor(deepiterator::forward<TAccessor_>(accessor)),
         childIterator(),
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0))
     {
         setToRbegin(container);
@@ -1310,6 +1351,7 @@ public:
         accessor(deepiterator::forward<TPrescription>(prescription).accessor),
         childIterator(),
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0))
     {
         setToRbegin(container);
@@ -1337,6 +1379,7 @@ public:
         accessor(deepiterator::forward<TPrescription_>(prescription).accessor),
         childIterator(),
         containerPtr(nullptr),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0))
     {}
     
@@ -1393,6 +1436,7 @@ public:
         navigator(deepiterator::forward<TNavigator_>(navigator)),
         accessor(deepiterator::forward<TAccessor_>(accessor)),
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0))
     {
         setToRend(container);
@@ -1412,6 +1456,7 @@ public:
         accessor(deepiterator::forward<TPrescription>(prescription).accessor),
         childIterator(),
         containerPtr(container),
+        componentPtr(nullptr),
         index(static_cast<IndexType>(0))
     {
         setToRend(container);
@@ -1439,6 +1484,7 @@ public:
         accessor(deepiterator::forward<TPrescription_>(prescription).accessor),
         childIterator(),
         containerPtr(nullptr),
+        componentPtr(nullptr),
         index(0)
     {}
     
@@ -1462,6 +1508,7 @@ public:
         navigator(deepiterator::forward<TNavigator_>(navigator)),
         accessor(deepiterator::forward<TAccessor_>(accessor)),
         containerPtr(nullptr),
+        componentPtr(nullptr),
         index(0)
     {}
     
@@ -1484,7 +1531,8 @@ public:
         else 
         {
             navigator.next(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 1u
             );
@@ -1522,7 +1570,8 @@ public:
     ComponentReference
     {
         return accessor.at(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1540,7 +1589,8 @@ public:
     ComponentReference
     {
         return accessor.at(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1595,7 +1645,8 @@ public:
     ReverseDeepIterator& 
     {
         navigator.previous(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             1u
         );
@@ -1643,7 +1694,8 @@ public:
             setToBegin();
         }
         navigator.next(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             tmpJump
         );
@@ -1674,6 +1726,7 @@ public:
         }
         navigator.previous(
             containerPtr,
+            componentPtr,
             index, 
             tmpJump
         );
@@ -1740,9 +1793,11 @@ public:
     >::type
     {
         return accessor.lesser(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,
             other.containerPtr,
+            other.componentPtr,
             other.index
         );
     }
@@ -1763,9 +1818,11 @@ public:
     >::type
     {
         return accessor.greater(
-            containerPtr,  
+            containerPtr,
+            componentPtr,
             index,
             other.containerPtr,
+            other.componentPtr,
             other.index
         );
     }
@@ -1822,7 +1879,8 @@ public:
     >::type
     {
         return accessor.at(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1840,7 +1898,8 @@ public:
     bool
     {
         return navigator.isAfterLast(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1858,7 +1917,8 @@ public:
     bool
     {
         return navigator.isBeforeFirst(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1877,6 +1937,7 @@ public:
     {
         navigator.begin(
             containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1897,7 +1958,8 @@ public:
     {
         containerPtr = con;
         navigator.begin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1918,7 +1980,8 @@ public:
     {
         containerPtr = &con;
         navigator.begin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1938,6 +2001,7 @@ public:
         containerPtr = con;
         navigator.end(
             containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1957,6 +2021,7 @@ public:
         containerPtr = con;
         navigator.rend(
             containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1977,7 +2042,8 @@ public:
     {
         containerPtr = &con;
         navigator.rbegin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -1999,6 +2065,7 @@ public:
         containerPtr = con;
         navigator.rbegin(
             containerPtr,
+            componentPtr,
             index
         );
     }
@@ -2016,7 +2083,8 @@ public:
     void
     {
         navigator.rbegin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
     }
@@ -2037,7 +2105,8 @@ public:
     RangeType
     {
         return navigator.next(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             steps
         );
@@ -2059,7 +2128,8 @@ public:
     RangeType
     {
         auto result = navigator.previous(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             steps
         );
