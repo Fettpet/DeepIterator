@@ -31,7 +31,7 @@ typedef deepiterator::SupercellContainer<Supercell> SupercellContainer;
  */
 BOOST_AUTO_TEST_CASE(ParticleInFrame)
 {
-    
+
     typedef deepiterator::SelfValue<uint_fast32_t> Offset;
     typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
         
@@ -46,17 +46,20 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
                                  Jumpsize(1)));
     
 
-    auto view = makeView(test,
-                         childPrescriptionJump1);
+    auto view = makeView(
+        test,
+        childPrescriptionJump1
+    );
 
-    int_fast32_t sum = 0; 
-
+    int_fast32_t sum = 0;
+    auto endElement = view.end()-2;
     for(auto it=view.begin(); it!=view.end()-2; it++)
     {
         sum += (*it).data[0] + (*it).data[1];
     }
     // sum [0, 15] = 120
     BOOST_TEST(sum == 120);
+
     sum = 0; 
     for(auto it=view.begin()+2; it!=view.end()-2; it++)
     {
@@ -64,7 +67,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     }
     // sum [4, 15] = 114
     BOOST_TEST(sum == 114);
-    
+
     sum = 0;
     for(auto it=view.begin()+2; it<view.end()-2; it+=3)
     {
@@ -74,7 +77,6 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     BOOST_TEST(sum == 30);
     
     sum = 0;
-
 
 
     std::cout << * (view.rbegin()+1) << std::endl;
@@ -148,7 +150,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     }
     // 3:(6,7) = 13
     BOOST_TEST(sum == 13);
-    
+
 }
 
 
@@ -275,6 +277,7 @@ BOOST_AUTO_TEST_CASE(ParticlInSupercell)
             }
 
 }
+
 
 BOOST_AUTO_TEST_CASE(ParticleAttributesInSupercell)
 {
@@ -421,3 +424,4 @@ BOOST_AUTO_TEST_CASE(CompareOperators)
             }
     
 }
+

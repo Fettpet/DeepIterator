@@ -226,7 +226,8 @@ public:
     HDINLINE
     auto
     next(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index,
         RangeType distance
     )
@@ -237,7 +238,8 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         RangeType const remainingJumpsize = static_cast<RangeType>(nextElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,  
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
@@ -288,7 +290,8 @@ public:
     HDINLINE
     auto
     previous(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index,
         RangeType distance
     )
@@ -301,7 +304,8 @@ public:
         assert(containerPtr != nullptr); // containerptr should be valid
         // We jump over distance * jumpsize elements
         RangeType remainingJumpsize = static_cast<RangeType>(previousElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,
             static_cast<RangeType>(jumpsize()) * distance,
             containerSize
@@ -331,7 +335,8 @@ public:
             {
                 auto indexCopy(index);
                 remainingJumpsize = static_cast<RangeType>(previousElement(
-                    containerPtr, 
+                    containerPtr,
+                    componentPtr,
                     indexCopy,
                     static_cast<RangeType>(offset()),
                     containerSize
@@ -356,7 +361,8 @@ public:
     HDINLINE 
     auto 
     begin(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     ->
@@ -364,13 +370,15 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         beginElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
 
 
         nextElement(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,  
             offset(),
             containerSize
@@ -390,7 +398,8 @@ public:
     HDINLINE 
     auto
     rbegin(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     ->
@@ -401,15 +410,18 @@ public:
         if(slice.from_start())
         {     
            begin(
-                containerPtr, 
-                index
+               containerPtr,
+               componentPtr,
+               index
            );
             // go to the last element
             auto idxCopy = index;
+            auto componentPtrCopy = componentPtr;
             auto counter = 0;        
             while(
                 next(
-                    containerPtr,  
+                    containerPtr,
+                    componentPtrCopy,
                     idxCopy,
                     1u  
                 ) == 0 
@@ -417,17 +429,20 @@ public:
             )
             {
                 ++counter;
+                componentPtr = componentPtrCopy;
                 index = idxCopy;
             }
             cur_pos = static_cast<RangeType>(0);
             if(endElement.test(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index, 
                 containerSize
             ))
             {
                 beforeBeginElement.set(
-                    containerPtr, 
+                    containerPtr,
+                    componentPtr,
                     index, 
                     containerSize
                 );
@@ -438,11 +453,13 @@ public:
         {
             lastElement(
                 containerPtr,
+                componentPtr,
                 index,
                 containerSize
             );
             previousElement(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 slice.distance(),
                 containerSize
@@ -459,7 +476,8 @@ public:
     HDINLINE 
     auto 
     end(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     ->
@@ -467,6 +485,7 @@ public:
     {
         endElement.set(
             containerPtr,
+            componentPtr,
             index,
             containerSize
         );
@@ -484,14 +503,16 @@ public:
     HDINLINE 
     auto
     rend(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     ->
     typename std::enable_if<T==true>::type
     {
         beforeBeginElement.set(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index, 
             containerSize
         );
@@ -507,7 +528,8 @@ public:
     HDINLINE 
     bool
     isAfterLast(
-        ContainerPtr containerPtr,  
+        ContainerPtr containerPtr,
+        ComponentPtr const & componentPtr,
         IndexType const & index)
     const
     {
@@ -523,7 +545,8 @@ public:
         RangeType const jump = static_cast<RangeType>(jumpsize());
         return 
              endElement.test(
-                 containerPtr, 
+                 containerPtr,
+                 componentPtr,
                  index, 
                  containerSize
              ) 
@@ -543,7 +566,8 @@ public:
     HDINLINE 
     auto
     isBeforeFirst(
-        ContainerPtr containerPtr,   
+        ContainerPtr containerPtr,
+        ComponentPtr const & componentPtr,
         IndexType const & index)
     const
     ->
@@ -558,19 +582,21 @@ public:
         RangeType const jump = static_cast<RangeType>(jumpsize());
         PreviousElement prev(previousElement);
         IndexType indexCopy = index;
-   
-        indexCopy = index;
+
+        auto componentPtrCopy = componentPtr;
         bool beforeFirst = beforeBeginElement.test(
-                    containerPtr, 
+                    containerPtr,
+                    componentPtr,
                     index, 
                     containerSize
                 );
         bool prevValue = not beforeFirst && prev(
-                        containerPtr, 
-                        indexCopy,
-                        offset(),
-                        containerSize
-                ) != 0;
+            containerPtr,
+            componentPtrCopy,
+            indexCopy,
+            offset(),
+            containerSize
+        ) != 0;
         bool rest = (slice.from_start() && (cur_pos <= static_cast<RangeType>(-1) * distance))
                 || (not slice.from_start() && (cur_pos * jump - off) <=
                     static_cast<RangeType>(-1) * (nbElem - distance));

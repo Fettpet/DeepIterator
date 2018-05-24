@@ -292,11 +292,12 @@ struct EndElement<
     void
     set(
         TContainer* conPtr,
-        TComponent * &,
+        TComponent * & component,
         TIndex & idx,
         TSizeFunction const & size)
     const
     {
+        component = nullptr;
         idx = size(conPtr);
     }
     
@@ -322,11 +323,12 @@ struct LastElement<
     void
     operator() (
         TContainer * conPtr,
-        TComponent * &,
+        TComponent * & component,
         TIndex& index,
         TSizeFunction& size
     )
     {
+        component = nullptr;
         index = size(conPtr) - 1;
     }
     

@@ -797,6 +797,7 @@ public:
         using SizeChild_t = decltype(childIterator.nbElements());
         using ResultType_t = decltype(navigator.previous(
             containerPtr,
+            componentPtr,
             index, 
             0u
         ));
@@ -913,17 +914,21 @@ public:
     >::type
     {
         if(accessor.lesser(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             )
         )
            return true;
         if( accessor.equal(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             ) && childIterator < other.childIterator
         )
@@ -946,18 +951,22 @@ public:
     >::type
     {
         if(accessor.greater(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             )
         )
            return true;
         
         if(accessor.equal(
-                containerPtr, 
+                containerPtr,
+                componentPtr,
                 index,
                 other.containerPtr,
+                other.componentPtr,
                 other.index
             ) 
             &&
@@ -1816,9 +1825,11 @@ public:
     >::type
     {
         return accessor.lesser(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index,
             other.containerPtr,
+            other.componentPtr,
             other.index
         );
     }
@@ -1839,9 +1850,11 @@ public:
     >::type
     {
         return accessor.greater(
-            containerPtr,  
+            containerPtr,
+            componentPtr,
             index,
             other.containerPtr,
+            other.componentPtr,
             other.index
         );
     }

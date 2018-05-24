@@ -374,6 +374,5 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             BOOST_TEST(counter == nbParticles);
 
         }
-
 }
 

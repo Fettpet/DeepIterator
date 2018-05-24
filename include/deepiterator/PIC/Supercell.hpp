@@ -318,7 +318,7 @@ struct Ahead<
         if(con1 != con2)
             return false;
         
-        TFrame tmp = framePtr1;
+        TFrame* tmp = framePtr1;
         while(tmp != nullptr)
         {
             tmp = tmp->previousFrame;
@@ -358,7 +358,7 @@ struct Behind<
         TIndex const & idx2
     )
     {
-        TFrame tmp = framePtr1;
+        TFrame* tmp = framePtr1;
         while(tmp != nullptr)
         {
             tmp = tmp->nextFrame;

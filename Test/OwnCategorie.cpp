@@ -134,7 +134,10 @@ struct At<
     
     HDINLINE
     TComponent&
-    operator() (TContainer* con, TIndex const & idx)
+    operator() (
+        TContainer* con,
+        TComponent*&,
+        TIndex const & idx)
     {
         // is not implemented. Specify the trait
         return (*con)[idx];
@@ -159,9 +162,11 @@ struct Equal<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent* const &,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent* const &,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -189,9 +194,11 @@ struct Ahead<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent* const &,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent* const &,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -219,9 +226,11 @@ struct Behind<
     HDINLINE
     bool
     operator() (
-        TContainer * const con1, 
+        TContainer * const con1,
+        TComponent* const &,
         TIndex const & idx1, 
-        TContainer * const con2, 
+        TContainer * const con2,
+        TComponent* const &,
         TIndex const & idx2)
     {
         // is not implemented. Specify the trait
@@ -243,7 +252,8 @@ template<
     typename TIndex,
     typename TCategorie>
 struct BeginElement<
-    boost::container::vector<TComponent>, 
+    boost::container::vector<TComponent>,
+    TComponent,
     TIndex, 
     TCategorie>
 {
@@ -251,7 +261,10 @@ struct BeginElement<
     
     HDINLINE
     void
-    operator() (TContainer*, TIndex& idx)
+    operator() (
+        TContainer*,
+        TComponent*&,
+        TIndex& idx)
     {
         idx = static_cast<TIndex>(0);
     }
@@ -268,6 +281,7 @@ template<
     typename TCategorie>
 struct NextElement<
     boost::container::vector<TComponent>,
+    TComponent,
     TIndex,
     TRange,
     TCategorie>
@@ -279,7 +293,8 @@ struct NextElement<
     HDINLINE
     TRange
     operator() (
-        TContainer* container, 
+        TContainer* container,
+        TComponent*&,
         TIndex& idx, 
         TRange const & range,
         TContainerSize& size)
@@ -298,7 +313,8 @@ template<
     typename TIndex,
     typename TCategorie>
 struct EndElement<
-    boost::container::vector<TComponent>, 
+    boost::container::vector<TComponent>,
+    TComponent,
     TIndex, 
     TCategorie>
 {
@@ -307,7 +323,12 @@ struct EndElement<
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer* conPtr, TIndex const & idx, TSizeFunction const & size)
+    test (
+        TContainer* conPtr,
+        TComponent* const &,
+        TIndex const & idx,
+        TSizeFunction const & size
+    )
     const
     {
         return idx >= size(conPtr);
@@ -316,7 +337,12 @@ struct EndElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set(TContainer* conPtr, TIndex & idx, TSizeFunction const & size)
+    set(
+        TContainer* conPtr,
+        TComponent*&,
+        TIndex & idx,
+        TSizeFunction const & size
+    )
     const
     {
         idx = size(conPtr);
@@ -334,6 +360,7 @@ template<
     typename TCategorie>
 struct LastElement<
     boost::container::vector<TComponent>,
+    TComponent,
     TIndex,
     TCategorie>
 {
@@ -342,9 +369,11 @@ struct LastElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    operator() (TContainer* conPtr, 
-                TIndex& index, 
-                TSizeFunction& size)
+    operator() (
+        TContainer* conPtr,
+        TComponent*&,
+        TIndex& index,
+        TSizeFunction& size)
     {
         index = size(conPtr) - 1;
     }
@@ -361,6 +390,7 @@ template<
     typename TCategorie>
 struct PreviousElement<
     boost::container::vector<TComponent>,
+    TComponent,
     TIndex,
     TRange,
     TCategorie>
@@ -371,11 +401,12 @@ struct PreviousElement<
     HDINLINE
     int
     operator() (
-        TContainer*, 
+        TContainer*,
+        TComponent*&,
         TIndex& idx, 
         TRange const & jumpsize,
         T const &
-               )
+    )
     {
         idx -= jumpsize;
         
@@ -393,7 +424,8 @@ template<
     typename TOffset,
     typename TCategorie>
 struct REndElement<
-    boost::container::vector<TComponent>, 
+    boost::container::vector<TComponent>,
+    TComponent,
     TIndex,
     TOffset,
     TCategorie>
@@ -403,7 +435,12 @@ struct REndElement<
     template<typename TSizeFunction>
     HDINLINE
     bool
-    test (TContainer*, TIndex const & idx, TSizeFunction&)
+    test (
+        TContainer*,
+        TComponent* const &,
+        TIndex const & idx,
+        TSizeFunction&
+    )
     const
     {
         return static_cast<int>(idx) < static_cast<int>(0);
@@ -412,7 +449,12 @@ struct REndElement<
     template<typename TSizeFunction>
     HDINLINE
     void
-    set (TContainer*, TIndex & idx, TSizeFunction&)
+    set (
+        TContainer*,
+        TComponent*&,
+        TIndex & idx,
+        TSizeFunction&
+    )
     const
     {
         idx = static_cast<TIndex>(-1);
