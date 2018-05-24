@@ -237,9 +237,10 @@ public:
         if(remainingJumpsize == 0)
         {
             auto indexCopy = index;
+            auto componentPtrCopy = componentPtr;
             remainingJumpsize = previousElement(
                 containerPtr,
-                componentPtr,
+                componentPtrCopy,
                 indexCopy,
                 static_cast<RangeType>(offset()) ,
                 containerSize

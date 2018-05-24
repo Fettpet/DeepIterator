@@ -362,7 +362,6 @@ struct PreviousElement<
     )
     {
         idx -= jumpsize;
-
         return (static_cast<int>(idx) < 0) * (-1 * static_cast<int>(idx));
     }
     

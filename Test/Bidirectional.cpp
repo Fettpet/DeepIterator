@@ -49,7 +49,6 @@ BOOST_AUTO_TEST_CASE(Frames)
     auto counter = 0u;
     for(auto && it = view.rbegin(); it != view.rend(); ++it)
     {
-        std::cout << *it <<std::endl;
         buffer[counter++] = *it;
     }
     BOOST_TEST(counter == 10u);
@@ -122,8 +121,6 @@ BOOST_AUTO_TEST_CASE(FramesDiffentOffsetJumpsizes)
             auto counter = 0u;
             for(auto && it = view.rbegin(); it != view.rend(); ++it)
             {
-                if(off == 1 and jump == 2)
-                    std::cout << *it << std::endl;
                 buffer[counter++] = *it;
             }
             BOOST_TEST(counter == (nbParticle - off+ jump - 1) / jump);
@@ -211,6 +208,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercell)
     BOOST_TEST(( --(++view.rbegin()) == view.rbegin()));
 }
 
+
 BOOST_AUTO_TEST_CASE(Borders)
 {
     uint_fast32_t nbFrames = 2u;
@@ -221,11 +219,10 @@ BOOST_AUTO_TEST_CASE(Borders)
     typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     std::vector<uint_fast32_t> offsetsInner({0u, 1u});
     std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
-    std::cout << supercell << std::endl;
+
     for(auto jump: jumpsizesInner)
         for(auto off: offsetsInner)
         {
-            std::cout << "(" << jump << ", " << off << ")" << std::endl;
             auto && view = deepiterator::makeView(
                         supercell, 
                         deepiterator::makeIteratorPrescription(
@@ -269,18 +266,19 @@ BOOST_AUTO_TEST_CASE(Borders)
 BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
 {
     uint_fast32_t nbFrames = 5u;
-    uint_fast32_t nbParticlesInLastFrame = 2u;
+    uint_fast32_t nbParticlesInLastFrame = 1u;
     Supercell supercell(nbFrames, nbParticlesInLastFrame);
 
     typedef deepiterator::SelfValue<uint_fast32_t> Offset;
     typedef deepiterator::SelfValue<uint_fast32_t> Jumpsize;
     
-    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u});
+    std::vector<uint_fast32_t> offsetsInner({0u, 1u, 2u, 3u, 4u});
     std::vector<uint_fast32_t> jumpsizesInner({1u, 2u, 3u, 4u});
     std::cout << supercell << std::endl;
     for(auto off: offsetsInner)
         for(auto jump: jumpsizesInner)
         {
+            std::cout << "Off " << off << " Jump " << jump << std::endl;
             auto && concept = makeIteratorPrescription(
                                     deepiterator::makeAccessor(),
                                     deepiterator::makeNavigator(
@@ -309,14 +307,13 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             uint counter{0u};
             for(auto it=view.rbegin(); it != view.rend(); ++it)
             {
-                if(off == 0u and jump == 3u)
-                    std::cout << *it << std::endl;
+
                 counter++;            
             }
             
             // There are 4 full frames with 10 Elements an one frame with 2 elements
             BOOST_TEST(counter == nbParticles);
-            
+
             counter = 0u;
             for(auto it=view.rbegin(); it != view.rend(); it++)
             {
@@ -360,7 +357,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             counter = 0u;
             for(auto it=viewInner.rbegin(); it != viewInner.rend(); ++it)
             {
-                std::cout << *it << std::endl;
+
                 counter++;            
             }
             
@@ -375,6 +372,7 @@ BOOST_AUTO_TEST_CASE(ParticleInSupercellDifferentOffsets)
             }
             // There are 4 full frames with 10 Elements an one frame with 2 elements
             BOOST_TEST(counter == nbParticles);
+
         }
 
 }

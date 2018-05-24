@@ -727,7 +727,7 @@ public:
         return remaining;
     }
 
-        /**
+    /**
      * @brief creates an iterator which is jumpsize elements behind. The iterator 
      * need to be random access to support this function.
      * @param jumpsize distance to the previous element

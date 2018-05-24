@@ -284,8 +284,7 @@ struct Equal<
         TIndex const &
     )
     {
-        std::cout << "FramePtr1 " << framePtr1 << std::endl;
-        std::cout << "FramePtr2 " << framePtr2 << std::endl;
+
         return con1 == con2 && framePtr1 == framePtr2;
     }
 } ;
