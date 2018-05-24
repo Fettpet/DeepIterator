@@ -441,10 +441,11 @@ public:
     {
 
         return (isAfterLast() && other.isAfterLast())
-            || (isBeforeFirst() && other.isBeforeFirst())
-            ||(containerPtr == other.containerPtr
-            && index == other.index 
-            && other.childIterator == childIterator);
+                || (isBeforeFirst() && other.isBeforeFirst())
+                ||(containerPtr == other.containerPtr
+                && index == other.index
+                && componentPtr == other.componentPtr
+                && other.childIterator == childIterator);
     }
     
     /**
@@ -1087,7 +1088,8 @@ public:
     void
     {
         navigator.rbegin(
-            containerPtr, 
+            containerPtr,
+            componentPtr,
             index
         );
         

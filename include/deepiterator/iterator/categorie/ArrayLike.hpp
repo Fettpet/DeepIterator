@@ -91,7 +91,7 @@ struct At<
     TComponent&
     operator() (
         TContainer* con,
-        TComponent*,
+        TComponent* &,
         TIndex const & idx
     )
     {
@@ -216,7 +216,7 @@ struct BeginElement<
     void
     operator() (
         TContainer * ,
-        TComponent * componentPtr,
+        TComponent * & componentPtr,
         TIndex& idx)
     {
         componentPtr = nullptr;
@@ -247,7 +247,7 @@ struct NextElement<
     TRange
     operator() (
         TContainer * container,
-        TComponent *,
+        TComponent * &,
         TIndex & idx,
         TRange const & range,
         TContainerSize & size)
@@ -279,7 +279,7 @@ struct EndElement<
     bool
     test (
         TContainer * conPtr,
-        TComponent *,
+        TComponent * const &,
         TIndex const & idx, 
         TSizeFunction const & size)
     const
@@ -292,7 +292,7 @@ struct EndElement<
     void
     set(
         TContainer* conPtr,
-        TComponent *,
+        TComponent * &,
         TIndex & idx,
         TSizeFunction const & size)
     const
@@ -322,7 +322,7 @@ struct LastElement<
     void
     operator() (
         TContainer * conPtr,
-        TComponent *,
+        TComponent * &,
         TIndex& index,
         TSizeFunction& size
     )
@@ -355,7 +355,7 @@ struct PreviousElement<
     int
     operator() (
         TContainer *,
-        TComponent *,
+        TComponent * &,
         TIndex& idx, 
         TRange const & jumpsize,
         T const &
@@ -391,7 +391,7 @@ struct REndElement<
     bool
     test(
         TContainer*,
-        TComponent*,
+        TComponent* const &,
         TIndex const & idx,
         TSizeFunction&
     )
@@ -405,12 +405,13 @@ struct REndElement<
     void
     set(
         TContainer*,
-        TComponent*,
+        TComponent* & component,
         TIndex & idx,
         TSizeFunction&
     )
     const
     {
+        component = nullptr;
         idx = static_cast<TIndex>(-1);
     }
     

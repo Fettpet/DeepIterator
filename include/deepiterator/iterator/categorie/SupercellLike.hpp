@@ -213,7 +213,7 @@ struct BeginElement<
     void
     operator() (
         TContainer * container,
-        TComponent * component,
+        TComponent * & component,
         TIndex& idx)
     {
         component = container->firstFramePtr;
@@ -241,7 +241,7 @@ struct NextElement<
     HDINLINE TRange
     operator() (
         TContainer* container,
-        TComponent* component,
+        TComponent* & component,
         TIndex& idx,
         TRange const & range,
         TContainerSize& size)
@@ -277,7 +277,7 @@ struct EndElement<
     bool
     test (
         TContainer*,
-        TComponent* component,
+        TComponent* & component,
         TIndex const &,
         TRangeFunction const &
     )
@@ -291,7 +291,7 @@ struct EndElement<
     void
     set (
         TContainer*,
-        TComponent* component,
+        TComponent* & component,
         TIndex const &,
         TRangeFunction const &
     )
@@ -321,7 +321,7 @@ struct LastElement<
     void
     operator() (
         TContainer* containerPtr,
-        TComponent* component,
+        TComponent* & component,
         TIndex& index,
         TSizeFunction& size)
     {
@@ -353,7 +353,7 @@ struct PreviousElement<
         TRange
     operator() (
         TContainer*,
-        TComponent* component,
+        TComponent* & component,
         TIndex& idx,
         TRange const & range,
         TContainerSize&)
@@ -392,8 +392,8 @@ struct REndElement<
     auto
     test (
         TContainer*,
-        TComponent*,
-        TIndex const & idx,
+        TComponent* component,
+        TIndex const & ,
         TRangeFunction&
     )
     const
@@ -401,7 +401,7 @@ struct REndElement<
     bool
     {
 
-        return idx == nullptr;
+        return component == nullptr;
     }
 
     template<typename TRangeFunction>
@@ -409,15 +409,15 @@ struct REndElement<
     auto
     set (
         TContainer*,
-        TComponent*,
-        TIndex const & idx,
+        TComponent* & component,
+        TIndex const &,
         TRangeFunction const &
     )
     const
     ->
     void
     {
-        idx = nullptr;
+        component = nullptr;
     }
 } ;
 }

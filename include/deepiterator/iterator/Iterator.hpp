@@ -709,7 +709,12 @@ public:
             }
             while(childIterator.isAfterLast() && not isAfterLast())
             {
-                navigator.next(containerPtr, index, 1u);
+                navigator.next(
+                    containerPtr,
+                    componentPtr,
+                    index,
+                    1u
+                );
                 // only valid, if it contains enough elements
                 if(not isAfterLast())
                     childIterator.setToBegin(accessor.at(
