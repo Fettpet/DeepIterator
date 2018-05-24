@@ -176,7 +176,7 @@ public:
     auto
     next(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index,
         RangeType const & distance
     )
@@ -216,7 +216,7 @@ public:
     auto
     previous(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index,
         RangeType distance
     )
@@ -276,7 +276,7 @@ public:
     auto
     begin(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     -> void
@@ -307,7 +307,7 @@ public:
     auto
     rbegin(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     -> void
@@ -366,7 +366,7 @@ public:
     auto
     end(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     -> 
@@ -392,7 +392,7 @@ public:
     auto
     rend(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr & componentPtr,
         IndexType & index
     )
     ->    
@@ -417,7 +417,7 @@ public:
     auto
     isAfterLast(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr const & componentPtr,
         IndexType const & index
     )
     const
@@ -443,7 +443,7 @@ public:
     auto
     isBeforeFirst(
         ContainerPtr containerPtr,
-        ComponentPtr componentPtr,
+        ComponentPtr const & componentPtr,
         IndexType const & index
     )
     const

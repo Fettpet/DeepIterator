@@ -284,6 +284,8 @@ struct Equal<
         TIndex const &
     )
     {
+        std::cout << "FramePtr1 " << framePtr1 << std::endl;
+        std::cout << "FramePtr2 " << framePtr2 << std::endl;
         return con1 == con2 && framePtr1 == framePtr2;
     }
 } ;
@@ -394,12 +396,13 @@ struct BeginElement<
     void
     operator() (
         deepiterator::Supercell<TFrame>* container,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex & idx
     )
     {
         framePtr = container->firstFrame;
-        //idx = static_cast<TIndex>(0);
+
+        idx = static_cast<TIndex>(0);
     }
 } ;
 /**
@@ -428,7 +431,7 @@ struct NextElement<
     TRange
     operator() (
         deepiterator::Supercell<TFrame>*,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex& idx,
         TRange const & range,
         TContainerSize &)
@@ -466,7 +469,7 @@ struct EndElement<
     test(
         deepiterator::Supercell<TFrame>*,
         TFrame* framePtr,
-        TIndex const & idx, 
+        TIndex const &,
         TRangeFunction const &
     )
     const
@@ -479,7 +482,7 @@ struct EndElement<
     void
     set(
         deepiterator::Supercell<TFrame>*,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex & idx,
         TRangeFunction const &
     )
@@ -509,13 +512,13 @@ struct LastElement<
     void
     operator() (
         deepiterator::Supercell<TFrame>* containerPtr,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex& index, 
         TSizeFunction && size
     )
     {
         framePtr = containerPtr->lastFrame;
-        index = size(containerPtr) -1;
+        index = static_cast<TIndex>(0);
     }
 } ;
 
@@ -544,7 +547,7 @@ struct PreviousElement<
     TRange
     operator() (
         deepiterator::Supercell<TFrame>*,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex& idx, 
         TRange const & jumpsize,
         TContainerSize&)
@@ -556,7 +559,7 @@ struct PreviousElement<
             if(framePtr == nullptr)
                 return jumpsize - i;
         }
-        idx -= jumpsize;
+
         return jumpsize - i;
     }
 } ;
@@ -586,7 +589,7 @@ struct REndElement<
     test(
         deepiterator::Supercell<TFrame>*,
         TFrame* framePtr,
-        TIndex const & idx,
+        TIndex const &,
         TRangeFunction&
     )
     const
@@ -600,7 +603,7 @@ struct REndElement<
     void
     set(
         deepiterator::Supercell<TFrame>*,
-        TFrame* framePtr,
+        TFrame*& framePtr,
         TIndex &,
         TRangeFunction&
     )

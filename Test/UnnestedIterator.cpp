@@ -199,16 +199,19 @@ BOOST_AUTO_TEST_CASE(FramesInSupercells)
 
     // we count the number of frames
     auto counter = 0u;
+
     for(auto it=view.begin(); it!=view.end(); ++it)
     {
+
         ++counter;
     }
     BOOST_TEST(counter == nbFrames);
-    
+
     // we count the number of frames reverse
     auto counterReverse = 0u;
     for(auto it=view.rbegin(); it!=view.rend(); ++it)
     {
+        std::cout << *it << std::endl;
         ++counterReverse;
     }
     BOOST_TEST(counterReverse == nbFrames);

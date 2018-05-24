@@ -183,7 +183,7 @@ protected:
 public:
     using RangeType = decltype(((Navigator*)nullptr)->next(
         nullptr,
-        nullptr,
+        componentPtr,
         index,
         0
     ));
@@ -1283,7 +1283,7 @@ protected:
 public:
     using RangeType = decltype(((Navigator*)nullptr)->next(
         nullptr,
-        nullptr,
+        componentPtr,
         index,
         0
     ));
@@ -1609,10 +1609,7 @@ public:
     bool
     {
         
-        return (containerPtr != other.containerPtr
-             || index != other.index)
-             && (not isAfterLast() || not other.isAfterLast())
-             && (not isBeforeFirst() || not other.isBeforeFirst());
+        return not (*this == other);
     }
     
     
@@ -1628,7 +1625,11 @@ public:
     -> 
     bool
     {
-        return not (*this != other);
+        return (containerPtr == other.containerPtr
+                && (index == other.index)
+                && (componentPtr == other.componentPtr))
+               || (isAfterLast() && other.isAfterLast())
+               || (isBeforeFirst() && other.isBeforeFirst());
     }
     
     
