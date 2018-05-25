@@ -71,7 +71,7 @@ OPTION(DEEPITERATOR_TEST_NEWCONTAINER "Build the new container Test" ON)
 OPTION(DEEPITERATOR_TEST_OWNCATEGORIE "Build the own categorie Test" ON)
 OPTION(DEEPITERATOR_TEST_RANDOMACCESS "Build the Random access Test" ON)
 OPTION(DEEPITERATOR_TEST_RUNTIME "Build the runtime Test" ON)
-OPTION(DEEPITERATOR_TEST_SLICENAVIGATOR "Build the slice navigator Test" ON)
+OPTION(DEEPITERATOR_TEST_EXTENTNAVIGATOR "Build the EXTENT navigator Test" ON)
 OPTION(DEEPITERATOR_TEST_UNNESTETITERATOR "Build the unnested Test" ON)
 
 mark_as_advanced(FORCE 
@@ -201,10 +201,10 @@ if(DEEPITERATOR_TEST_RUNTIME)
         COMMAND Tests/Runtime
     )
 endif()
-if(DEEPITERATOR_TEST_SLICENAVIGATOR)
+if(DEEPITERATOR_TEST_EXTENTNAVIGATOR)
     add_test(
-        NAME SliceNavigator        
-        COMMAND Tests/SliceNavigator
+        NAME ExtentNavigator
+        COMMAND Tests/ExtentNavigator
     )
 endif()
 if(DEEPITERATOR_TEST_UNNESTETITERATOR)

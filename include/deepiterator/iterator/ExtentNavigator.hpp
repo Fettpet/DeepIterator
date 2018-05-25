@@ -34,7 +34,7 @@ namespace deepiterator
 template<
     int_fast32_t _distance
 >
-struct Slice
+struct Extent
 {
 public:
     
@@ -72,8 +72,8 @@ public:
 };
 
 /**
- * \struct SliceNavigator
- @brief This is the default implementation of the SliceNavigator. The task of 
+ * \struct ExtentNavigator
+ @brief This is the default implementation of the ExtentNavigator. The task of 
  the navigator is to define the first element, the next element and an after 
  last element. If the navigator is bidirectional it need also a last element, a 
  previous element and a before first element. 
@@ -84,11 +84,11 @@ public:
  is the jumpsize. The jumpsize is the distance between two iterator elements. 
  The number of threads can be mapped on the jumpsize. With this two traits you 
  can go parallel over all elements and touch each element only one times. 
- Additional the SliceNavigator has a slice template parameter. With this 
+ Additional the ExtentNavigator has a Extent template parameter. With this 
  template, the container can be restricted. It supports two cases: 1. Counter 
  modus: only the first n-th elements are used to iterate throw; 2. Ignore modus:
- the last n-th elements are ignored. The slice parameter is used after offset 
- and jumpsize. The slice template parameter  has two function:
+ the last n-th elements are ignored. The Extent parameter is used after offset 
+ and jumpsize. The Extent template parameter  has two function:
  bool from_start(): true if Counter Modus, false if Ignore Modus
  int distance(): n for the modies.
  We had three/six traits for the behaviour of the container. The first three 
@@ -146,7 +146,7 @@ template<
     typename T_Component,
     typename T_Offset,
     typename T_Jumpsize,
-    typename T_Slice,
+    typename T_Extent,
     typename T_Index,
     typename T_ContainerSize,
     typename T_Range,
@@ -158,7 +158,7 @@ template<
     typename T_REndElement = deepiterator::details::UndefinedType, 
     bool isBidirectional = false
 >
-struct SlicedNavigator
+struct ExtentdNavigator
 {
 // define the types 
     using ContainerType = typename std::decay<T_Container>::type;
@@ -168,7 +168,7 @@ struct SlicedNavigator
     using ComponentPtr = ComponentType*;
     using JumpsizeType = T_Jumpsize;
     using OffsetType = T_Offset;
-    using SliceType = T_Slice;
+    using ExtentType = T_Extent;
     using IndexType = T_Index;
     using RangeType = T_Range;
     using Size = T_ContainerSize;
@@ -181,12 +181,12 @@ struct SlicedNavigator
     
 public:
 // the default constructors
-    HDINLINE SlicedNavigator() = default;
-    HDINLINE SlicedNavigator(SlicedNavigator const &) = default;
-    HDINLINE SlicedNavigator(SlicedNavigator &&) = default;
-    HDINLINE ~SlicedNavigator() = default;
-    HDINLINE SlicedNavigator& operator=(const SlicedNavigator&) = default;
-    HDINLINE SlicedNavigator& operator=(SlicedNavigator&&) = default;
+    HDINLINE ExtentdNavigator() = default;
+    HDINLINE ExtentdNavigator(ExtentdNavigator const &) = default;
+    HDINLINE ExtentdNavigator(ExtentdNavigator &&) = default;
+    HDINLINE ~ExtentdNavigator() = default;
+    HDINLINE ExtentdNavigator& operator=(const ExtentdNavigator&) = default;
+    HDINLINE ExtentdNavigator& operator=(ExtentdNavigator&&) = default;
 
     
     /**
@@ -195,15 +195,15 @@ public:
        @param jumpsize distance between two elements
     */
     HDINLINE
-    SlicedNavigator(
+    ExtentdNavigator(
             OffsetType && offset, 
             JumpsizeType && jumpsize,
-            SliceType && slice
+            ExtentType && Extent
     ):
         cur_pos(static_cast<RangeType>(0)),
         offset(deepiterator::forward<OffsetType>(offset)),
         jumpsize(deepiterator::forward<JumpsizeType>(jumpsize)),
-        slice(deepiterator::forward<SliceType>(slice)),
+        Extent(deepiterator::forward<ExtentType>(Extent)),
         containerSize(),
         beginElement(),
         nextElement(),
@@ -247,21 +247,21 @@ public:
         
         cur_pos += distance;
         RangeType const nbElem = static_cast<RangeType>(size(containerPtr));
-        RangeType const distanceSlice = static_cast<RangeType>(slice.distance());
+        RangeType const distanceExtent = static_cast<RangeType>(Extent.distance());
         // we need the distance from the last element to the current index position
         // this is a round up
        
         // 1. We start counting from the begininng and the position is outside
-        // the slice.
-        if( slice.from_start() && (cur_pos >= distanceSlice))
+        // the Extent.
+        if( Extent.from_start() && (cur_pos >= distanceExtent))
         {
-            // +1 since distanceSlice == 1 looks only at the current position
-            return cur_pos - distanceSlice + 1;
+            // +1 since distanceExtent == 1 looks only at the current position
+            return cur_pos - distanceExtent + 1;
         }
         // 2. We ignore the last elements
-        else if(not slice.from_start() && (cur_pos > nbElem - distanceSlice))
+        else if(not Extent.from_start() && (cur_pos > nbElem - distanceExtent))
         {
-            return cur_pos + distanceSlice - nbElem;
+            return cur_pos + distanceExtent - nbElem;
         }
         // 3. if it is outside the container 
         else 
@@ -312,23 +312,23 @@ public:
         ));
         cur_pos -= distance;
         RangeType const nbElem = static_cast<RangeType>(size(containerPtr));
-        RangeType const distanceSlice = static_cast<RangeType>(slice.distance());
+        RangeType const distanceExtent = static_cast<RangeType>(Extent.distance());
         if(remainingJumpsize == 0)
         {
             // we need the distance from the last element to the current index position
             // this is a round up
            
             // 1. We start counting from the begininng and the position is outside
-            // the slice.
-            if( slice.from_start() && (static_cast<RangeType>(-1) * cur_pos >= distanceSlice))
+            // the Extent.
+            if( Extent.from_start() && (static_cast<RangeType>(-1) * cur_pos >= distanceExtent))
             {
-                return static_cast<RangeType>(-1) * cur_pos - distanceSlice + static_cast<RangeType>(1);
+                return static_cast<RangeType>(-1) * cur_pos - distanceExtent + static_cast<RangeType>(1);
             }
             // 2. We ignore the last elements
             // The cast is nessacary since the container could be empty
-            else if(not slice.from_start() && (static_cast<RangeType>(-1) * cur_pos > nbElem - distanceSlice))
+            else if(not Extent.from_start() && (static_cast<RangeType>(-1) * cur_pos > nbElem - distanceExtent))
             {
-                return static_cast<RangeType>(-1) * cur_pos + distanceSlice - nbElem;
+                return static_cast<RangeType>(-1) * cur_pos + distanceExtent - nbElem;
             }
             // 3. if it is outside the container 
             else 
@@ -407,7 +407,7 @@ public:
     {
         assert(containerPtr != nullptr); // containerptr should be valid
         // set to the first element
-        if(slice.from_start())
+        if(Extent.from_start())
         {     
            begin(
                containerPtr,
@@ -425,7 +425,7 @@ public:
                     idxCopy,
                     1u  
                 ) == 0 
-                && counter <= slice.distance()
+                && counter <= Extent.distance()
             )
             {
                 ++counter;
@@ -461,7 +461,7 @@ public:
                 containerPtr,
                 componentPtr,
                 index,
-                slice.distance(),
+                Extent.distance(),
                 containerSize
             );
         }
@@ -536,10 +536,10 @@ public:
         
         /*there are three cases: 
          * 1. if the trait say it after the last element
-         * 2. if slice.from_start() and cur_pos > slice.distance()
-         * 3. not slice.from_start() and cur_pos > nbElements - offset - slice.distance()
+         * 2. if Extent.from_start() and cur_pos > Extent.distance()
+         * 3. not Extent.from_start() and cur_pos > nbElements - offset - Extent.distance()
          */
-        RangeType const distance = static_cast<RangeType>(slice.distance());
+        RangeType const distance = static_cast<RangeType>(Extent.distance());
         RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr));
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
@@ -550,8 +550,8 @@ public:
                  index, 
                  containerSize
              ) 
-            || (slice.from_start() && (cur_pos >= distance))
-            || (not slice.from_start() && (cur_pos * jump + off >=
+            || (Extent.from_start() && (cur_pos >= distance))
+            || (not Extent.from_start() && (cur_pos * jump + off >=
                  nbElem - distance ));
     }
     
@@ -576,7 +576,7 @@ public:
         bool
     >::type
     {
-        RangeType const distance = static_cast<RangeType>(slice.distance());
+        RangeType const distance = static_cast<RangeType>(Extent.distance());
         RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr)); 
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
@@ -597,8 +597,8 @@ public:
             offset(),
             containerSize
         ) != 0;
-        bool rest = (slice.from_start() && (cur_pos <= static_cast<RangeType>(-1) * distance))
-                || (not slice.from_start() && (cur_pos * jump - off) <=
+        bool rest = (Extent.from_start() && (cur_pos <= static_cast<RangeType>(-1) * distance))
+                || (not Extent.from_start() && (cur_pos * jump - off) <=
                     static_cast<RangeType>(-1) * (nbElem - distance));
         return beforeFirst || prevValue || rest;
     }
@@ -641,17 +641,17 @@ public:
         RangeType const nbElem = static_cast<RangeType>(nbElements(containerPtr));
         RangeType const off = static_cast<RangeType>(offset());
         RangeType const jump = static_cast<RangeType>(jumpsize());
-        RangeType const distance = static_cast<RangeType>(slice.distance());
-        if(slice.from_start())
+        RangeType const distance = static_cast<RangeType>(Extent.distance());
+        if(Extent.from_start())
         {
             
-            // 1. Case nbElem - off > slice.distance()
+            // 1. Case nbElem - off > Extent.distance()
             RangeType const sizeFirstCase = (
                     distance
                     + jump
                     - static_cast<RangeType>(1))
                 / jump;
-            // 2. Case nbElem - off < slice.distance()
+            // 2. Case nbElem - off < Extent.distance()
             RangeType const sizeSecondCase = (nbElem > off) *(
                     nbElem 
                     - off
@@ -663,17 +663,17 @@ public:
             return (nbElem - off >= distance) * sizeFirstCase 
                 + (nbElem - off < distance) * sizeSecondCase;
         }
-        // it ignores the last slice.distance() elements
+        // it ignores the last Extent.distance() elements
         else 
         {
-            // 1. Case nbElem - off > slice.distance()
-            // I had nbElem - off - slice.distance() elements
+            // 1. Case nbElem - off > Extent.distance()
+            // I had nbElem - off - Extent.distance() elements
                 RangeType const sizeFirstCase = (
                     nbElem - off - distance
                     + jump
                     - static_cast<RangeType>(1))
                 / jump;
-            // 2. Case nbElem - off < slice.distance()
+            // 2. Case nbElem - off < Extent.distance()
             // I had 0 elements inside
             
                 
@@ -687,7 +687,7 @@ protected:
     RangeType cur_pos;
     OffsetType offset;
     JumpsizeType jumpsize;
-    SliceType slice;
+    ExtentType Extent;
     Size containerSize;
     BeginElement beginElement;
     NextElement nextElement;
@@ -705,13 +705,13 @@ protected:
 template<
     typename T_Offset,
     typename T_Jumpsize,
-    typename T_Slice>
-struct SlicedNavigator<
+    typename T_Extent>
+struct ExtentdNavigator<
     deepiterator::details::UndefinedType,
     deepiterator::details::UndefinedType,
     T_Offset,
     T_Jumpsize,
-    T_Slice,
+    T_Extent,
     deepiterator::details::UndefinedType,
     deepiterator::details::UndefinedType,
     deepiterator::details::UndefinedType,
@@ -730,7 +730,7 @@ struct SlicedNavigator<
     using ComponentPtr = ComponentType*;
     using JumpsizeType = T_Jumpsize;
     using OffsetType = T_Offset;
-    using SliceType = T_Slice;
+    using ExtentType = T_Extent;
     using IndexType = deepiterator::details::UndefinedType ;
     using RangeType = deepiterator::details::UndefinedType ;
     using Size = deepiterator::details::UndefinedType ;
@@ -742,10 +742,10 @@ struct SlicedNavigator<
     using REndElement = deepiterator::details::UndefinedType ;
     
     // the default constructors
-    HDINLINE SlicedNavigator() = default;
-    HDINLINE SlicedNavigator(SlicedNavigator const &) = default;
-    HDINLINE SlicedNavigator(SlicedNavigator &&) = default;
-    HDINLINE ~SlicedNavigator() = default;
+    HDINLINE ExtentdNavigator() = default;
+    HDINLINE ExtentdNavigator(ExtentdNavigator const &) = default;
+    HDINLINE ExtentdNavigator(ExtentdNavigator &&) = default;
+    HDINLINE ~ExtentdNavigator() = default;
     
     /**
      * @brief Set the offset and the jumpsize to the given values
@@ -755,21 +755,21 @@ struct SlicedNavigator<
     template<
         typename T_Offset_,
         typename T_Jumpsize_,
-        typename T_Slice_>
+        typename T_Extent_>
     HDINLINE
-    SlicedNavigator(
+    ExtentdNavigator(
             T_Offset_ && offset, 
             T_Jumpsize_ && jumpsize,
-            T_Slice_ && slice
+            T_Extent_ && Extent
              ):
         offset(deepiterator::forward<T_Offset_>(offset)),
         jumpsize(deepiterator::forward<T_Jumpsize_>(jumpsize)),
-        slice(deepiterator::forward<T_Slice_>(slice))
+        Extent(deepiterator::forward<T_Extent_>(Extent))
     {}
     
     OffsetType offset;
     JumpsizeType jumpsize;
-    SliceType slice;
+    ExtentType Extent;
     
 } ;
 
@@ -784,21 +784,21 @@ struct SlicedNavigator<
 template<
     typename T_Offset,
     typename T_Jumpsize,
-    typename T_Slice>
+    typename T_Extent>
 HDINLINE
 auto 
 makeNavigator(
     T_Offset && offset,
     T_Jumpsize && jumpsize,
-    T_Slice && slice
+    T_Extent && Extent
              )
 -> 
-    deepiterator::SlicedNavigator<
+    deepiterator::ExtentdNavigator<
         details::UndefinedType,
         details::UndefinedType,
         typename std::decay<T_Offset>::type,
         typename std::decay<T_Jumpsize>::type,
-        typename std::decay<T_Slice>::type,
+        typename std::decay<T_Extent>::type,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
@@ -812,13 +812,13 @@ makeNavigator(
 {
     using OffsetType = typename std::decay<T_Offset>::type ;
     using JumpsizeType = typename std::decay<T_Jumpsize>::type ;
-    using SliceType = typename std::decay<T_Slice>::type;
-    using ResultType =  deepiterator::SlicedNavigator<
+    using ExtentType = typename std::decay<T_Extent>::type;
+    using ResultType =  deepiterator::ExtentdNavigator<
         details::UndefinedType,
         details::UndefinedType,
         OffsetType,
         JumpsizeType,
-        SliceType,
+        ExtentType,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
@@ -834,7 +834,7 @@ makeNavigator(
     auto && result = ResultType(
         deepiterator::forward<T_Offset>(offset),
         deepiterator::forward<T_Jumpsize>(jumpsize),
-        deepiterator::forward<T_Slice>(slice)
+        deepiterator::forward<T_Extent>(Extent)
     );
     return result;
 }
@@ -847,7 +847,7 @@ namespace details
     template<
         typename T,
         typename _T = typename std::decay<T>::type,
-        typename T_SliceType = typename _T::SliceType,
+        typename T_ExtentType = typename _T::ExtentType,
         typename T_ContainerType = typename _T::ContainerType,
         typename T_Offset = typename _T::OffsetType,
         typename T_Jumpsize = typename _T::JumpsizeType,
@@ -861,12 +861,12 @@ namespace details
         typename TPrevious = typename _T::PreviousElement,
         typename TBeforeFirst = typename _T::REndElement
     >
-    struct SlicedNavigatorTemplates
+    struct ExtentdNavigatorTemplates
     {
         using ContainerType = T_ContainerType;
         using OffsetType = T_ContainerType;
         using JumpsizeType = T_Jumpsize;
-        using SliceType = T_SliceType;
+        using ExtentType = T_ExtentType;
         using IndexType = T_Index;
         using RangeType = T_Range;
         using Size = TSize;
@@ -884,7 +884,7 @@ template<
     typename T_ContainerNoRef = typename std::decay<T_Container>::type,
     typename OffsetType,
     typename JumpsizeType,
-    typename SliceType,
+    typename ExtentType,
     typename T_Component = typename deepiterator::traits::ComponentType<
         T_ContainerNoRef
     >::type,
@@ -949,12 +949,12 @@ template<
 auto
 HDINLINE
 makeNavigator(
-    deepiterator::SlicedNavigator<
+    deepiterator::ExtentdNavigator<
         details::UndefinedType,
         details::UndefinedType,
         OffsetType,
         JumpsizeType,
-        SliceType,
+        ExtentType,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
         deepiterator::details::UndefinedType,
@@ -968,12 +968,12 @@ makeNavigator(
     > & navi
 )
 ->
-deepiterator::SlicedNavigator<
+deepiterator::ExtentdNavigator<
     T_ContainerNoRef,
     T_Component,
     OffsetType,
     JumpsizeType,
-    SliceType,
+    ExtentType,
     T_Index,
     T_ContainerSize,
     T_Range,
@@ -985,12 +985,12 @@ deepiterator::SlicedNavigator<
     T_REndElement,
     isBidirectional>
 {
-    using ResultType = deepiterator::SlicedNavigator<
+    using ResultType = deepiterator::ExtentdNavigator<
         T_ContainerNoRef,
         T_Component,
         OffsetType,
         JumpsizeType,
-        SliceType,
+        ExtentType,
         T_Index,
         T_ContainerSize,
         T_Range,
@@ -1006,7 +1006,7 @@ deepiterator::SlicedNavigator<
     auto && result = ResultType(
         deepiterator::forward<OffsetType>(navi.offset), 
         deepiterator::forward<JumpsizeType>(navi.jumpsize),
-        deepiterator::forward<SliceType>(navi.slice)
+        deepiterator::forward<ExtentType>(navi.Extent)
     );
 
     return result;
@@ -1029,7 +1029,7 @@ template<
     typename T_ContainerNoRef = typename std::decay<T_Container>::type,
     typename T_Offset,
     typename T_Jumpsize,
-    typename T_Slice,
+    typename T_Extent,
     typename T_Component = typename deepiterator::traits::ComponentType<
         T_ContainerNoRef
     >::type,
@@ -1096,15 +1096,15 @@ HDINLINE
 makeNavigator(
     T_Offset && offset,
     T_Jumpsize && jumpsize,
-    T_Slice && slice
+    T_Extent && Extent
              )
 -> 
-    deepiterator::SlicedNavigator<
+    deepiterator::ExtentdNavigator<
         T_ContainerNoRef,
         T_Component,
         typename std::decay<T_Offset>::type,
         typename std::decay<T_Jumpsize>::type,
-        typename std::decay<T_Slice>::type,
+        typename std::decay<T_Extent>::type,
         T_Index,
         T_ContainerSize,
         T_Range,
@@ -1117,12 +1117,12 @@ makeNavigator(
         isBidirectional>
 {
 
-    using ResultType = deepiterator::SlicedNavigator<
+    using ResultType = deepiterator::ExtentdNavigator<
         T_ContainerNoRef,
         T_Component,
         typename std::decay<T_Offset>::type,
         typename std::decay<T_Jumpsize>::type,
-        typename std::decay<T_Slice>::type,
+        typename std::decay<T_Extent>::type,
         T_Index,
         T_ContainerSize,
         T_Range,
@@ -1137,7 +1137,7 @@ makeNavigator(
     auto && result = ResultType(
         deepiterator::forward<T_Offset>(offset),
         deepiterator::forward<T_Jumpsize>(jumpsize),
-        deepiterator::forward<T_Slice>(slice)
+        deepiterator::forward<T_Extent>(Extent)
     );
     
     return result;

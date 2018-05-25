@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(ParticleInFrame)
     );
 
     int_fast32_t sum = 0;
-    auto endElement = view.end()-2;
+
     for(auto it=view.begin(); it!=view.end()-2; it++)
     {
         sum += (*it).data[0] + (*it).data[1];

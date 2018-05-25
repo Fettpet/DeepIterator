@@ -1,13 +1,13 @@
 /**
  * @author Sebastian Hahn
- * @brief The Sliced Navigator is tested in this file. To do this I test the 
+ * @brief The Extentd Navigator is tested in this file. To do this I test the 
  * following things
  * 1. Test a single Layer
  * 1.1 from begining to end with increasing number 
  * 1.2 from end to beginning with decreasing number
  * 2. Test multiple layers 
- * 2.1 navigator-slice 
- * 2.2 slice-navigator
+ * 2.1 navigator-Extent 
+ * 2.2 Extent-navigator
  * 3. Repeat 1 and 2 with rbegin
  * 
  */
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<1>()));
+                                            deepiterator::Extent<1>()));
 
             auto view = makeView(
                 container,
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<2>()));
+                                            deepiterator::Extent<2>()));
 
             auto view = makeView(
                 container,
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<0>()));
+                                            deepiterator::Extent<0>()));
 
 
             auto view = makeView(
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<-1>()));
+                                            deepiterator::Extent<-1>()));
 
 
             auto view = makeView(
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<1>()));
+                                            deepiterator::Extent<1>()));
 
 
             auto view = makeView(
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<2>()));
+                                            deepiterator::Extent<2>()));
 
 
             auto view = makeView(
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<0>()));
+                                                deepiterator::Extent<0>()));
 
 
                 auto view = makeView(
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
                                         deepiterator::makeNavigator(
                                             Offset(off),
                                             Jumpsize(jumpsize),
-                                            deepiterator::Slice<-2>()));
+                                            deepiterator::Extent<-2>()));
 
 
             auto view = makeView(
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(SingleLayer)
 }
 
 /**
- * @brief This test is used to check whether the slice naviagatror and the
+ * @brief This test is used to check whether the Extent naviagatror and the
  * navigator are compatile to each other
  */
 BOOST_AUTO_TEST_CASE(TWOLAYER)
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<2>()
+                                            deepiterator::Extent<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<2>()
+                                            deepiterator::Extent<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                         deepiterator::makeNavigator(
                                             Offset(0),
                                             Jumpsize(1),
-                                            deepiterator::Slice<2>()
+                                            deepiterator::Extent<2>()
                                         ),
                                         deepiterator::makeIteratorPrescription(
                                             deepiterator::makeAccessor(),
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<2>()
+                                                deepiterator::Extent<2>()
                                             )
                                         )
             );
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<0>()
+                                                deepiterator::Extent<0>()
                                             )
                                         )
             );
@@ -509,7 +509,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<-1>()
+                                                deepiterator::Extent<-1>()
                                             )
                                         )
             );
@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<-1>()
+                                                deepiterator::Extent<-1>()
                                             )
                                         )
             );
@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE(TWOLAYER)
                                             deepiterator::makeNavigator(
                                                 Offset(off),
                                                 Jumpsize(jumpsize),
-                                                deepiterator::Slice<-1>()
+                                                deepiterator::Extent<-1>()
                                             )
                                         )
             );
