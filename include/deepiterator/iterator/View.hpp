@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -34,7 +34,7 @@ namespace deepiterator
 
 /**
  * \struct View
- * @author Sebastian Hahn (t.hahn@deepiterator.de )
+ * @author Sebastian Hahn ( )
  * 
  * @brief The View is a composition of a Prescription and a datastructure. It is
  * used to generate the DeepIterator. The View has four ways to create a Deep -

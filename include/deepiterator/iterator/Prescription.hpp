@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -29,7 +29,7 @@ namespace deepiterator
 namespace details 
 {
 /**
- * @author Sebastian Hahn t.hahn <at> deepiterator.de
+ * @author Sebastian Hahn
  * @brief A Prescription consists of an accessor, a navigator and a child. 
  * A Prescription decribes an abstract way to iterate through the data. The 
  * navigator and the accessor are not bound to a container.

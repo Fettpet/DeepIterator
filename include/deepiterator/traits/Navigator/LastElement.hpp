@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -28,7 +28,7 @@ namespace navigator
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief This trait is used to set the iterator to the last element. If there
  * are not enough elements (e.g. empty container) The iterator is set to the 
  * AfterLastElement or the BeforeFirstElement. The trait need the operator() with

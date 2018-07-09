@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -24,7 +24,7 @@ namespace deepiterator
 namespace traits
 {
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief Each container categorie need to determine if it is a random accessable.
  * A container categorie is random accessable if there is a way to overjump some
  * values easily. Mostly a container is random accessable if the operator [] is

@@ -13,10 +13,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
-
 #pragma once
 
 
@@ -27,7 +26,7 @@ namespace traits
 namespace navigator
 {
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief This trait is used as the element after the last one. The trait has
  * two functions: 
  * 1. test(Container*, Index, ContainerSizeFunction): returns true if the 

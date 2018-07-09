@@ -13,12 +13,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief A container is bidirectional it is possible to go to the previous element.
  * The deepiterator has the functions --it and it-- if it is bidirectional.
  * @tparam TContainer: type of the container

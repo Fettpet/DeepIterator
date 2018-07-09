@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -26,7 +26,7 @@ namespace traits
 namespace accessor
 {
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief This trait is used to get a component out of the container. The trait
  * need the operator () overloaded with two arguments:
  * 1. A pointer to the container of the iterator,

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -30,7 +30,7 @@ namespace traits
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief This trait is used to decide the indextype. The indextype is used to 
  * specify the position to get the current component out of the container.
  * @tparam TContainer: type of the container

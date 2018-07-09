@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -24,7 +24,7 @@ namespace deepiterator
 namespace traits
 {
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief Each container category need to specify one range type. This is the 
  * type of the distance between two iterator points. The range type need a 
  * constructor such that it can be constructed from int. The RangeType need the 

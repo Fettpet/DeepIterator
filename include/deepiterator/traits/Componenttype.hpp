@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -31,7 +31,7 @@ namespace traits
 {
 /**
  * \struct ComponentType
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief The ComponentType trait gives information about the type of the 
  * components of a container. You need to implement a specialication such that,
  * <b> typedef ComponentType< ContainerType >::type YourComponentType;</b>

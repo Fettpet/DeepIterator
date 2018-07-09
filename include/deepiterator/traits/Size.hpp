@@ -13,13 +13,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
  * \struct NumberElements
- * @author Sebastian Hahn t.hahn@deepiterator.de
+ * @author Sebastian Hahn
  * @brief This is a helper class to get the number of elements within
  * a container. This helper class has one function, size(const containertype&), 
  * which determine the size of the container. If it is not possible, for example

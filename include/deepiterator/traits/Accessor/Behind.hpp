@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with PIConGPU.
+ * along with DeepIterator.
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -27,7 +27,7 @@ namespace accessor
 {
 
 /**
- * @author Sebastian Hahn t.hahn < at > deepiterator.de
+ * @author Sebastian Hahn
  * @brief We use this trait to check whether an iterators position is behind an
  * other iterators position. This means it1 < it2. The trait need the operator()
  * which has four arguments:
